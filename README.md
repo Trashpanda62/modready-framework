@@ -1,7 +1,7 @@
 # BetaDeps
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Latest release](https://img.shields.io/badge/release-v0.5.8-green.svg)](https://github.com/stevenh1156-hash/Betadeps/releases)
+[![Latest release](https://img.shields.io/badge/release-v0.5.8-green.svg)](https://github.com/Trashpanda62/Betadeps/releases)
 [![Game version](https://img.shields.io/badge/Bannerlord-e1.4.5-orange.svg)](https://store.steampowered.com/app/261550/Mount__Blade_II_Bannerlord/)
 
 A single drop-in dependency module for **Mount & Blade II: Bannerlord** that replaces the entire BUTR foundation stack (Harmony + UIExtenderEx + ButterLib + MCM) with one folder, one load entry, and one settings UI.
@@ -35,7 +35,7 @@ Requirements:
 - PowerShell 5+ on Windows
 
 ```powershell
-git clone https://github.com/stevenh1156-hash/Betadeps.git
+git clone https://github.com/Trashpanda62/Betadeps.git
 cd Betadeps
 .\scripts\Build-Phase1.ps1
 ```
