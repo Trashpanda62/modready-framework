@@ -63,5 +63,34 @@ public class MCMSubModule : MBSubModuleBase
         {
             DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/Discover", ex);
         }
+
+        // v0.6: Auto-disable detection. Scan launcher_data.xml vs the
+        // engine's actually-loaded SubModules and report any mods the
+        // user has enabled that didn't construct (Banner Kings on a
+        // newer game version is the canonical case). Findings are
+        // written to runtime.log and to Modules\BetaDeps\incompatible-mods.log.
+        try
+        {
+            IncompatibleModDetector.ScanAndReport();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/IncompatScan", ex);
+        }
+
+        // v0.6.1: Mark this session's boot as successful. Writes the
+        // current loaded-mod list to last-good-modlist.txt and deletes
+        // the session-launching marker. Next launch uses this baseline
+        // to identify mods that failed to load, so any future game
+        // update that breaks a mod gets auto-handled without us having
+        // to maintain a hardcoded incompatibility list.
+        try
+        {
+            IncompatibleModDetector.MarkBootSuccessful();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/MarkBootSuccessful", ex);
+        }
     }
 }

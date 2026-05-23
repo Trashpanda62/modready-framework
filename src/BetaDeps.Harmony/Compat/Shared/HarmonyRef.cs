@@ -45,14 +45,14 @@ public sealed class HarmonyRef
         }
     }
 
-    /// <summary>Forward to HarmonyLib.Harmony.Patch.</summary>
-    public MethodInfo Patch(
-        MethodBase original,
-        global::HarmonyLib.HarmonyMethod? prefix = null,
-        global::HarmonyLib.HarmonyMethod? postfix = null,
-        global::HarmonyLib.HarmonyMethod? transpiler = null,
-        global::HarmonyLib.HarmonyMethod? finalizer = null)
-        => Instance.Patch(original, prefix, postfix, transpiler, finalizer);
+    // Note: a Patch(...) forwarding wrapper used to live here. It was removed
+    // because Harmony 2.4's Patch overload set differs from the one in 2.3
+    // and the wrapper's optional-param signature no longer resolves cleanly
+    // against the binary the consumer mods end up linking against. Consumer
+    // mods that previously did `harmony.Patch(target, prefix: hm)` should now
+    // call `harmony.Instance.Patch(target, prefix: hm)` (or use the typed
+    // overload directly). The Instance property above is still the single
+    // entry point.
 
     /// <summary>Forward to HarmonyLib.Harmony.Unpatch.</summary>
     public void Unpatch(MethodBase original, global::HarmonyLib.HarmonyPatchType type, string? harmonyID = null)

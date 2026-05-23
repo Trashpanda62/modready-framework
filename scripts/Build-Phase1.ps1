@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$Version = '0.5.8',
+    [string]$Version = '0.6.0',
     [switch]$SkipVerify,
     [switch]$SkipZip,
     # When the live Bannerlord install is found at the standard Steam path

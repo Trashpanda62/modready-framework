@@ -19,6 +19,15 @@ The easiest way is from Nexus Mods:
 3. Launch the game through BLSE LauncherEx (or your preferred launcher) and enable **BetaDeps** at the top of your load order, above any mod that needs Harmony, ButterLib, UIExtenderEx, or MCM.
 4. Make sure the upstream BUTR mods (Bannerlord.Harmony, Bannerlord.ButterLib, Bannerlord.UIExtenderEx, MCMv5) are **disabled or uninstalled** — BetaDeps replaces them.
 
+### Do I need to enable the four alias folders manually?
+
+**It depends on which launcher you're using.**
+
+- **BLSE LauncherEx** (most modders' choice) auto-activates the four alias folders (`Bannerlord.Harmony`, `Bannerlord.UIExtenderEx`, `Bannerlord.ButterLib`, `Bannerlord.MBOptionScreen`) for you. Enable BetaDeps and BLSE silently turns on the aliases that consumer mods need.
+- **Vanilla TaleWorlds launcher** does NOT auto-resolve dependencies. You must manually check all five boxes — BetaDeps plus the four aliases.
+
+If a fresh install doesn't show all four aliases in the launcher yet, BetaDeps materializes them on first run. Close the launcher, start the game once to let BetaDeps create the folders, exit, then reopen the launcher — all four will appear and you can enable them.
+
 ## Features
 
 - **One module, four libraries.** Harmony, ButterLib, UIExtenderEx, and MCM all live inside `Modules\BetaDeps\` so there's exactly one thing to enable and one thing to update.

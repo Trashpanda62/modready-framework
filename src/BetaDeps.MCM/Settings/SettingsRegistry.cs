@@ -85,6 +85,85 @@ public static class SettingsRegistry
     }
 
     /// <summary>
+    /// Resolves the Modules\ folder root from this assembly's location.
+    /// Returns null if the location can't be parsed.
+    /// </summary>
+    private static string? TryGetModulesRoot()
+    {
+        try
+        {
+            var asmPath = typeof(SettingsRegistry).Assembly.Location;
+            if (string.IsNullOrEmpty(asmPath)) return null;
+            var dir = Path.GetDirectoryName(asmPath);
+            while (!string.IsNullOrEmpty(dir))
+            {
+                if (string.Equals(Path.GetFileName(dir), "Modules", StringComparison.OrdinalIgnoreCase))
+                    return dir;
+                dir = Path.GetDirectoryName(dir);
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    /// <summary>
+    /// Returns true iff the given assembly belongs to a currently-enabled
+    /// module folder (or doesn't live under Modules\ at all -- system/Talevworlds
+    /// assemblies). Used to filter orphan-mod settings out of Mod Config when
+    /// the underlying module is disabled but the DLL still happens to be in
+    /// the AppDomain.
+    ///
+    /// If <paramref name="enabledFolders"/> is empty (detection failed), we
+    /// permissively return true so the user doesn't lose all settings on a
+    /// detection edge case.
+    /// </summary>
+    private static bool IsAssemblyOwningModuleEnabled(
+        Assembly asm,
+        string? modulesRoot,
+        HashSet<string> enabledFolders)
+    {
+        if (enabledFolders == null || enabledFolders.Count == 0)
+            return true; // fail-open: no signal -> don't filter
+        if (asm == null) return true;
+
+        string? asmLoc = null;
+        try { asmLoc = asm.Location; } catch { /* dynamic assemblies have no location */ }
+        if (string.IsNullOrEmpty(asmLoc)) return true; // can't classify -> don't filter
+
+        if (string.IsNullOrEmpty(modulesRoot)) return true; // no Modules root -> don't filter
+
+        // Is asmLoc under modulesRoot? If not, it's a system/TaleWorlds/
+        // dotnet runtime DLL -- always pass through (those don't register
+        // mod settings anyway, but no point filtering them).
+        try
+        {
+            if (!asmLoc!.StartsWith(modulesRoot!, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        catch { return true; }
+
+        // Walk up the asm's directory until parent == modulesRoot. That
+        // directory's name is the module folder.
+        try
+        {
+            var dir = Path.GetDirectoryName(asmLoc);
+            while (!string.IsNullOrEmpty(dir))
+            {
+                var parent = Path.GetDirectoryName(dir);
+                if (!string.IsNullOrEmpty(parent)
+                    && string.Equals(parent, modulesRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    var folder = Path.GetFileName(dir);
+                    return enabledFolders.Contains(folder);
+                }
+                dir = parent;
+            }
+        }
+        catch { }
+        return true; // walk failed -> fail open
+    }
+
+    /// <summary>
     /// Walk every loaded assembly for AttributeGlobalSettings&lt;T&gt; subclasses
     /// and register them. Idempotent; safe to call multiple times.
     /// </summary>
@@ -129,8 +208,47 @@ public static class SettingsRegistry
             // for normal operation; if you need the full list for diagnostics, set a
             // breakpoint or re-enable this loop temporarily.
 
+            // Compute the set of currently-enabled module folder names so
+            // we can filter out orphan-mod settings: assemblies whose DLLs
+            // got eager-loaded but whose owning module is disabled in the
+            // launcher. Without this filter, ROT's settings classes (and
+            // similar) keep appearing in Mod Config even after the user
+            // unchecks ROT-Core in BLSE.
+            //
+            // LauncherData.xml is the source of truth -- it's what the user
+            // physically checked or unchecked in the launcher UI. Reading
+            // TaleWorlds.Module.CurrentModule.ModuleList here would return
+            // EVERY installed module's metadata, not just the enabled ones,
+            // which is why the prior version of this filter never excluded
+            // anything. Fall through to the other detection paths only if
+            // we can't read the XML at all.
+            var enabledFolders = BetaDeps.Foundation.IncompatibleModDetector.GetEnabledModsFromLauncherData();
+            string? modulesRoot = TryGetModulesRoot();
+            if (enabledFolders.Count == 0)
+            {
+                enabledFolders = ParseEnabledModulesFromCommandLine();
+                if (enabledFolders.Count == 0)
+                    enabledFolders = GetEnabledModulesFromTaleWorlds();
+                if (enabledFolders.Count == 0 && !string.IsNullOrEmpty(modulesRoot))
+                {
+                    var alreadyLoaded = new HashSet<string>(
+                        AppDomain.CurrentDomain.GetAssemblies()
+                            .Select(a => a.GetName().Name ?? string.Empty)
+                            .Where(n => n.Length > 0),
+                        StringComparer.OrdinalIgnoreCase);
+                    enabledFolders = DetectEnabledModulesByLoadedAssemblies(modulesRoot!, alreadyLoaded);
+                }
+            }
+            DiagLog.Log(Tag, $"DiscoverAll: enabled module folders for filter: {enabledFolders.Count} (source: LauncherData.xml preferred)");
+
             foreach (var asm in asms)
             {
+                if (!IsAssemblyOwningModuleEnabled(asm, modulesRoot, enabledFolders))
+                {
+                    // Settings from an unloaded/disabled module -- skip so
+                    // they don't ghost into Mod Config.
+                    continue;
+                }
                 newlyRegistered += DiscoverInAssembly(asm);
             }
 
@@ -145,6 +263,9 @@ public static class SettingsRegistry
             {
                 foreach (var fs in MCM.Internal.FluentSettingsRegistry.All)
                 {
+                    // Apply the same enabled-module filter to fluent settings.
+                    if (!IsAssemblyOwningModuleEnabled(fs.GetType().Assembly, modulesRoot, enabledFolders))
+                        continue;
                     lock (_gate)
                     {
                         if (string.IsNullOrEmpty(fs.Id)) continue;

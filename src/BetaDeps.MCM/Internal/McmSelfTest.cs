@@ -1179,7 +1179,109 @@ internal static class McmSelfTest
             }
         }
 
+        // v0.6: auto-disable diagnostics. Surfaces the runtime detection
+        // state so users sending in a Self-Test can show us at a glance
+        // which mods loaded clean this session, which BetaDeps auto-disabled
+        // and why, and which suspects got skipped (content-only, stale, etc.).
+        AppendAutoDisableDiagnostics(sb);
+
         sb.AppendLine("===== END SELF-TEST REPORT =====");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Reads the three runtime-detection files written by IncompatibleModDetector
+    /// (last-good-modlist.txt, betadeps-disabled-mods.log, incompatible-mods.log)
+    /// and appends a clean summary to the Self-Test report.
+    /// </summary>
+    private static void AppendAutoDisableDiagnostics(StringBuilder sb)
+    {
+        try
+        {
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rtPath);
+            if (string.IsNullOrEmpty(dir)) return;
+
+            sb.AppendLine();
+            sb.AppendLine("--- Auto-disable diagnostics (v0.6 runtime detection) ---");
+
+            // last-good-modlist.txt: every mod that loaded clean to main menu
+            // this session. The baseline against which next session's
+            // crash-recovery diffs.
+            var lastGoodPath = System.IO.Path.Combine(dir, "last-good-modlist.txt");
+            if (System.IO.File.Exists(lastGoodPath))
+            {
+                var lines = System.IO.File.ReadAllLines(lastGoodPath)
+                    .Where(l => !string.IsNullOrWhiteSpace(l) && !l.TrimStart().StartsWith("#"))
+                    .ToList();
+                sb.AppendLine($"Mods that loaded cleanly this session ({lines.Count}):");
+                if (lines.Count == 0)
+                {
+                    sb.AppendLine("  (none recorded yet -- this is the first successful boot, baseline establishing now)");
+                }
+                else
+                {
+                    foreach (var l in lines)
+                        sb.AppendLine($"  GOOD: {l}");
+                }
+            }
+            else
+            {
+                sb.AppendLine("Mods that loaded cleanly this session: (no baseline file yet — first BetaDeps run, or boot never reached main menu)");
+            }
+
+            // betadeps-disabled-mods.log: append-only history of every mod
+            // BetaDeps has auto-disabled, with reason. Most recent entries
+            // first (we tail the last 20 lines so the report doesn't bloat
+            // for users with months of history).
+            sb.AppendLine();
+            var disabledPath = System.IO.Path.Combine(dir, "betadeps-disabled-mods.log");
+            if (System.IO.File.Exists(disabledPath))
+            {
+                var lines = System.IO.File.ReadAllLines(disabledPath)
+                    .Where(l => !string.IsNullOrWhiteSpace(l))
+                    .ToList();
+                int show = Math.Min(20, lines.Count);
+                sb.AppendLine($"BetaDeps auto-disable history (last {show} of {lines.Count} entries):");
+                foreach (var l in lines.Skip(Math.Max(0, lines.Count - show)))
+                    sb.AppendLine($"  DISABLED: {l}");
+            }
+            else
+            {
+                sb.AppendLine("BetaDeps auto-disable history: (no disables ever recorded — no incompatible mods detected)");
+            }
+
+            // incompatible-mods.log: latest post-load scan of mods that were
+            // enabled but failed to construct. Useful for users to see WHICH
+            // of their mods didn't survive the load.
+            sb.AppendLine();
+            var incompatPath = System.IO.Path.Combine(dir, "incompatible-mods.log");
+            if (System.IO.File.Exists(incompatPath))
+            {
+                var content = System.IO.File.ReadAllText(incompatPath);
+                if (!string.IsNullOrWhiteSpace(content))
+                {
+                    sb.AppendLine("Incompatible-mods scan (mods enabled in launcher but didn't load):");
+                    foreach (var l in content.Split('\n'))
+                    {
+                        var trimmed = l.TrimEnd('\r');
+                        if (!string.IsNullOrWhiteSpace(trimmed))
+                            sb.AppendLine($"  {trimmed}");
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("Incompatible-mods scan: (no entries — all enabled mods loaded successfully)");
+                }
+            }
+            else
+            {
+                sb.AppendLine("Incompatible-mods scan: (no scan file written this session)");
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"--- Auto-disable diagnostics: skipped, threw {ex.GetType().Name}: {ex.Message} ---");
+        }
     }
 }

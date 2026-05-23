@@ -1905,6 +1905,227 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
     }
 
+    /// <summary>
+    /// "Send to GitHub" button. Opens the BetaDeps GitHub issues page in
+    /// the user's default browser, with the selftest.log path reminder so
+    /// they can attach it to the issue. Light-touch by design: GitHub
+    /// new-issue URL has a length cap on pre-filled body content, and most
+    /// users prefer to write their own description anyway. The path-to-file
+    /// reminder is the value we add.
+    /// </summary>
+    [DataSourceMethod]
+    public void ExecuteSendToGitHub()
+    {
+        // First log line lets us verify (via runtime.log) that the click
+        // actually reached this method. If we click in-game and don't see
+        // this line, the XML binding is wrong; if we see it but no browser
+        // opens, Process.Start is the issue.
+        DiagLog.Log(Tag, "ExecuteSendToGitHub: click received");
+        try
+        {
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rtPath) ?? "(unknown)";
+            var selftest = System.IO.Path.Combine(dir, "selftest.log");
+            var runtime  = System.IO.Path.Combine(dir, "runtime.log");
+
+            var prompt = new TaleWorlds.Library.InquiryData(
+                titleText: "Send a crash report to BetaDeps",
+                text: "This will open the BetaDeps GitHub issues page in your browser. Before clicking \"New Issue\" there:\n\n" +
+                      "1. Click \"Run Self-Test\" first if you haven't already this session, so the report is fresh.\n" +
+                      $"2. Attach BOTH of these files to the issue (drag-and-drop works):\n   • {RedactUserPath(selftest)}\n   • {RedactUserPath(runtime)}\n" +
+                      "3. Describe what you were doing when the crash happened.\n\n" +
+                      "Open GitHub now?",
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: true,
+                affirmativeText: "Open GitHub",
+                negativeText: "Cancel",
+                affirmativeAction: () => OpenGitHubIssueUrl(),
+                negativeAction: () => { });
+            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "ExecuteSendToGitHub", ex);
+        }
+    }
+
+    private void OpenGitHubIssueUrl()
+    {
+        try
+        {
+            // Build a pre-populated issue URL: ?title=...&body=...
+            // GitHub caps body length at roughly 8KB before the URL gets
+            // rejected. Selftest.log alone can be 30KB+, so we don't try
+            // to inline the full file. Instead the body contains the
+            // useful summary the user needs to triage (BetaDeps version,
+            // last-good count, auto-disabled mods, top of selftest report)
+            // plus instructions for the user to drag-drop the full log
+            // files as attachments.
+
+            var titleText = $"BetaDeps Self-Test report  {System.DateTime.Now:yyyy-MM-dd}";
+            var body = BuildGitHubIssueBody();
+
+            // Trim body if it would exceed GitHub's URL cap. 7000 chars
+            // leaves headroom for URL encoding (each char becomes 1-3
+            // bytes after escape) plus the title and template params.
+            const int maxBody = 7000;
+            if (body.Length > maxBody)
+            {
+                body = body.Substring(0, maxBody) +
+                       "\n\n[... truncated for URL length; attach full files for the rest ...]";
+            }
+
+            var url = "https://github.com/Trashpanda62/Betadeps/issues/new"
+                    + "?title=" + System.Uri.EscapeDataString(titleText)
+                    + "&body=" + System.Uri.EscapeDataString(body);
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true,
+            };
+            System.Diagnostics.Process.Start(psi);
+            DiagLog.Log(Tag, $"ExecuteSendToGitHub: opened pre-filled GitHub URL ({url.Length} chars)");
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OpenGitHubIssueUrl", ex);
+        }
+    }
+
+    /// <summary>
+    /// Constructs the issue body for the "Send to GitHub" pre-fill. Includes
+    /// BetaDeps version, the Bannerlord version, the auto-disable diagnostics
+    /// (which mods loaded clean, which got disabled and why), and a head-of-
+    /// file snippet from selftest.log if one exists. Paths are redacted via
+    /// RedactUserPath so users don't accidentally leak their Windows username
+    /// when the issue page renders.
+    /// </summary>
+    private static string BuildGitHubIssueBody()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("### What happened");
+        sb.AppendLine("(replace this line with a short description of what you were doing when the crash / issue occurred)");
+        sb.AppendLine();
+        sb.AppendLine("### Environment");
+        try
+        {
+            sb.AppendLine($"- Branch:    {BetaDeps.Foundation.VersionProbe.Branch} (Bannerlord v{BetaDeps.Foundation.VersionProbe.Major}.{BetaDeps.Foundation.VersionProbe.Minor})");
+            var asmName = typeof(MCMSubModule).Assembly.GetName();
+            sb.AppendLine($"- BetaDeps:  v{asmName.Version}");
+        }
+        catch { }
+        sb.AppendLine();
+        sb.AppendLine("### Logs");
+        sb.AppendLine("Please drag-drop these two files from your install into the GitHub issue (they auto-attach):");
+        try
+        {
+            var rt = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rt);
+            sb.AppendLine($"- runtime.log  (`{RedactUserPath(rt)}`)");
+            if (!string.IsNullOrEmpty(dir))
+                sb.AppendLine($"- selftest.log (`{RedactUserPath(System.IO.Path.Combine(dir, "selftest.log"))}`)");
+        }
+        catch { }
+        sb.AppendLine();
+
+        // Auto-disable diagnostics section: this is the most actionable
+        // piece for someone debugging the user's crash.
+        sb.AppendLine("### BetaDeps runtime detection state");
+        try
+        {
+            var rt = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rt);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                var lastGoodPath = System.IO.Path.Combine(dir, "last-good-modlist.txt");
+                if (System.IO.File.Exists(lastGoodPath))
+                {
+                    var lines = System.IO.File.ReadAllLines(lastGoodPath)
+                        .Where(l => !string.IsNullOrWhiteSpace(l) && !l.TrimStart().StartsWith("#")).ToList();
+                    sb.AppendLine($"**Loaded cleanly last session ({lines.Count} mod(s))**: " +
+                                  string.Join(", ", lines));
+                }
+                else
+                {
+                    sb.AppendLine("**Loaded cleanly last session**: no baseline file yet (first run or never reached main menu)");
+                }
+                sb.AppendLine();
+
+                var disabledPath = System.IO.Path.Combine(dir, "betadeps-disabled-mods.log");
+                if (System.IO.File.Exists(disabledPath))
+                {
+                    var lines = System.IO.File.ReadAllLines(disabledPath)
+                        .Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
+                    int take = System.Math.Min(10, lines.Count);
+                    sb.AppendLine($"**Auto-disable history (last {take} of {lines.Count})**:");
+                    sb.AppendLine("```");
+                    foreach (var l in lines.Skip(System.Math.Max(0, lines.Count - take)))
+                        sb.AppendLine(l);
+                    sb.AppendLine("```");
+                }
+                else
+                {
+                    sb.AppendLine("**Auto-disable history**: empty (no mods have been auto-disabled)");
+                }
+            }
+        }
+        catch (System.Exception ex) { sb.AppendLine($"(error gathering diagnostics: {ex.Message})"); }
+        sb.AppendLine();
+
+        // Top of selftest.log so reviewer sees the headline pass/fail
+        // numbers without having to download the attachment.
+        sb.AppendLine("### Self-Test headline");
+        try
+        {
+            var rt = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rt);
+            var selftestPath = string.IsNullOrEmpty(dir) ? null : System.IO.Path.Combine(dir, "selftest.log");
+            if (!string.IsNullOrEmpty(selftestPath) && System.IO.File.Exists(selftestPath))
+            {
+                var head = System.IO.File.ReadAllLines(selftestPath).Take(15);
+                sb.AppendLine("```");
+                foreach (var l in head) sb.AppendLine(l);
+                sb.AppendLine("```");
+            }
+            else
+            {
+                sb.AppendLine("_No selftest.log on disk this session. Click \"Run Self-Test\" in Mod Config before submitting._");
+            }
+        }
+        catch { }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Replace the per-user portion of a Windows path (C:\Users\&lt;name&gt;\OneDrive\Documents\...
+    /// or similar) with a placeholder, so users who screenshot or paste this
+    /// dialog into a public GitHub issue don't accidentally leak their
+    /// Windows username / OneDrive folder structure. Everything after the
+    /// well-known "Documents\Mount and Blade II Bannerlord\..." stays intact
+    /// so the user can still find the folder.
+    /// </summary>
+    private static string RedactUserPath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return path;
+        try
+        {
+            // Common patterns: C:\Users\Foo\OneDrive\Documents\..., C:\Users\Foo\Documents\...
+            // Replace everything up to and including the username segment.
+            var lower = path.Replace('/', '\\').ToLowerInvariant();
+            var anchor = "\\documents\\";
+            var idx = lower.IndexOf(anchor, System.StringComparison.Ordinal);
+            if (idx >= 0)
+            {
+                // Keep the "...\Documents\" tail intact, redact everything before it.
+                return "<Documents>" + path.Substring(idx + anchor.Length - 1);
+            }
+        }
+        catch { }
+        return path;
+    }
+
     private void RunSelfTestConfirmed()
     {
         if (_selfTestRunning) return;
@@ -1984,14 +2205,17 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 }
 
                 // v0.5.9 (post-Nexus comment): tell the user where their
-                // pre-test JSON backup lives. The AIInfluence user complaint
-                // ("I cannot load the saved values of the mode due to the
-                // AI Influence Settings PASS") is fixable by copying the
-                // backup folder's JSON files back over the live ones.
+                // pre-test JSON backup lives. v0.6: redact the per-user
+                // portion of the path so users who screenshot or paste this
+                // dialog (e.g. into a public GitHub issue) don't leak their
+                // Windows username / OneDrive folder structure. The user
+                // can still find the folder because everything from
+                // "Documents\Mount and Blade II Bannerlord\..." is the
+                // stable, well-known part of the path.
                 if (!string.IsNullOrEmpty(report.BackupDir))
                 {
                     sb.Append("\n\nPre-test settings backed up to:\n");
-                    sb.Append(report.BackupDir);
+                    sb.Append(RedactUserPath(report.BackupDir));
                     sb.Append("\n(Copy those .json files back over the live ones if any setting looks wrong.)");
                 }
                 string body = sb.ToString();

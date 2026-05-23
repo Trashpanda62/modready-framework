@@ -70,6 +70,18 @@ if (Test-Path $log) {
     Move-Item $log $archive -Force
     Write-Host "  archived previous runtime.log -> $archive"
 }
+# Prune old archives: keep only the 5 most recent so the BetaDeps folder
+# doesn't balloon to 300+ MB after many test runs (especially noisy ones).
+$archiveDir = "$bl\Modules\BetaDeps"
+$keepCount  = 5
+$old = Get-ChildItem -Path $archiveDir -Filter "runtime.archive-*.log" -ErrorAction SilentlyContinue |
+       Sort-Object LastWriteTime -Descending |
+       Select-Object -Skip $keepCount
+if ($old) {
+    $freedMb = [math]::Round(($old | Measure-Object Length -Sum).Sum / 1MB, 1)
+    $old | Remove-Item -Force -ErrorAction SilentlyContinue
+    Write-Host "  pruned $($old.Count) old archive(s), freed ${freedMb} MB (kept newest $keepCount)"
+}
 if (Test-Path $selftest) {
     Remove-Item $selftest -Force
     Write-Host "  cleared previous selftest.log (so wait loop only triggers on fresh test)"

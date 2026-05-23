@@ -207,6 +207,18 @@ if (Test-Path $log) {
 } else {
     Write-Host "  (no existing log to archive)"
 }
+# Prune old archives: keep only the 5 most recent so the BetaDeps folder
+# doesn't balloon to 300+ MB after many bisect runs.
+$archiveDir = "$bl\Modules\BetaDeps"
+$keepCount  = 5
+$old = Get-ChildItem -Path $archiveDir -Filter "runtime.archive-*.log" -ErrorAction SilentlyContinue |
+       Sort-Object LastWriteTime -Descending |
+       Select-Object -Skip $keepCount
+if ($old) {
+    $freedMb = [math]::Round(($old | Measure-Object Length -Sum).Sum / 1MB, 1)
+    $old | Remove-Item -Force -ErrorAction SilentlyContinue
+    Write-Host "  pruned $($old.Count) old archive(s), freed ${freedMb} MB (kept newest $keepCount)"
+}
 
 # ----- 4. Build + deploy -----
 Banner "Building"

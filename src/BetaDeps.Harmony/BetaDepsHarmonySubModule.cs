@@ -36,6 +36,29 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     // produce an infinite recursion inside FirstChanceException.
     [System.ThreadStatic] private static bool _inFirstChance;
 
+    // Shared one-shot gate for IncompatibleModDetector.RunEarlyPhase. Same
+    // mechanism as AliasStubSubModule -- whichever runs first wins, the
+    // other is a no-op. Constructor (not OnSubModuleLoad) so this hook
+    // runs DURING the SubModule construction phase, before any other mod's
+    // class has been instantiated. That's the only phase that survives if
+    // a later mod's ctor throws and Bannerlord aborts the sequence.
+    private static int _ctorEarlyDetectionRan;
+
+    public BetaDepsHarmonySubModule()
+    {
+        if (System.Threading.Interlocked.Exchange(ref _ctorEarlyDetectionRan, 1) == 0)
+        {
+            try
+            {
+                IncompatibleModDetector.RunEarlyPhase();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/IncompatEarly", ex); } catch { }
+            }
+        }
+    }
+
     protected override void OnSubModuleLoad()
     {
         base.OnSubModuleLoad();
@@ -129,6 +152,21 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "OnSubModuleLoad/banner", ex);
+        }
+
+        // v0.6: Preemptive disable of known-incompatible mods. Runs as the
+        // very first BetaDeps action (after alias bootstrap + version shim)
+        // so the SubModule.xml rename lands on disk even if a later mod
+        // CTDs the game during load. Effect takes hold on the NEXT launch.
+        // The current launch may still crash if the user just enabled the
+        // bad mod -- but the next launch will be clean.
+        try
+        {
+            IncompatibleModDetector.RunEarlyPhase();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnSubModuleLoad/IncompatEarly", ex);
         }
 
         // Open the Harmony runtime gate. If this fails, downstream

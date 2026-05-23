@@ -25,7 +25,7 @@
          compiled against Bannerlord.UIExtenderEx v2.13.x.x bind to ours. -->
     <AssemblyVersion>2.13.2.0</AssemblyVersion>
     <FileVersion>2.13.2.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.5.8</InformationalVersion>
+    <InformationalVersion>BetaDeps 0.6.0</InformationalVersion>
 
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
