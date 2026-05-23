@@ -1,0 +1,33 @@
+<Prefab>
+  <Constants>
+    <Constant Name="Popup.CloseButton.Width" BrushLayer="Default" BrushName="Popup.CloseButton" BrushValueType="Width" />
+    <Constant Name="Popup.CloseButton.Height" BrushLayer="Default" BrushName="Popup.CloseButton" BrushValueType="Height" />
+    
+    <Constant Name="ButtonBrush.Width" BrushName="ButtonBrush4" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="ButtonBrush.Height" BrushName="ButtonBrush4" BrushLayer="Default" BrushValueType="Height"/>
+  </Constants>
+  <Window>
+    <Widget HeightSizePolicy="StretchToParent" WidthSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#000000CC">
+      <Children>
+
+        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="455" SuggestedHeight="205" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="false">
+          <Children>
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="450" SuggestedHeight="200" VerticalAlignment="Center" HorizontalAlignment="Center" ClipContents="true">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="512" SuggestedHeight="645" HorizontalAlignment="Center" Sprite="StdAssets\Popup\canvas"/>
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="SPOptions.GameKeysGroup.Title.Text" Brush.TextHorizontalAlignment="Center" Text="@PressKeyText"/>
+                <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="20" Brush="SPOptions.OptionName.Text" Brush.TextHorizontalAlignment="Center" Brush.FontSize="16" Text="@CancelText"/>
+              </Children>
+            </Widget>
+
+            <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" VerticalAlignment="Center" HorizontalAlignment="Center" Brush="Popup.Frame" IsEnabled="false"/>
+          </Children>
+        </Widget>
+        
+        <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Popup.CloseButton.Width" SuggestedHeight="!Popup.CloseButton.Height" VerticalAlignment="Center" HorizontalAlignment="Center" PositionXOffset="220" PositionYOffset="-95" Brush="Popup.CloseButton" Command.Click="ExecuteCancel" />
+
+      </Children>
+    </Widget>
+
+  </Window>
+</Prefab>

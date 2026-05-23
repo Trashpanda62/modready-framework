@@ -1,0 +1,30 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="Radius" DefaultValue="16" />
+    <Parameter Name="Period" DefaultValue="0.75" />
+  </Parameters>
+  <Constants>
+    <Constant Name="Diameter" Value="*Radius" MultiplyResult="2" />
+  </Constants>
+  <Variables>
+  </Variables>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <Widget Id="StandardCircleParent" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren">
+      <Children>
+        <CircleLoadingAnimWidget Id="CircleLoadingWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Diameter" SuggestedHeight="!Diameter" PivotX="0.5" PivotY="0.5" CircleRadius="*Radius" NumOfCirclesInASecond="*Period" StaySeconds="-1" >
+          <Children>
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" Color="#F2AF48FF" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="12" SuggestedHeight="12" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="MapMenuUnread@2x" AlphaFactor="0.6" />
+          </Children>
+        </CircleLoadingAnimWidget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

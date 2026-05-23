@@ -1,0 +1,130 @@
+<Prefab>
+  <Constants>
+    <Constant Name="TypingAreaHeight" Value="40"/>
+    <Constant Name="TopPanelHeight" Value="45"/>
+  </Constants>
+  <VisualDefinitions>
+    <VisualDefinition Name="ChatLogParent" TransitionDuration="0.14">
+      <VisualState State="Default" PositionXOffset="0" />
+      <VisualState State="Offset" PositionXOffset="160" />
+    </VisualDefinition>
+  </VisualDefinitions>
+  <Window>
+    <Widget Id="ChatLogWidgetParent" VisualDefinition="ChatLogParent" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" >
+      <!--Command.FocusGained="StartTyping" Command.FocusLost="StopTyping"-->
+      <Children>
+        <BoolStateChangerWidget TargetWidget="..\." BooleanCheck="@ShouldHaveOffset" TrueState="Offset" FalseState="Default" />
+        
+        <ChatLogWidget Id="ChatLogWidget" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" MinWidth="425" MaxWidth="650" SuggestedWidth="495" SizeX="@ChatBoxSizeX" SizeY="@ChatBoxSizeY" Command.FinishResize="ExecuteSaveSizes" MinHeight="170" MaxHeight="470" SuggestedHeight="350" HorizontalAlignment="Left" VerticalAlignment="Bottom" MarginLeft="27" MarginBottom="32"
+		FullyShowChat="@IsInspectingMessages" FullyShowChatWithTyping="@IsTypingText" ScrollablePanel="MainHolder\Content\ScrollablePanelContainer\ScrollablePanel" Scrollbar="MainHolder\Content\ScrollablePanelContainer\ScrollbarHolder\VerticalScrollbar" TextInputWidget="MainHolder\Content\ChatInputParent\ChatInputWidget" ResizeFrameWidget="ResizeSquare" ResizerWidget="ResizerWidget" MessageHistoryList="MainHolder\Content\ScrollablePanelContainer\ScrollablePanel\ClipRect\InnerPanel" IsMPChatLog="false">
+          <Children>
+            <Widget Id="ChatLogBackground" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Sprite="BlankWhiteSquare_9" Color="#000000FF" AlphaFactor="0.5" MarginBottom="!TypingAreaHeight" IsVisible="@IsInspectingMessages" />
+            
+            
+            <ListPanel Id="MainHolder" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" StackLayout.LayoutMethod="VerticalTopToBottom">
+              <Children>
+                
+                <!-- Top Panel -->
+                <Widget Id="TopPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="!TopPanelHeight" IsVisible="@IsOptionsAvailable" >
+                  <Children>
+                    
+                    <!-- Options Container -->
+                    <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" VerticalAlignment="Center" MarginTop="7" MarginBottom="8" MarginLeft="18" MarginRight="22" StackLayout.LayoutMethod="VerticalTopToBottom">
+                      <Children>
+                        
+                        <!-- Options -->
+                        <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                          <Children>
+                            
+                            <!-- Show Combat Log -->
+                            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Left" MarginLeft="5" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@IsTypingText" >
+                              <Children>
+                                <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="25" SuggestedHeight="25" Brush="SPChatlog.Checkbox.CombatLog" IsSelected="@IncludeCombatLog" Command.Click="ToggleIncludeCombatLog">
+                                  <Children>
+                                    <HintWidget DataSource="{CombatLogHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" IsDisabled="true" />
+                                  </Children>
+                                </ButtonWidget>
+                                <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" MarginLeft="5" Brush="ChatLog.TabText" Text="@ToggleCombatLogText" />
+                              </Children>
+                            </ListPanel>
+                            
+                          </Children>
+                        </ListPanel>
+                        
+                      </Children>
+                    </ListPanel>
+                    
+                    <!-- Divider -->
+                    <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="3" MarginLeft="7" MarginRight="7" VerticalAlignment="Bottom" Sprite="horizontal_gradient_divider_9" Color="#FEE9CAFF" AlphaFactor="0.8" IsVisible="@IsInspectingMessages" />
+                    
+                  </Children>
+                </Widget>
+                
+                <!-- Top Panel Placeholder-->
+                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="!TopPanelHeight" IsHidden="@IsOptionsAvailable" />
+                
+                <!-- Content -->
+                <Widget Id="Content" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+                  <Children>
+                    
+                    <!-- This widget is always visible, even when the chat is not active -->
+                    <Widget Id="ScrollablePanelContainer" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Left" VerticalAlignment="Bottom" MarginBottom="65" MarginTop="5" >
+                      <Children>
+                    
+                        <ScrollablePanel Id="ScrollablePanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" AutoHideScrollBars="true" VerticalAlignment="Bottom"  ClipRect="ClipRect" InnerPanel="ClipRect\InnerPanel" VerticalScrollbar="..\ScrollbarHolder\VerticalScrollbar" >
+                          <Children>
+                        
+                            <Widget Id="ClipRect" ClipContents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="15" MarginRight="21" >
+                              <Children>
+                                <ListPanel Id="InnerPanel" DataSource="{MessageHistory}" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" ClipContents="true" StackLayout.LayoutMethod="VerticalTopToBottom" >
+                                  <ItemTemplate>
+                                    <ChatLogItemWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" ChatLine="@ChatLine" ChatLogWidget="..\..\..\..\..\..\..\..\ChatLogWidget" CollapsableWidget="ChatCollapsableListPanel" OneLineTextWidget="OneLineTextWidget">
+                                      <Children>
+
+                                        <RichTextWidget Id="OneLineTextWidget" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="5" MarginRight="5" Brush="ChatLog.Text" Brush.FontColor="@Color" Brush.GlobalAlphaFactor="@Alpha" Brush.TextHorizontalAlignment="Left" Brush.TextVerticalAlignment="Center" ClipContents="false" />
+
+                                        <ChatCollapsableListPanel Id="ChatCollapsableListPanel" DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="5" MarginRight="5" Alpha="@Alpha" ClipContents="false" LineColor="@Color" StackLayout.LayoutMethod="VerticalTopToBottom" />
+
+                                      </Children>
+                                    </ChatLogItemWidget>
+                                  </ItemTemplate>
+                                </ListPanel>
+                              </Children>
+                            </Widget>
+
+                          </Children>
+                        </ScrollablePanel>
+                    
+                        <Widget Id="ScrollbarHolder" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" HorizontalAlignment="Right" IsVisible="@IsInspectingMessages">
+                          <Children>          
+                            <ScrollbarWidget Id="VerticalScrollbar" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" AlignmentAxis="Vertical" Handle="VerticalScrollbarHandle" MarginTop="12" MarginBottom="5" MaxValue="100" MinValue="0" >
+                              <Children>
+                                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="2" HorizontalAlignment="Center" Sprite="BlankWhiteSquare_9" Color="#A37434FF" MarginTop="5" MarginBottom="5" AlphaFactor="0.7" />
+                                <ImageWidget Id="VerticalScrollbarHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" MinHeight="15" SuggestedHeight="10" SuggestedWidth="14" HorizontalAlignment="Center" Brush="SPChatlog.Scrollbar.Handle" />
+                              </Children>
+                            </ScrollbarWidget>
+                          </Children>
+                        </Widget>
+                        
+                      </Children>
+                    </Widget>
+
+                    <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Text="@HideShowText" Brush="ChatLog.HideShowText" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginRight="15" MarginBottom="45" IsVisible="@ShowHideShowHint" />
+                    
+                  </Children>
+                </Widget>
+                
+              </Children>
+            </ListPanel>
+          
+            
+            <Widget Id="ResizeSquare" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="WhiteFrame_9" VerticalAlignment="Bottom" MarginBottom="37" IsVisible="false" />
+           
+            <ImageWidget Id="ResizerWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="21" SuggestedHeight="22" HorizontalAlignment="Right" MarginRight="1" MarginTop="1" Brush="SPChatlog.Resizer" IsVisible="@IsInspectingMessages" HoveredCursorState="DiagonalRightResize" />
+
+          </Children>
+        </ChatLogWidget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

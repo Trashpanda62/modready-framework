@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BetaDeps alias stub for Bannerlord.MBOptionScreen (MCM). The actual MCM
+  code ships inside Modules\BetaDeps\bin\.
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.MBOptionScreen" />
+  <Name value="Mod Configuration Menu (provided by BetaDeps)" />
+  <Version value="v5.11.99.0" />
+  <DefaultModule value="false" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="true" />
+  <Official value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="BetaDeps" />
+    <DependedModule Id="Bannerlord.Harmony" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" />
+    <DependedModule Id="Bannerlord.ButterLib" />
+  </DependedModules>
+
+  <DependedModuleMetadatas />
+
+  <SubModules>
+    <SubModule>
+      <Name value="Bannerlord.MBOptionScreen alias stub" />
+      <DLLName value="BetaDeps.Foundation.dll" />
+      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>

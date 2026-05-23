@@ -1,0 +1,75 @@
+<Prefab>
+  <Constants>
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+      <Children>
+
+        <MissionObjectiveMarkers DataSource="{Markers}" />
+
+        <!-- Main Objective Panel -->
+        <ButtonWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Top" MarginLeft="20" MarginTop="20" IsEnabled="@IsEnabled">
+          <Children>
+            
+            <!-- Main Layout -->
+            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
+              <Children>
+                
+                <!-- Title -->
+                <BrushWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="Mission.Objective.Title.Background" IsVisible="@HasTitle">
+                  <Children>
+                    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren">
+                      <Children>
+                        <!-- Title Icon -->
+                        <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="21" SuggestedHeight="25" MarginLeft="5" VerticalAlignment="Center" Brush="Mission.Objective.Tracker.Title.Icon" />
+                        <!-- Title Text -->
+                        <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="30" MarginLeft="5" MarginRight="5" VerticalAlignment="Center" Brush="Mission.Objective.Tracker.Title.Text" Text="@Title"/>
+                      </Children>
+                    </ListPanel>
+                  </Children>
+                </BrushWidget>
+
+                <BrushWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginTop="5" Brush="Mission.Objective.Description.Background" IsVisible="@HasDescription">
+                  <Children>
+                    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginRight="5" StackLayout.LayoutMethod="HorizontalLeftToRight" >
+                      <Children>
+                        <!-- Objective Giver Portrait & Name -->
+                        <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" MarginLeft="6" MarginRight="6" MarginTop="6" MarginBottom="6" IsVisible="@HasObjectiveGiver" >
+                          <Children>
+                            <ImageIdentifierWidget DataSource="{ObjectiveGiverIdentifier}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="100" SuggestedHeight="67" HorizontalAlignment="Center" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" HideWhenNull="true" IsBig="false" />
+                          </Children>
+                        </Widget>
+                        <!-- Description -->
+                        <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="468" MarginLeft="8" MarginTop="5" MarginRight="5" MarginBottom="5" VerticalAlignment="Top" Brush="Mission.Objective.Tracker.Description.Text" Text="@Description" />
+                      </Children>
+                    </ListPanel>
+                  </Children>
+                </BrushWidget>
+                
+                <!-- Progress Bar -->
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" MarginTop="5" StackLayout.LayoutMethod="HorizontalLeftToRight" IsVisible="@HasProgress">
+                  <Children>
+                    <!-- Fillbar -->
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="380" SuggestedHeight="14" VerticalAlignment="Center">
+                      <Children>
+                        <FillBar WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Mission.Objective.Progress.FillBar.Fill" CurrentAmount="@CurrentProgress" InitialAmount="@CurrentProgress" MaxAmount="@RequiredProgress" />
+                        <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Mission.Objective.Progress.FillBar.Frame" />
+                      </Children>
+                    </Widget>
+
+                    <!-- Progress Text -->
+                    <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="5" Brush="Mission.Objective.Tracker.Progress.Text" Text="@ProgressText" />
+                  </Children>
+                </ListPanel>
+                
+              </Children>
+            </ListPanel>
+            
+          </Children>
+        </ButtonWidget>
+        
+      </Children>
+    </Widget>
+
+  </Window>
+</Prefab>

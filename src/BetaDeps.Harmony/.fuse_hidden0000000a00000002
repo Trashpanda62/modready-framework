@@ -1,0 +1,163 @@
+// BetaDeps.Harmony -- BetaSigSafePatches
+//
+// CTD-prevention patches that the CREST sprint identified as
+// necessary on beta-branch (e1.4.x). These are NOT gameplay patches;
+// they're defensive shims that swallow engine-side null derefs and
+// signature-drift cases so the game stays up while community mods
+// load against unstable beta APIs.
+//
+// On public branch (e1.3.x) these are no-ops -- VersionProbe returns
+// GameBranch.Public and we skip the apply.
+//
+// The patches themselves are concept-level rewrites of the
+// CrestBattleSizeBetaPatches work, re-authored against the public
+// Harmony 2.x API. No source is copied from any Aragas-authored file.
+//
+// MIT, copyright 2026 Maxfield Management Group.
+
+using System;
+using System.Reflection;
+
+using BetaDeps.Foundation;
+
+using HarmonyLib;
+
+namespace BetaDeps.Harmony;
+
+internal static class BetaSigSafePatches
+{
+    private const string Tag = "BetaSigSafePatches";
+    private const string HarmonyId = "betadeps.harmony.sigsafe";
+
+    private static bool _applied;
+
+    public static void Apply()
+    {
+        if (_applied) return;
+        _applied = true;
+
+        if (!VersionProbe.IsBeta)
+        {
+            DiagLog.Log(Tag, $"Not on beta branch (detected {VersionProbe.Branch}, v{VersionProbe.Major}.{VersionProbe.Minor}) -- sigsafe patches not needed.");
+            return;
+        }
+
+        DiagLog.Log(Tag, $"Beta branch detected (v{VersionProbe.Major}.{VersionProbe.Minor}). Applying sigsafe defensive patches.");
+
+        try
+        {
+            var harmony = new HarmonyLib.Harmony(HarmonyId);
+            int applied = 0;
+
+            applied += TryPatchAgentTickFinalizer(harmony) ? 1 : 0;
+            applied += TryPatchBrushRaceFinalizer(harmony) ? 1 : 0;
+
+            DiagLog.Log(Tag, $"sigsafe pass complete: {applied} patches active.");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "Apply", ex);
+        }
+    }
+
+    // ---- patch slots --------------------------------------------------
+    //
+    // Each slot follows the same template:
+    //   1. SafeBind.Method(...) to resolve & verify the target.
+    //   2. If null, log and return false (the game stays up; we just
+    //      don't get the defensive shim on this build).
+    //   3. SafeBind.TryPatch to attach the finalizer.
+
+    /// <summary>
+    /// Mission.TickAgentsAndTeamsImp can NRE under parallel agent tick
+    /// race on beta. The finalizer eats the exception so the worker
+    /// thread doesn't abort the process. Loses one tick of agent
+    /// updates; keeps the game running.
+    /// </summary>
+    private static bool TryPatchAgentTickFinalizer(HarmonyLib.Harmony harmony)
+    {
+        var missionType = BetaDeps.Foundation.ReflectionUtils.ResolveTypeByFullName("TaleWorlds.MountAndBlade.Mission");
+        if (missionType == null)
+        {
+            DiagLog.Log(Tag, "skip AgentTickFinalizer: TaleWorlds.MountAndBlade.Mission not found");
+            return false;
+        }
+
+        var target = SafeBind.Method(
+            missionType,
+            "TickAgentsAndTeamsImp",
+            expectedReturnType: typeof(void),
+            expectedParamCount: 1);
+        if (target == null) return false;
+
+        var finalizer = new HarmonyMethod(typeof(BetaSigSafePatches), nameof(SwallowEngineException));
+        return SafeBind.TryPatch(harmony, target, finalizer: finalizer);
+    }
+
+    /// <summary>
+    /// UpdateBrushesWidget AOORE under parallel brush update on beta.
+    /// </summary>
+    private static bool TryPatchBrushRaceFinalizer(HarmonyLib.Harmony harmony)
+    {
+        var widgetType = BetaDeps.Foundation.ReflectionUtils.ResolveTypeByFullName("TaleWorlds.GauntletUI.PrefabSystem.WidgetFactory")
+                      ?? BetaDeps.Foundation.ReflectionUtils.ResolveTypeByFullName("TaleWorlds.GauntletUI.UIContext");
+        if (widgetType == null)
+        {
+            DiagLog.Log(Tag, "skip BrushRaceFinalizer: target type not found");
+            return false;
+        }
+
+        var target = SafeBind.Method(
+            widgetType,
+            "UpdateBrushesWidget",
+            expectedReturnType: typeof(void),
+            expectedParamCount: 1);
+        if (target == null)
+        {
+            DiagLog.Log(Tag, "skip BrushRaceFinalizer: UpdateBrushesWidget not found with expected signature -- harmless on this build");
+            return false;
+        }
+
+        var finalizer = new HarmonyMethod(typeof(BetaSigSafePatches), nameof(SwallowEngineException));
+        return SafeBind.TryPatch(harmony, target, finalizer: finalizer);
+    }
+
+    /// <summary>
+    /// Shared Harmony finalizer that eats any exception, logs once,
+    /// and returns null (= "swallow it, do not propagate"). Harmony
+    /// passes the in-flight exception via the __exception parameter;
+    /// returning null clears it.
+    /// </summary>
+    public static Exception? SwallowEngineException(MethodBase __originalMethod, Exception? __exception)
+    {
+        if (__exception == null) return null;
+        try
+        {
+            DiagLog.Log(Tag,
+                $"swallowed engine exception in {__originalMethod?.DeclaringType?.FullName}::{__originalMethod?.Name}: " +
+                $"{__exception.GetType().Name} -- {__exception.Message}");
+        }
+        catch { }
+        return null;
+    }
+
+    // ---- helpers ------------------------------------------------------
+
+    private static Type? ResolveTypeByName(string fullName)
+    {
+        try
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    var t = asm.GetType(fullName, throwOnError: false);
+                    if (t != null) return t;
+                }
+                catch { }
+            }
+        }
+        catch { }
+        return null;
+    }
+}

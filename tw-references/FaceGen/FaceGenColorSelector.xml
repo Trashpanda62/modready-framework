@@ -1,0 +1,25 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="NavigationMinIndex" DefaultValue="" />
+    <Parameter Name="NavigationMaxIndex" DefaultValue="" />
+  </Parameters>
+  <Window>
+    <SelectorWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" CurrentSelectedIndex="@SelectedIndex" Container="ColorGrid">
+      <Children>
+
+        <NavigatableGridWidget Id="ColorGrid" DataSource = "{ItemList}" WidthSizePolicy = "CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Center" ColumnCount="12" DefaultCellHeight="45" DefaultCellWidth="45" MinIndex="*NavigationMinIndex" MaxIndex="*NavigationMaxIndex">
+          <ItemTemplate>
+
+            <ColorButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="44" SuggestedHeight="44" MarginLeft="1" MarginRight="1" Brush="Creation.ColorCard" ColorToApply="@StringItem" ButtonType="Radio" UpdateChildrenStates="true" DoNotUseCustomScaleAndChildren="true" DominantSelectedState="true" IsSelected="@IsSelected">
+              <Children>
+                <ButtonWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Creation.ColorCard.Selection" DominantSelectedState="true" IsSelected="@IsSelected"/>
+              </Children>
+            </ColorButtonWidget>
+
+          </ItemTemplate>
+        </NavigatableGridWidget>
+
+      </Children>
+    </SelectorWidget>
+  </Window>
+</Prefab>

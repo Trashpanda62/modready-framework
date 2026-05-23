@@ -1,0 +1,27 @@
+<Window>
+  <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#000000FF">
+    <Children>
+      <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" Text="@Text" />
+
+      <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="9">
+        <Children>
+
+          <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" MarginRight="20"  HorizontalAlignment="Right" VerticalAlignment="Center" Brush="Popup.Cancel.Button" Command.Click="OnPreviousStage">
+            <Children>
+              <InputKeyVisualWidget DataSource="{CancelInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-30" KeyID="@KeyID" IsVisible="@IsVisible"/>
+            </Children>
+          </ButtonWidget>
+
+          <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" MarginLeft="20" HorizontalAlignment="Right" VerticalAlignment="Center" Brush="Popup.Done.Button" Command.Click="OnNextStage" >
+            <Children>
+              <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Popup.Button.Text" Text="@NextStageText" />
+              <InputKeyVisualWidget DataSource="{DoneInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-30" KeyID="@KeyID" IsVisible="@IsVisible"/>
+            </Children>
+          </ButtonWidget>
+
+        </Children>
+      </ListPanel>
+
+    </Children>
+  </Widget>
+</Window>

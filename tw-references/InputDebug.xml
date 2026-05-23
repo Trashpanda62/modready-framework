@@ -1,0 +1,22 @@
+<Prefab>
+  <Constants>
+
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsEnabled="false">
+      <Children>
+        
+        <GridWidget DataSource="{ActiveInputKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Top" DefaultCellWidth="85" DefaultCellHeight="85" ColumnCount="12" LayoutImp="GridLayout" ClipContents="true" >
+          <ItemTemplate>
+            <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" >
+              <Children>
+                <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="80" SuggestedHeight="80" HorizontalAlignment="Left" KeyID="@KeyID" Color="#F4E1C4FF"/>
+              </Children>
+            </Widget>
+          </ItemTemplate>
+        </GridWidget>
+        
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

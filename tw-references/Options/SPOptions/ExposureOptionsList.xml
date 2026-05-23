@@ -1,0 +1,11 @@
+<Prefab>
+  <Window>
+    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren">
+      <Children>
+        <BrightnessDemoWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="574" SuggestedHeight="742" MarginRight="15" DemoType="ExposureTexture1"/>
+        <BrightnessDemoWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="574" SuggestedHeight="742" MarginRight="15" DemoType="ExposureTexture2"/>
+        <BrightnessDemoWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="574" SuggestedHeight="742" DemoType="ExposureTexture3"/>
+      </Children>
+    </ListPanel>
+  </Window>
+</Prefab>

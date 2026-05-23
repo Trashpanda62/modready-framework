@@ -1,0 +1,46 @@
+<Window>
+  <Widget WidthSizePolicy = "StretchToParent" HeightSizePolicy = "StretchToParent" IsVisible="@IsEnabled">
+    <Children>
+
+      <Widget WidthSizePolicy = "StretchToParent" HeightSizePolicy = "Fixed" SuggestedHeight="150" VerticalAlignment="Bottom" Sprite="highscore_bar_small_9" AlphaFactor="0.85" >
+        <Children>         
+
+          <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="65" VerticalAlignment="Top" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="36" Brush.TextAlphaFactor="0.75" Brush.TextHorizontalAlignment="Center" Text="@StatusText" />
+
+          <ListPanel WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Left" MarginLeft="20">
+            <Children>
+              <InputKeyVisualWidget DataSource="{PrevCharacterKey}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="48" SuggestedHeight="48" VerticalAlignment="Center" HorizontalAlignment="Left" KeyID="@KeyID"/>
+              <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" Text="@PrevCharacterText" Brush="ScoreboardDefaultFontBrush" ClipContents="false"/>
+            </Children>
+          </ListPanel>
+
+          <ListPanel WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Right" MarginRight="20">
+            <Children>
+              <InputKeyVisualWidget DataSource="{NextCharacterKey}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="48" SuggestedHeight="48" VerticalAlignment="Center" HorizontalAlignment="Left" KeyID="@KeyID"/>
+              <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" Text="@NextCharacterText" Brush="ScoreboardDefaultFontBrush" ClipContents="false"/>
+            </Children>
+          </ListPanel>       
+          
+        </Children>
+      </Widget>
+
+      <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="170" Sprite="BlankWhiteSquare_9" Color="#000000FF" AlphaFactor="0.50">
+        <Children>
+          <TextWidget Id="SpectatedAgentName" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginRight="5" MarginLeft="5" MarginTop="5" MarginBottom="5" Brush="ScoreboardDefaultFontBrush" Brush.FontSize="28" Brush.TextHorizontalAlignment="Center" Brush.TextAlphaFactor="0.85" Text="@SpectatedAgentName" AutoHideIfEmpty="true"/>
+        </Children>
+      </Widget>
+
+      <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="220" Sprite="BlankWhiteSquare_9" Color="#000000FF" AlphaFactor="0.4" IsVisible="@IsTakeControlRelevant">
+        <Children>
+          <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="@IsTakeControlEnabled">
+            <Children>
+              <InputKeyVisualWidget DataSource="{TakeControlKey}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="48" SuggestedHeight="48" VerticalAlignment="Center" KeyID="@KeyID" ColorFactor="0.9"/>
+              <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" Text="@TakeControlText" Brush="ScoreboardDefaultFontBrush" Brush.TextColorFactor="0.9"/>
+            </Children>
+          </ListPanel>
+        </Children>
+      </Widget>
+      
+    </Children>
+  </Widget>
+</Window>

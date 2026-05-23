@@ -1,0 +1,142 @@
+<Prefab>
+  <VisualDefinitions>
+    <VisualDefinition Name="TopPanel" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+      <VisualState PositionYOffset="0" State="Default" />
+    </VisualDefinition>
+    <VisualDefinition Name="BottomMenu" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.45">
+      <VisualState PositionYOffset="0" State="Default" />
+    </VisualDefinition>
+  </VisualDefinitions>
+  <Window>
+    <OptionsScreenWidget Id="Options" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" CurrentOptionDescriptionWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionDescriptionWidget" CurrentOptionImageWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionImageWidget" CurrentOptionNameWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionNameWidget" CurrentOptionExtraInformationWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionExtraInformationWidget" PerformanceTabToggle="TopPanel\TabToggleList\PerformanceTabToggle" VideoMemoryUsageWidget="MainSectionListPanel\DescriptionsRightPanel\VideoMemoryUsageWidget">
+      <Children>
+
+        <Standard.Background />
+
+        <ListPanel Id="MainSectionListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginTop="164">
+          <Children>
+
+            <Widget Id="CenterPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+              <Children>
+
+                <ScrollablePanel Id="ScrollablePanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" AutoHideScrollBarHandle="true" AutoHideScrollBars="false" ClipRect="MyClipRect" InnerPanel="MyClipRect\TabControl" VerticalScrollbar="..\..\VerticalScrollbar">
+                  <Children>
+                    <Widget Id="MyClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" ClipContents="true">
+                      <Children>
+                        <TabControl Id="TabControl" SelectedIndex="@CategoryIndex" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren">
+                          <Children>
+                            <OptionsGroupedPage Id="VideoOptionsPage" DataSource="{VideoOptions}" Parameter.ResetButtonScopeID="VideoResetButtonScope" Parameter.HasCircularNavigation="true" />
+                            <OptionsGroupedPage Id="PerformanceOptionsPage" DataSource="{PerformanceOptions}" Parameter.ResetButtonScopeID="PerformanceResetButtonScope" />
+                            <OptionsGroupedPage Id="AudioOptionsPage" DataSource="{AudioOptions}" Parameter.ResetButtonScopeID="AudioResetButtonScope" Parameter.HasCircularNavigation="true" />
+                            <OptionsGroupedPage Id="GameplayOptionsPage" DataSource="{GameplayOptions}" Parameter.ResetButtonScopeID="GameplayResetButtonScope" />
+                            <OptionsGameKeyPage Id="GameKeyOptionGroupsPage" DataSource="{GameKeyOptionGroups}" />
+                            <OptionsGamepadPage Id="GamepadOptionsPage" DataSource="{GamepadOptions}" />
+                          </Children>
+                        </TabControl>
+                      </Children>
+                    </Widget>
+
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="150" VerticalAlignment="Bottom" Sprite="StdAssets\Popup\scrollable_field_gradient" IsEnabled="false" />
+
+                  </Children>
+                </ScrollablePanel>
+
+              </Children>
+            </Widget>
+
+            <ScrollbarWidget Id="VerticalScrollbar" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="8" HorizontalAlignment="Right" VerticalAlignment="Center" MarginTop="26" MarginBottom="85" AlignmentAxis="Vertical" Handle="VerticalScrollbarHandle" MaxValue="100" MinValue="0">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="4" HorizontalAlignment="Center" Sprite="MPLobby\CustomServer\lobby_slider_bed" AlphaFactor="0.4" />
+                <ImageWidget Id="VerticalScrollbarHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="8" SuggestedHeight="10" HorizontalAlignment="Center" Brush="FaceGen.Scrollbar.Handle" />
+              </Children>
+            </ScrollbarWidget>
+
+            <!--Descriptions Right Panel-->
+            <Widget Id="DescriptionsRightPanel" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="650">
+              <Children>
+
+                <ListPanel Id="DescriptionsListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="40" MarginRight="40" MarginTop="65" StackLayout.LayoutMethod="VerticalTopToBottom">
+                  <Children>
+                    <RichTextWidget Id="CurrentOptionNameWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="SPOptions.Description.Title.Text" Text=" " />
+                    <RichTextWidget Id="CurrentOptionDescriptionWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="25" Brush="SPOptions.Description.Text" Text=" " />
+                    <RichTextWidget Id="CurrentOptionExtraInformationWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="25" Brush="SPOptions.ExtraInformation.Text" Text=" " AutoHideIfEmpty="true" />
+                    <Widget Id="CurrentOptionImageWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="576" SuggestedHeight="324" MarginTop="35" />
+                  </Children>
+                </ListPanel>
+
+                <!--Video Memory Usage Slider-->
+                <ListPanel Id="VideoMemoryUsageWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Bottom" MarginBottom="100" MarginLeft="40" StackLayout.LayoutMethod="VerticalTopToBottom">
+                  <Children>
+
+                    <RichTextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="SPOptions.OptionName.Text" Text="@VideoMemoryUsageName" MarginLeft="10" />
+
+                    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Top" StackLayout.LayoutMethod="VerticalTopToBottom">
+                      <Children>
+
+                        <FillBarWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="321" SuggestedHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center" ContainerWidget="ContainerWidget" FillWidget="FillBarParent\FillWidget"  MaxAmountAsFloat="1" InitialAmountAsFloat="@VideoMemoryUsageNormalized">
+                          <Children>
+
+                            <Widget Id="FillBarParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="14" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="13" MarginRight="14">
+                              <Children>
+
+                                <!--Fill-->
+                                <Widget Id="FillWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="14" Sprite="options_memory_progress_bar">
+                                  <Children>
+                                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Right" Sprite="options_memory_progress_bar_glow" ColorFactor="0.8"/>
+                                  </Children>
+                                </Widget>
+
+                              </Children>
+                            </Widget>
+
+                            <!--Container-->
+                            <Widget Id="ContainerWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="options_memory_progress_frame" />
+
+                          </Children>
+                        </FillBarWidget>
+
+                        <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="SPOptions.Slider.Value.Text" IsEnabled="false" Text="@VideoMemoryUsageText" MarginLeft="10"/>
+                      </Children>
+                    </ListPanel>
+
+                  </Children>
+                </ListPanel>
+
+              </Children>
+            </Widget>
+
+          </Children>
+        </ListPanel>
+
+        <!--Top Panel-->
+        <Standard.TopPanel Id="TopPanel" VisualDefinition="TopPanel" PositionYOffset="-196" Parameter.Title="@OptionsLbl">
+          <Children>
+            
+            <ListPanel Id="TabToggleList" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="128" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="2" StackLayout.LayoutMethod="HorizontalLeftToRight">
+              <Children>
+                <OptionsTabToggle DataSource="{VideoOptions}" Parameter.ButtonBrush="Header.Tab.Left" Parameter.Text.Top.Margin="4" Parameter.Text.Left.Margin="20" Parameter.Text.Right.Margin="10" Parameter.TabName="VideoOptionsPage" />
+                <OptionsTabToggle Id="PerformanceTabToggle" DataSource="{PerformanceOptions}" Parameter.ButtonBrush="Header.Tab.Center" PositionYOffset="2" Parameter.Text.Left.Margin="7" Parameter.Text.Right.Margin="7" Parameter.TabName="PerformanceOptionsPage" IsVisible="@IsEnabled"/>
+                <OptionsTabToggle DataSource="{AudioOptions}" Parameter.ButtonBrush="Header.Tab.Center" PositionYOffset="2" Parameter.Text.Left.Margin="7" Parameter.Text.Right.Margin="7" Parameter.TabName="AudioOptionsPage"/>
+                <OptionsTabToggle DataSource="{GameplayOptions}" Parameter.ButtonBrush="Header.Tab.Center" PositionYOffset="2" Parameter.Text.Left.Margin="7" Parameter.Text.Right.Margin="7" Parameter.TabName="GameplayOptionsPage" />
+                <OptionsTabToggle DataSource="{GameKeyOptionGroups}" Parameter.ButtonBrush="Header.Tab.Right" Parameter.Text.Top.Margin="3" Parameter.TabName="GameKeyOptionGroupsPage" IsVisible="@IsEnabled"/>
+                <OptionsTabToggle DataSource="{GamepadOptions}" Parameter.ButtonBrush="Header.Tab.Right" Parameter.Text.Top.Margin="4" Parameter.Text.Left.Margin="10" Parameter.Text.Right.Margin="20" Parameter.TabName="GamepadOptionsPage" IsVisible="@IsEnabled"/>
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </Standard.TopPanel>
+
+        <!-- Previous Tab Key Identifier-->
+        <InputKeyVisualWidget DataSource="{PreviousTabInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="70" HorizontalAlignment="Left" VerticalAlignment="Top" PositionYOffset="75" PositionXOffset="225" KeyID="@KeyID" IsVisible="@IsVisible" />
+        <!-- Next Tab Key Identifier -->
+        <InputKeyVisualWidget DataSource="{NextTabInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="70" HorizontalAlignment="Right" VerticalAlignment="Top" PositionYOffset="75" PositionXOffset="-225" KeyID="@KeyID" IsVisible="@IsVisible" />
+
+        <Standard.DialogCloseButtons VisualDefinition="BottomMenu" PositionYOffset="100" Parameter.CancelButtonAction="ExecuteCancel" Parameter.CancelButtonText="@CancelLbl" Parameter.DoneButtonAction="ExecuteDone" Parameter.DoneButtonText="@DoneLbl" Parameter.DoneInputKeyDataSource="{DoneInputKey}" Parameter.CancelInputKeyDataSource="{CancelInputKey}" />
+
+        <BrightnessOption DataSource="{BrightnessPopUp}" IsVisible="@Visible" />
+        <ExposureOption DataSource="{ExposurePopUp}" IsVisible="@Visible" />
+
+      </Children>
+    </OptionsScreenWidget>
+  </Window>
+</Prefab>

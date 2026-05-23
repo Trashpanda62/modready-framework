@@ -1,0 +1,55 @@
+<Prefab>
+  <Constants>
+    <Constant Name ="VerticalMargin" Value ="10"/>
+  </Constants>
+  <Window>
+    <Widget Id="PhotoModeScreen" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" DoNotAcceptEvents="true">
+      <Children>
+
+				<Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="50" SuggestedHeight="50" HorizontalAlignment="Center" VerticalAlignment="Center" GamepadNavigationIndex="0">
+					<Children>
+						<NavigationScopeTargeter ScopeID="PhotoModeCenterScope" ScopeParent="..\." />
+					</Children>
+				</Widget>
+
+        <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" DoNotAcceptEvents="true">
+          <Children>
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="600" SuggestedHeight="475" Sprite="PhotoMode\photo_mode_options_background" Color="#000000FF" AlphaFactor="0.8" DoNotAcceptEvents="true"/>
+						<NavigationScopeTargeter ScopeID="PhotoModeControlsScope" ScopeParent="..\Controls" ScopeMovements="Vertical" />
+            <ListPanel Id="Controls" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MinWidth="500" MinHeight="500" MarginTop="50" MarginLeft="25" StackLayout.LayoutMethod = "VerticalTopToBottom" Color="#000000FF" AlphaFactor="0.8">
+              <Children>
+                
+                <Standard.DropdownWithHorizontalControl Id="SelectionOption" MarginRight="5" Parameter.IsFlatDesign="true" Parameter.SelectorDataSource="{ColorGradeSelector}" Parameter.ShowNextAndPrevious="true" HorizontalAlignment="Center" GamepadNavigationIndex="0" />
+                
+                <Standard.DropdownWithHorizontalControl Id="SelectionOption" HorizontalAlignment="Center" MarginRight="5" Parameter.IsFlatDesign="true" Parameter.SelectorDataSource="{OverlaySelector}" MarginTop="!VerticalMargin" Parameter.ShowNextAndPrevious="false" GamepadNavigationIndex="1"/>
+
+                <PhotoModeValueOption DataSource="{FocusValueOption}" MarginRight="40" MarginTop="!VerticalMargin" Parameter.GamepadNavigationIndex="2"/>
+                <PhotoModeValueOption DataSource="{FocusStartValueOption}" MarginRight="40" MarginTop="!VerticalMargin" Parameter.GamepadNavigationIndex="3"/>
+                <PhotoModeValueOption DataSource="{FocusEndValueOption}" MarginRight="40" MarginTop="!VerticalMargin" Parameter.GamepadNavigationIndex="4"/>
+                <PhotoModeValueOption DataSource="{ExposureOption}" MarginRight="40" MarginTop="!VerticalMargin" Parameter.GamepadNavigationIndex="5"/>
+                <PhotoModeValueOption DataSource="{VerticalFovOption}" MarginRight="40" MarginTop="!VerticalMargin" Parameter.GamepadNavigationIndex="6"/>
+
+              </Children>
+            </ListPanel>
+          </Children>
+        </Widget>
+
+        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" DoNotAcceptEvents="true">
+          <Children>
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="140" Sprite="PhotoMode\photo_mode_shortcuts_background" HorizontalAlignment="Right" Color="#000000FF" AlphaFactor="0.8" DoNotAcceptEvents="true"/>
+            <ListPanel DataSource="{Keys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Bottom" HorizontalAlignment="Right" MarginRight="15" StackLayout.LayoutMethod="HorizontalLeftToRight" >
+              <ItemTemplate>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginRight="17" IsVisible="@IsVisible">
+                  <Children>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="50" SuggestedHeight="50" VerticalAlignment="Center" KeyID="@KeyID"/>
+                    <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MaxWidth="91" MaxHeight="50" VerticalAlignment="Center" Brush="PhotoMode.Property.Text" Brush.TextHorizontalAlignment="Left" Text="@KeyName" Brush.FontSize="17"/>
+                  </Children>
+                </ListPanel>
+              </ItemTemplate>
+            </ListPanel>
+          </Children>
+        </Widget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

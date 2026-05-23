@@ -1,0 +1,12 @@
+<Prefab>
+  <Constants>
+
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsEnabled="false">
+      <Children>
+        <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Top" HorizontalAlignment="Left" Text="@GameVersion"/>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

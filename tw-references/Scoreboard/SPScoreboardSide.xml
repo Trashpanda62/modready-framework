@@ -1,0 +1,26 @@
+<Prefab>
+  <Window>
+    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="630">
+      <Children>
+
+        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+          <Children>
+
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren">
+              <Children>
+
+                <ListPanel DataSource="{Parties}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Top" StackLayout.LayoutMethod="VerticalTopToBottom">
+                  <ItemTemplate>
+                    <SPScoreboardParty />
+                  </ItemTemplate>
+                </ListPanel>
+
+              </Children>
+            </Widget>
+
+          </Children>
+        </Widget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

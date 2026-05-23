@@ -1,0 +1,61 @@
+<Prefab>
+
+  <Constants>
+    <Constant Name="Standard.DialogCloseButtons.CancelButton.Width" BrushLayer="Default" BrushName="Standard.DialogCloseButtons.CancelButton" BrushValueType="Width" />
+    <Constant Name="Standard.DialogCloseButtons.CancelButton.Height" BrushLayer="Default" BrushName="Standard.DialogCloseButtons.CancelButton" BrushValueType="Height" />
+
+    <Constant Name="Standard.DialogCloseButtons.DoneButton.Width" BrushLayer="Default" BrushName="Standard.DialogCloseButtons.DoneButton" BrushValueType="Width" />
+    <Constant Name="Standard.DialogCloseButtons.DoneButton.Height" BrushLayer="Default" BrushName="Standard.DialogCloseButtons.DoneButton" BrushValueType="Height" />
+  </Constants>
+
+  <Parameters>
+    <Parameter Name="ShowCancel" DefaultValue="true" />
+    <Parameter Name="ShowDone" DefaultValue="true" />
+
+    <Parameter Name="CancelButtonText" DefaultValue="- Missing -" />
+    <Parameter Name="DoneButtonText" DefaultValue="- Missing -" />
+
+    <Parameter Name="CancelButtonAction" DefaultValue="" />
+    <Parameter Name="DoneButtonAction" DefaultValue="" />
+
+    <Parameter Name="NavigationScopeMovements" DefaultValue="Horizontal" />
+    <Parameter Name="CancelButtonNavigationIndex" DefaultValue="-1" />
+    <Parameter Name="DoneButtonNavigationIndex" DefaultValue="-1" />
+
+    <Parameter Name="CancelInputKeyDataSource" DefaultValue="" />
+    <Parameter Name="DoneInputKeyDataSource" DefaultValue="" />
+
+    <Parameter Name="IsDoneEnabled" DefaultValue="true" />
+  </Parameters>
+
+  <Window>
+    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+      <Children>
+        <NavigationScopeTargeter ScopeID="DialogCloseButtonsScope" ScopeParent="..\." ScopeMovements="*NavigationScopeMovements" HasCircularMovement="true" />
+        <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Standard.DialogCloseButtons.CancelButton.Width" SuggestedHeight="!Standard.DialogCloseButtons.CancelButton.Height" Brush="Standard.DialogCloseButtons.CancelButton" Command.Click="*CancelButtonAction" IsEnabled="*ShowCancel" IsVisible="*ShowCancel" UpdateChildrenStates="true" GamepadNavigationIndex="*CancelButtonNavigationIndex">
+          <Children>
+            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" MaxWidth="200" MarginTop="20" MarginBottom="20" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="13" Brush="Standard.DialogCloseButtons.ButtonText" Text="*CancelButtonText">
+              <Children>
+                <InputKeyVisualWidget DataSource="*CancelInputKeyDataSource" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="48" SuggestedHeight="48" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-44" KeyID="@KeyID" IsVisible="@IsVisible"/>
+              </Children>
+            </TextWidget>
+          </Children>
+        </ButtonWidget>
+        <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Standard.DialogCloseButtons.DoneButton.Width" SuggestedHeight="!Standard.DialogCloseButtons.DoneButton.Height" Brush="Standard.DialogCloseButtons.DoneButton" Command.Click="*DoneButtonAction" IsEnabled="*IsDoneEnabled" IsVisible="*ShowDone" UpdateChildrenStates="true" GamepadNavigationIndex="*DoneButtonNavigationIndex"> 
+          <Children>
+            <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MaxWidth="200" MarginTop="20" MarginBottom="20" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="13" Brush="Standard.DialogCloseButtons.ButtonText" Text="*DoneButtonText">
+              <Children>
+                <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-44" IsVisible="*IsDoneEnabled">
+                  <Children>
+                    <InputKeyVisualWidget DataSource="*DoneInputKeyDataSource" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="48" SuggestedHeight="48" KeyID="@KeyID" IsVisible="@IsVisible"/>
+                  </Children>
+                </Widget>
+              </Children>
+            </TextWidget>
+          </Children>
+        </ButtonWidget>
+      </Children>
+    </ListPanel>
+  </Window>
+
+</Prefab>

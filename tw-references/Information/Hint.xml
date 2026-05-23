@@ -1,0 +1,17 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="HintText" DefaultValue="NoHint"/>
+  </Parameters>
+  <Constants>
+  </Constants>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <!--Hint-->
+    <Widget Id="Hint" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Sprite="BlankWhiteSquare_9" Color="#FF0000D9">
+      <Children>
+        <RichTextWidget Id="HintText" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginLeft="13" MarginRight="13" MarginTop="2" MarginBottom="2" Brush="Tooltip.Description.Text" MaxWidth="200" Text="*HintText"/>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

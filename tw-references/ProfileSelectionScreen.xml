@@ -1,0 +1,37 @@
+<Prefab>
+  <Constants>
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#000000FF">
+      <Children>
+        <Widget WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth="1920" SuggestedHeight="1080" Sprite="loading_09" HorizontalAlignment="Center" VerticalAlignment="Center" DoNotUseCustomScale="true">
+          <Children>
+
+            <ListPanel WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" StackLayout.LayoutMethod="VerticalTopToBottom" Sprite="BlankWhiteSquare_9" Color="#000000FF" AlphaFactor="0.5">
+              <Children>
+
+                <!--Select Profile-->
+                <ListPanel WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" MarginTop="10" DoNotAcceptEvents="true">
+                  <Children>
+                    <InputKeyVisualWidget DataSource="{SelectProfileKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="60" SuggestedHeight="60" VerticalAlignment="Center" KeyID="@KeyID" IsVisible="@IsVisible" MarginRight="5"/>
+                    <TextWidget WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" Text="@SelectProfileText" VerticalAlignment="Center" MarginLeft="5" Brush="InitialMenuButtonBrush" DoNotAcceptEvents="true"/>
+                  </Children>
+                </ListPanel>
+
+                <!--Play-->
+                <ListPanel WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" MarginBottom="10" IsEnabled="@IsPlayEnabled" DoNotAcceptEvents="true">
+                  <Children>
+                    <InputKeyVisualWidget DataSource="{PlayKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="60" SuggestedHeight="60" VerticalAlignment="Center" KeyID="@KeyID" IsVisible="@IsVisible" MarginRight="5" IsEnabled="@IsPlayEnabled"/>
+                    <TextWidget WidthSizePolicy = "CoverChildren" HeightSizePolicy = "CoverChildren" Text="@PlayText" VerticalAlignment="Center" MarginLeft="5" IsEnabled="@IsPlayEnabled" Brush="InitialMenuButtonBrush" DoNotAcceptEvents="true"/>
+                  </Children>
+                </ListPanel>
+
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </Widget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

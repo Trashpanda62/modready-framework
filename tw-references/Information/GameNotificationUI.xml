@@ -1,0 +1,31 @@
+<Prefab>
+  <Variables>
+  </Variables>
+  <Constants>
+    <Constant Name="GameNotification.Background.Width" BrushLayer="Default" BrushName="GameNotification" BrushValueType="Width" MultiplyResult="0.8" />
+    <Constant Name="GameNotification.Background.Height" BrushLayer="Default" BrushName="GameNotification" BrushValueType="Height" />
+    <Constant Name="GameNotification.Text.HorizontalMargins" Value="10"/>
+  </Constants>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsDisabled="true">
+      <Children>
+        <GameNotificationWidget WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="!GameNotification.Background.Width" SuggestedHeight="!GameNotification.Background.Height" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="125" Brush="GameNotification" AlphaFactor="0.9" IsVisible="@GotNotification" NotificationId="@NotificationId" TextWidget="LayoutListPanel\TextWidget" AnnouncerImageIdentifier="LayoutListPanel\AnnouncerImageIdentifier" IsPaused="@IsPaused" NotificationDurationInSeconds="@CurrentNotificationDurationInSeconds" RampUpInSeconds="0.2" RampDownInSeconds="0.2" MustFadeOutCurrentNotification="@MustFadeOutCurrentNotification" NotificationFadeOutDelayInSeconds="@CurrentNotificationFadeOutDelayInSeconds" Command.NotificationFinished="SkipCurrentNotification">
+          <Children>
+            <ListPanel Id="LayoutListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginRight="!GameNotification.Text.HorizontalMargins" MarginLeft="65">
+              <Children>
+                <ImageIdentifierWidget Id="AnnouncerImageIdentifier" HideWhenNull="true" DataSource="{CurrentNotification\Announcer}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="127" SuggestedHeight="94.77" VerticalAlignment="Center" PositionYOffset="-15" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" IsDisabled="true" MarginRight="15">
+                  <Children>
+                    <RichTextWidget DataSource="{..}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="GameNotification.AnnouncerName.Text" HorizontalAlignment="Center" PositionYOffset="30" VerticalAlignment="Bottom" Text="@CharacterNameText" Sprite="BlankWhiteSquare_9" Brush.Color="#00000044"/>
+                  </Children>
+                </ImageIdentifierWidget>
+                <RichTextWidget Id="TextWidget" DataSource="{CurrentNotification}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginTop="32.5" MarginBottom="32.5" MarginRight="60" Brush="GameNotification.Text" Text="@GameNotificationText"/>
+              </Children>
+            </ListPanel> 
+          </Children>
+        </GameNotificationWidget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

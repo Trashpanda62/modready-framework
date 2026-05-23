@@ -1,0 +1,58 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="AttackerFillBarBrush" DefaultValue="PowerLevelComparer.LeftBar.Battle" />
+    <Parameter Name="DefenderFillBarBrush" DefaultValue="PowerLevelComparer.RightBar.Battle" />
+    <Parameter Name="AttackerFillBarHighlightBrush" DefaultValue="PowerLevelComparer.LeftBar.Battle.Highlight" />
+    <Parameter Name="DefenderFillBarHighlightBrush" DefaultValue="PowerLevelComparer.RightBar.Battle.Highlight" />
+    <Parameter Name="CenterSpace" DefaultValue="0" />
+    <Parameter Name="IsCenterSeperatorEnabled" DefaultValue="false" />
+  </Parameters>
+  <Window>
+
+    <PowerLevelComparerWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="400" SuggestedHeight="10" AttackerPower="@AttackerBattlePowerValue" AttackerPowerListPanel="PowerListPanel\AttackerSideInitialPowerLevel\AttackerPowerListPanel" AttackerPowerWidget="PowerListPanel\AttackerSideInitialPowerLevel" CenterSeperatorWidget="CenterSeperatorWidget" DefenderPower="@DefenderBattlePowerValue" DefenderPowerListPanel="PowerListPanel\DefenderSideInitialPowerLevel\DefenderPowerListPanel" DefenderPowerWidget="PowerListPanel\DefenderSideInitialPowerLevel" InitialAttackerBattlePower="@InitialAttackerBattlePowerValue" InitialDefenderBattlePower="@InitialDefenderBattlePowerValue" IsCenterSeperatorEnabled="*IsCenterSeperatorEnabled" PowerListPanel="PowerListPanel" >
+      <Children>
+
+        <ListPanel Id="PowerListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" StackLayout.LayoutMethod="HorizontalLeftToRight">
+          <Children>
+
+            <BrushWidget Id="AttackerSideInitialPowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="*AttackerFillBarBrush" Brush.Color="#00000088">
+              <Children>
+                <ListPanel Id="AttackerPowerListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <BrushWidget Id="AttackerSideEmptyPowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" />
+                    <BrushWidget Id="AttackerSidePowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="*AttackerFillBarBrush" Brush.Color="@AttackerColor" ClipContents="true">
+                      <Children>
+                        <BrushWidget Id="AttackerSidePowerLevelHighlight" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="23" HorizontalAlignment="Left" Brush="*AttackerFillBarHighlightBrush" Brush.Color="@AttackerColor" />
+                      </Children>
+                    </BrushWidget>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </BrushWidget>
+
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="*CenterSpace" />
+
+            <BrushWidget Id="DefenderSideInitialPowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="*DefenderFillBarBrush" Brush.Color="#00000088">
+              <Children>
+                <ListPanel Id="DefenderPowerListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <BrushWidget Id="DefenderSidePowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="*DefenderFillBarBrush" Brush.Color="@DefenderColor" ClipContents="true">
+                      <Children>
+                        <BrushWidget Id="DefenderSidePowerLevelHighlight" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="23" HorizontalAlignment="Right" Brush="*DefenderFillBarHighlightBrush" Brush.Color="@DefenderColor" />
+                      </Children>
+                    </BrushWidget>
+                    <BrushWidget Id="DefenderSideEmptyPowerLevel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" />
+                  </Children>
+                </ListPanel>
+              </Children>
+            </BrushWidget>
+          </Children>
+        </ListPanel>
+
+        <Widget Id="CenterSeperatorWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" SuggestedHeight="21" PositionYOffset="-5" Sprite="General\Mission\power_bar_divider" IsVisible="*IsCenterSeperatorEnabled" />
+        <HintWidget DataSource="{Hint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+      
+      </Children>
+    </PowerLevelComparerWidget>
+  </Window>
+</Prefab>

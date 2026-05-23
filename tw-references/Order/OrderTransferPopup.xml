@@ -1,0 +1,58 @@
+<Prefab>
+  <Constants>
+    <Constant Name="DoneButton.Width" BrushName="ButtonBrush1" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="DoneButton.Height" BrushName="ButtonBrush1" BrushLayer="Default" BrushValueType="Height"/>
+
+    <Constant Name="CancelButton.Width" BrushName="ButtonBrush2" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="CancelButton.Height" BrushName="ButtonBrush2" BrushLayer="Default" BrushValueType="Height"/>
+  </Constants>
+  <Window>
+    <Widget IsVisible="@IsTransferActive" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#00000088">
+      <Children>
+        
+        <!--Background & Body-->
+        <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="900" SuggestedHeight="370" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Frame1Brush">
+          <Children>
+            <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" StackLayout.LayoutMethod="VerticalTopToBottom">
+              <Children>
+
+                <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginTop="15" Brush="Order.TransferPopup.TitleText" Text="@TransferTitleText"/>
+
+                <NavigationScopeTargeter ScopeID="TransferTargetsScope" ScopeParent="..\TransferTargets" ScopeMovements="Horizontal" />
+                <NavigatableListPanel Id="TransferTargets" DataSource="{TransferTargetList}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" MarginTop="30" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <ItemTemplate>
+                    <ButtonWidget IsEnabled="@IsSelectable" IsSelected="@IsSelected" Command.Click="ExecuteAction" ButtonType="Radio" DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="Order.Transfer.Card.Background" >
+                      <Children>
+                        <OrderTransferTroopItem />
+                      </Children>
+                    </ButtonWidget>
+                  </ItemTemplate>
+                </NavigatableListPanel>
+
+                <!-- Weight Slider -->
+                <NavigationScopeTargeter ScopeID="TransferSliderScope" ScopeParent="..\TransferSlider" ScopeMovements="Horizontal" UpNavigationScope="TransferTargetsScope" DownNavigationScope="TransferTargetsScope" />
+                <SliderWidget  Id="TransferSlider" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="500" SuggestedHeight="24" HorizontalAlignment="Center" MarginTop="60" DoNotUpdateHandleSize="true" Filler="Filler" Handle="SliderHandle" IsDiscrete="true" MaxValueInt="@TransferMaxValue" MinValueInt="0" ValueInt="@TransferValue" UpdateChildrenStates="true">
+                  <Children>
+                    <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="510" SuggestedHeight="25" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="minimal_slider_bed_9"/>
+                    <Widget Id="Filler" ClipContents="true" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="23" VerticalAlignment="Center">
+                      <Children>
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="492" SuggestedHeight="21" Sprite="minimal_slider_fill_9" PositionYOffset="1" ColorFactor="1.2"/>
+                      </Children>
+                    </Widget>
+                    <ImageWidget Id="SliderHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="11" SuggestedHeight="27" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="OrderOfBattle.Slider.SliderHandle" GamepadNavigationIndex="0" />
+                  </Children>
+                </SliderWidget>
+
+                <TextWidget IntText="@TransferValue" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" SuggestedWidth="80" SuggestedHeight="30" HorizontalAlignment="Center" Brush="Order.TransferPopup.SliderValue"/>
+
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </BrushWidget>
+        <!--Triple Button-->
+        <Standard.TriplePopupCloseButtons MarginTop="480" VerticalAlignment="Center" Parameter.ResetInputKeyDataSource="{ResetInputKey}" Parameter.CancelInputKeyDataSource="{CancelInputKey}" Parameter.DoneInputKeyDataSource="{DoneInputKey}" Parameter.CancelButtonAction="ExecuteCancelTransfer" Parameter.CancelButtonText="@CancelText" Parameter.IsDoneEnabled="@IsTransferValid" Parameter.DoneButtonAction="ExecuteConfirmTransfer" Parameter.DoneButtonText="@AcceptText" Parameter.ResetButtonAction="ExecuteReset" />
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

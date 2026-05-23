@@ -1,0 +1,14 @@
+<Prefab>
+  <Window>
+    <MultiplayerMissionMarkerListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" CloseDistanceCutoff="25" Distance="@Distance" FarAlphaTarget="0.5" FarDistanceCutoff="250" SiegeEngineWidget="SiegeEngineWidget" IsMarkerEnabled="@IsEnabled" StackLayout.LayoutMethod="VerticalTopToBottom" MarkerType="@MarkerType" Position="@ScreenPosition" IsSpawnFlag="false">
+      <Children>
+        <SiegeEngineVisualWidget Id="SiegeEngineWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="66" SuggestedHeight="66" EngineID="@SiegeEngineID" OutlineWidget="SiegeEngineOutlineWidget" IconWidget="SiegeEngineIconWidget">
+          <Children>
+            <Widget Id="SiegeEngineOutlineWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Color="@Color" />
+            <Widget Id="SiegeEngineIconWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Color="@Color2" />
+          </Children>
+        </SiegeEngineVisualWidget>
+      </Children>
+    </MultiplayerMissionMarkerListPanel>
+  </Window>
+</Prefab>

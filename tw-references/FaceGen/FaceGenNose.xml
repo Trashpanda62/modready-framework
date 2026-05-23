@@ -1,0 +1,45 @@
+<Window>
+  <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginTop="0">
+    <Children>
+
+      <ScrollablePanel WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" AutoHideScrollBars="true" ClipRect="ClipRect" InnerPanel="ClipRect\InnerList" VerticalScrollbar="..\VerticalScrollbar">
+        <Children>
+
+          <Widget Id="ClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" ClipContents="true">
+            <Children>
+
+              <NavigationScopeTargeter ScopeID="NoseScope" ScopeParent="..\InnerList" ScopeMovements="Vertical" HasCircularMovement="true" />
+              <ListPanel Id="InnerList" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom" MarginTop="25">
+                <Children>
+
+                  <NavigatableListPanel DataSource="{NoseProperties}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" MarginRight="10" MarginTop="10" MarginBottom="80" StackLayout.LayoutMethod="VerticalTopToBottom" MinIndex="1000" MaxIndex="10000">
+                    <ItemTemplate>
+                      <FaceGenProperty HorizontalAlignment="Right" MarginTop="14"/>
+                    </ItemTemplate>
+                  </NavigatableListPanel>
+
+                </Children>
+              </ListPanel>
+            </Children>
+          </Widget>
+          <!--Scroll Gradient-->
+          <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="576" SuggestedHeight="57" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalFlip="true" Sprite="General\CharacterCreation\character_creation_scroll_gradient" />
+
+          <!--Scroll Gradient-->
+          <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="576" SuggestedHeight="57" HorizontalAlignment="Right" VerticalAlignment="Bottom" Sprite="General\CharacterCreation\character_creation_scroll_gradient" />
+
+        </Children>
+      </ScrollablePanel>
+
+
+      <ScrollbarWidget Id="VerticalScrollbar" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="8" HorizontalAlignment="Right" VerticalAlignment="Center" MarginTop="15" MarginBottom="15" AlignmentAxis="Vertical" Handle="VerticalScrollbarHandle" MaxValue="100" MinValue="0" >
+        <Children>
+          <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="4" HorizontalAlignment="Center" Sprite="BlankWhiteSquare_9" Color="#5a4033FF" AlphaFactor="0.2" />
+          <ImageWidget Id="VerticalScrollbarHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="10" SuggestedWidth="8" HorizontalAlignment="Center" Brush="FaceGen.Scrollbar.Handle" />
+        </Children>
+      </ScrollbarWidget>
+
+
+    </Children>
+  </Widget>
+</Window>

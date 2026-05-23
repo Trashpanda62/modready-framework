@@ -1,0 +1,46 @@
+<Window>
+  <NameMarkerScreenWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsMarkersEnabled="@IsEnabled" Sprite="BlankWhiteSquare_9" Brush.Color="#000000FF" TargetAlphaValue="0.0" Brush.AlphaFactor="0" MarkersContainer="MarkersContainer">
+    <Children>
+
+      <Widget Id="MarkersContainer" DataSource="{Targets}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+        <ItemTemplate>
+
+          <NameMarkerListPanel WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="40" Position="@ScreenPosition" HasIssue="@IsTracked" HasMainQuest="@IsQuestMainStory" IsEnemy="@IsEnemy" IsFriendly="@IsFriendly" TypeVisualWidget="TypeWidget" NameTextWidget="TypeWidget\NameAndDistanceContainer\NameTextWidget" DistanceTextWidget="TypeWidget\NameAndDistanceContainer\DistanceInfo\DistanceText" DistanceIconWidget="TypeWidget\NameAndDistanceContainer\DistanceInfo\DistanceIcon" NameType="@NameType" IconType="@IconType" StackLayout.LayoutMethod = "VerticalTopToBottom" IsMarkerEnabled="@IsEnabled" IsMarkerPersistent="@IsPersistent" Distance="@Distance" FarAlphaTarget="0.5" FarDistanceCutoff="250" CloseDistanceCutoff="25" IssueNotificationColor="#FFFFFFFF" MainQuestNotificationColor="#FFFFFFFF" EnemyColor="#ED1C24FF" FriendlyColor="#4EE04CFF">
+            <Children>
+
+              <BrushWidget Id="TypeWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="NameMarker.VisualBrush" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Children>
+
+                  <ListPanel DataSource="{Quests}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight" PositionYOffset="-40" HorizontalAlignment="Center">
+                    <ItemTemplate>
+                      <QuestMarkerBrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="42" SuggestedWidth="25" QuestMarkerType="@QuestMarkerType" Brush="GameMenu.QuestMarker" />
+                    </ItemTemplate>
+                  </ListPanel>
+
+                  <ListPanel Id="NameAndDistanceContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" MarginTop="50" StackLayout.LayoutMethod="VerticalTopToBottom">
+                    <Children>
+
+                      <TextWidget Id="NameTextWidget" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="150" Text="@Name" HorizontalAlignment="Center" Brush="NameMarker.TextBrush" OverrideDefaultStateSwitchingEnabled="true" ClipContents="false"/>
+
+                      <ListPanel Id="DistanceInfo" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" PositionYOffset="0" HorizontalAlignment="Center" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                        <Children>
+                          <BrushWidget Id="DistanceIcon" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="20" SuggestedHeight="28" Brush="NameMarker.Distance.Icon" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                          <TextWidget Id="DistanceText" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="NameMarker.Distance.Text" MarginLeft="4" MarginTop="5" IntText="@Distance" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Children>
+                      </ListPanel>
+
+                    </Children>
+                  </ListPanel>
+
+                </Children>
+              </BrushWidget>
+              
+            </Children>
+          </NameMarkerListPanel>
+
+        </ItemTemplate>
+      </Widget>
+
+    </Children>
+  </NameMarkerScreenWidget>
+</Window>

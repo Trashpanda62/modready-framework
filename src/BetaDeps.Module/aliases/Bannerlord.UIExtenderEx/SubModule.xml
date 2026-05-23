@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BetaDeps alias stub for Bannerlord.UIExtenderEx. The actual UIExtenderEx
+  work is done by Bannerlord.UIExtenderEx.dll inside Modules\BetaDeps\.
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.UIExtenderEx" />
+  <Name value="Bannerlord.UIExtenderEx (provided by BetaDeps)" />
+  <Version value="v2.14.99.0" />
+  <DefaultModule value="false" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="true" />
+  <Official value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="BetaDeps" />
+    <DependedModule Id="Bannerlord.Harmony" />
+  </DependedModules>
+
+  <DependedModuleMetadatas />
+
+  <SubModules>
+    <SubModule>
+      <Name value="Bannerlord.UIExtenderEx alias stub" />
+      <DLLName value="BetaDeps.Foundation.dll" />
+      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>

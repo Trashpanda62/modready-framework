@@ -1,0 +1,127 @@
+// BetaDeps clean-room re-implementation of ButterLib's BEWPatch.
+// MIT, copyright 2026 Maxfield Management Group.
+//
+// BetterExceptionWindow (BEW) finalizers: Harmony finalizers attached to
+// the 5 tick methods where engine exceptions are most disruptive. The
+// finalizer logs the exception and returns null, which tells Harmony to
+// swallow it. The game continues. Loses one tick of work in exchange for
+// staying up.
+//
+// Targets (same set CREST's runtime.log validated):
+//   TaleWorlds.DotNet.Managed.ApplicationTick
+//   TaleWorlds.MountAndBlade.Module.OnApplicationTick
+//   TaleWorlds.ScreenSystem.ScreenManager.Tick
+//   TaleWorlds.Engine.ManagedScriptHolder.TickComponents
+//   TaleWorlds.MountAndBlade.Mission.Tick
+
+using System;
+using System.Reflection;
+
+using BetaDeps.Foundation;
+
+using HarmonyLib;
+
+namespace Bannerlord.ButterLib.ExceptionHandler;
+
+public static class BEWPatch
+{
+    private const string Tag = "BEWPatch";
+    private const string HarmonyId = "betadeps.butterlib.bewpatch";
+
+    private static bool _enabled;
+
+    /// <summary>
+    /// Install the 5 finalizers. Idempotent. Each bind logs its result so
+    /// CrestPatchSelfTest can verify they took effect.
+    /// </summary>
+    public static void Enable()
+    {
+        if (_enabled) return;
+        _enabled = true;
+
+        DiagLog.Log(Tag, "Enable() invoked -- attempting 5 finalizer binds");
+
+        var harmony = new HarmonyLib.Harmony(HarmonyId);
+
+        TryBind(harmony, "TaleWorlds.DotNet.Managed",            "ApplicationTick",          label: "Managed.ApplicationTick");
+        TryBind(harmony, "TaleWorlds.MountAndBlade.Module",      "OnApplicationTick",        label: "Module.OnApplicationTick");
+        TryBind(harmony, "TaleWorlds.ScreenSystem.ScreenManager","Tick",                     label: "ScreenManager.Tick");
+        TryBind(harmony, "TaleWorlds.Engine.ManagedScriptHolder","TickComponents",           label: "ManagedScriptHolder.TickComponents");
+        TryBind(harmony, "TaleWorlds.MountAndBlade.Mission",     "Tick",                     label: "Mission.Tick");
+    }
+
+    private static void TryBind(HarmonyLib.Harmony harmony, string typeName, string methodName, string label)
+    {
+        try
+        {
+            var t = BetaDeps.Foundation.ReflectionUtils.ResolveTypeByFullName(typeName);
+            if (t == null)
+            {
+                DiagLog.Log(Tag, $"{label} bind skipped -- type {typeName} not found");
+                return;
+            }
+            // Find any method with the given name. Most have one overload; if
+            // there are several, we attach to all to keep behavior identical
+            // across game versions.
+            var matches = t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            int boundCount = 0;
+            foreach (var m in matches)
+            {
+                if (!string.Equals(m.Name, methodName, StringComparison.Ordinal)) continue;
+                try
+                {
+                    var finalizer = new HarmonyMethod(typeof(BEWPatch), nameof(Finalizer));
+                    harmony.Patch(m, finalizer: finalizer);
+                    boundCount++;
+                }
+                catch (Exception inner)
+                {
+                    DiagLog.LogCaught(Tag, $"{label} bind on overload", inner);
+                }
+            }
+            if (boundCount > 0)
+                DiagLog.Log(Tag, $"{label} bound -- finalizer active on {t.FullName}.{methodName}");
+            else
+                DiagLog.Log(Tag, $"{label} bind skipped -- no method named '{methodName}' on {t.FullName}");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"TryBind({label})", ex);
+        }
+    }
+
+    /// <summary>
+    /// Harmony finalizer body. Receives the in-flight exception via
+    /// __exception, logs it, and returns null to swallow.
+    /// </summary>
+    public static Exception? Finalizer(MethodBase __originalMethod, Exception? __exception)
+    {
+        if (__exception == null) return null;
+        try
+        {
+            DiagLog.Log(Tag,
+                $"swallowed engine exception in {__originalMethod?.DeclaringType?.FullName}.{__originalMethod?.Name}: " +
+                $"{__exception.GetType().Name} -- {__exception.Message}");
+        }
+        catch { }
+        return null;
+    }
+
+    private static Type? ResolveType(string fullName)
+    {
+        try
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    var t = asm.GetType(fullName, throwOnError: false);
+                    if (t != null) return t;
+                }
+                catch { }
+            }
+        }
+        catch { }
+        return null;
+    }
+}

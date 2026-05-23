@@ -1,0 +1,42 @@
+<Window>
+  <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+    <Children>
+
+      <Widget DataSource="{Targets}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+        <ItemTemplate>
+
+          <MissionSiegeEngineMarkerWidget DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" IsEnemy="@IsEnemy" EngineType="@EngineType" MachineTypeIconWidget="MachineCircle\MachineIconParent\MachineTypeIconWidget" MachineIconParent="MachineCircle\MachineIconParent" EnemyBrush="Mission.SiegeEngine.Marker.Enemy" AllyBrush="Mission.SiegeEngine.Marker.Ally" ScreenPosition="@ScreenPosition" Slider="SliderParent\Slider" IsActive="@IsEnabled" >
+            <Children>
+
+              <Widget Id="SliderParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="76" SuggestedHeight="13" HorizontalAlignment="Right" VerticalAlignment="Bottom" Sprite="BlankWhiteSquare" Color="#272624FF" IsEnabled="false">
+                <Children>
+                  <SliderWidget Id="Slider" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="9" HorizontalAlignment="Center" VerticalAlignment="Center" Filler="Filler" Handle="Handle" MaxValueInt="100" MinValueInt="0" ValueInt="@HitPoints">
+                    <Children>
+                      <BrushWidget Id="Filler" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="11" SuggestedHeight="9" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="Mission.SiegeEngine.Marker.Hitpoint" />
+                      <BrushWidget Id="Handle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="1" SuggestedHeight="1" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="false" IsVisible="false" />
+                    </Children>
+                  </SliderWidget>
+                </Children>
+              </Widget>
+
+              <!--Machine Circle Icon-->
+              <Widget Id="MachineCircle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="35" SuggestedHeight="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" PositionYOffset="9" MarginRight="72" Sprite="BlankWhiteCircle" Color="#272624FF">
+                <Children>
+                  <BrushWidget Id="MachineIconParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="32" SuggestedHeight="32" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="BlankWhiteCircle">
+                    <Children>
+                      <!--Machine Type Icon-->
+                      <Widget Id="MachineTypeIconWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="27" SuggestedHeight="20.7" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Children>
+                  </BrushWidget>
+                </Children>
+              </Widget>
+
+            </Children>
+          </MissionSiegeEngineMarkerWidget>
+
+        </ItemTemplate>
+      </Widget>
+
+    </Children>
+  </Widget>
+</Window>

@@ -1,0 +1,57 @@
+﻿BetaDeps third-party license notices
+====================================
+
+BetaDeps redistributes the following third-party software:
+
+----
+
+0Harmony.dll  --  Lib.Harmony 2.x
+Copyright (c) Andreas Pardeike
+Licensed under the MIT License.
+Source: https://github.com/pardeike/Harmony
+
+Mono.Cecil.dll, Mono.Cecil.Mdb.dll, Mono.Cecil.Pdb.dll, Mono.Cecil.Rocks.dll
+Copyright (c) Jean-Baptiste Evain
+Licensed under the MIT License.
+Source: https://github.com/jbevain/cecil
+
+MonoMod.Backports.dll, MonoMod.Core.dll, MonoMod.Iced.dll,
+MonoMod.ILHelpers.dll, MonoMod.RuntimeDetour.dll, MonoMod.Utils.dll
+Copyright (c) Maxime Beauchemin (0x0ade) and MonoMod contributors
+Licensed under the MIT License.
+Source: https://github.com/MonoMod/MonoMod
+
+Newtonsoft.Json.dll
+Copyright (c) James Newton-King
+Licensed under the MIT License.
+Source: https://github.com/JamesNK/Newtonsoft.Json
+
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+----
+
+All other code in this distribution is original work,
+including BetaDeps.Foundation.dll, BetaDeps.Harmony.dll,
+Bannerlord.UIExtenderEx.dll, Bannerlord.ButterLib.dll, and
+MCMv5.dll (clean-room re-implementations of the corresponding
+public API surfaces).
+
+Copyright (c) 2026 Maxfield Management Group, licensed under the MIT License.

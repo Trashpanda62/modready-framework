@@ -1,0 +1,162 @@
+<Prefab>
+  <Constants>
+    <Constant Name="SpectateButton.Width" BrushName="WideButton.Flat" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="SpectateButton.Height" BrushName="WideButton.Flat" BrushLayer="Default" BrushValueType="Height"/>
+  </Constants>
+  <Window>
+    <OptionsScreenWidget Id="Options" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="1800" HorizontalAlignment="Center" PositionYOffset="20" Brush="MPLobby.CustomServer.ServersListBackground" CurrentOptionDescriptionWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionDescriptionWidget" CurrentOptionNameWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionNameWidget" CurrentOptionImageWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionImageWidget" CurrentOptionExtraInformationWidget="MainSectionListPanel\DescriptionsRightPanel\DescriptionsListPanel\CurrentOptionExtraInformationWidget" PerformanceTabToggle="ToggleList\PerformanceTabToggle" VideoMemoryUsageWidget="MainSectionListPanel\DescriptionsRightPanel\VideoMemoryUsageWidget">
+      <Children>
+
+        <ListPanel Id="MainSectionListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginTop="110">
+          <Children>
+
+            <Widget Id="CenterPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+              <Children>
+
+                <ScrollablePanel Id="ScrollablePanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" AutoHideScrollBars="false" AutoHideScrollBarHandle="true" ClipRect="MyClipRect" InnerPanel="MyClipRect\TabControl" VerticalScrollbar="..\..\VerticalScrollbar">
+                  <Children>
+                    <Widget Id="MyClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" AlphaFactor="0.75" ClipContents="true">
+                      <Children>
+                        <TabControl Id="TabControl" SelectedIndex="@CategoryIndex" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren">
+                          <Children>
+                            <OptionsGroupedPage Id="VideoOptionsPage" DataSource="{VideoOptions}" Parameter.ResetButtonScopeID="VideoResetButtonScope" />
+                            <OptionsGroupedPage Id="PerformanceOptionsPage" DataSource="{PerformanceOptions}" Parameter.ResetButtonScopeID="PerformanceResetButtonScope" />
+                            <OptionsGroupedPage Id="AudioOptionsPage" DataSource="{AudioOptions}" Parameter.ResetButtonScopeID="AudioResetButtonScope"/>
+                            <OptionsGroupedPage Id="GameplayOptionsPage" DataSource="{GameplayOptions}" Parameter.ResetButtonScopeID="GameplayResetButtonScope" />
+                            <OptionsGameKeyPage Id="GameKeyOptionGroupsPage" DataSource="{GameKeyOptionGroups}" />
+                            <OptionsGamepadPage Id="GamepadOptionsPage" DataSource="{GamepadOptions}" />
+                          </Children>
+                        </TabControl>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </ScrollablePanel>
+
+                <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="90" VerticalAlignment="Bottom"  Sprite="MPLobby\Armory\cosmetics_gradient" Color="#000000FF" AlphaFactor="0.8"/>
+
+              </Children>
+            </Widget>
+
+            <ScrollbarWidget Id="VerticalScrollbar" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="8" HorizontalAlignment="Right" VerticalAlignment="Center" MarginTop="26" MarginBottom="40" AlignmentAxis="Vertical" Handle="VerticalScrollbarHandle" MaxValue="100" MinValue="0">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="4" HorizontalAlignment="Center" Sprite="MPLobby\CustomServer\lobby_slider_bed" AlphaFactor="0.4" />
+                <ImageWidget Id="VerticalScrollbarHandle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="8" SuggestedHeight="10" HorizontalAlignment="Center" Brush="FaceGen.Scrollbar.Handle" />
+              </Children>
+            </ScrollbarWidget>
+
+            <!--Descriptions Right Panel-->
+            <Widget Id="DescriptionsRightPanel" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="600">
+              <Children>
+
+                <ListPanel Id="DescriptionsListPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom" MarginTop="65" MarginLeft="40" MarginRight="40">
+                  <Children>
+                    <RichTextWidget Id="CurrentOptionNameWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="SPOptions.Description.Title.Text" Text=" " />
+                    <RichTextWidget Id="CurrentOptionDescriptionWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="SPOptions.Description.Text" Text=" " MarginTop="25"/>
+                    <RichTextWidget Id="CurrentOptionExtraInformationWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="25" Brush="SPOptions.ExtraInformation.Text" Text=" " AutoHideIfEmpty="true" />
+                    <Widget Id="CurrentOptionImageWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="576" SuggestedHeight="324" MarginTop="35"/>
+                  </Children>
+                </ListPanel>
+
+                <!--Video Memory Usage Slider-->
+                <ListPanel Id="VideoMemoryUsageWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Bottom" MarginBottom="200" MarginLeft="40" StackLayout.LayoutMethod="VerticalTopToBottom">
+                  <Children>
+
+                    <RichTextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="SPOptions.OptionName.Text" Text="@VideoMemoryUsageName" MarginLeft="10" />
+
+                    <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Top" StackLayout.LayoutMethod="VerticalTopToBottom">
+                      <Children>
+
+                        <FillBarWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="321" SuggestedHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center" ContainerWidget="ContainerWidget" FillWidget="FillBarParent\FillWidget"  MaxAmountAsFloat="1" InitialAmountAsFloat="@VideoMemoryUsageNormalized">
+                          <Children>
+
+                            <Widget Id="FillBarParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="14" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="13" MarginRight="14">
+                              <Children>
+
+                                <!--Fill-->
+                                <Widget Id="FillWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="300" SuggestedHeight="14" Sprite="options_memory_progress_bar">
+                                  <Children>
+                                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Right" Sprite="options_memory_progress_bar_glow" ColorFactor="0.8"/>
+                                  </Children>
+                                </Widget>
+
+                              </Children>
+                            </Widget>
+
+                            <!--Container-->
+                            <Widget Id="ContainerWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="options_memory_progress_frame" />
+
+                          </Children>
+                        </FillBarWidget>
+
+                        <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" Brush="SPOptions.Slider.Value.Text" IsEnabled="false" Text="@VideoMemoryUsageText" MarginLeft="10"/>
+                      </Children>
+                    </ListPanel>
+
+                  </Children>
+                </ListPanel>
+
+              </Children>
+            </Widget>
+
+          </Children>
+        </ListPanel>
+
+        <ListPanel Id="ToggleList" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="128" HorizontalAlignment="Center" VerticalAlignment="Top" StackLayout.LayoutMethod="HorizontalLeftToRight">
+          <Children>
+						<!-- Previous Tab Key Identifier-->
+            <Widget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" PositionYOffset="25" IsVisible="@AreHotkeysEnabled">
+              <Children>
+						    <InputKeyVisualWidget DataSource="{PreviousTabInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="60" SuggestedHeight="60" KeyID="@KeyID" IsVisible="@IsVisible" />
+              </Children>
+            </Widget>
+            <MPOptionsTabToggle DataSource="{VideoOptions}" Parameter.ButtonBrush="Header.Tab.Left" Parameter.TabName="VideoOptionsPage" Parameter.IsFirstToggle="true" />
+            <MPOptionsTabToggle Id="PerformanceTabToggle" DataSource="{PerformanceOptions}" Parameter.ButtonBrush="Header.Tab.Center" Parameter.TabName="PerformanceOptionsPage" />
+            <MPOptionsTabToggle DataSource="{AudioOptions}" Parameter.ButtonBrush="Header.Tab.Center" Parameter.TabName="AudioOptionsPage" />
+            <MPOptionsTabToggle DataSource="{GameplayOptions}" Parameter.ButtonBrush="Header.Tab.Center" Parameter.TabName="GameplayOptionsPage" />
+            <MPOptionsTabToggle DataSource="{GameKeyOptionGroups}" Parameter.ButtonBrush="Header.Tab.Right" Parameter.TabName="GameKeyOptionGroupsPage" IsVisible="@IsEnabled"/>
+            <MPOptionsTabToggle DataSource="{GamepadOptions}" Parameter.ButtonBrush="Header.Tab.Right" Parameter.TabName="GamepadOptionsPage" IsVisible="@IsEnabled"/>
+						<!-- Next Tab Key Identifier -->
+            <Widget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" PositionYOffset="25" IsVisible="@AreHotkeysEnabled">
+              <Children>
+						    <InputKeyVisualWidget DataSource="{NextTabInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="60" SuggestedHeight="60" KeyID="@KeyID" IsVisible="@IsVisible" />
+              </Children>
+            </Widget>
+          </Children>
+        </ListPanel>
+
+        <NavigationScopeTargeter ScopeID="MultiplayerOptionsActionButtonsScope" ScopeParent="..\ActionButtons" ScopeMovements="Vertical" />
+        <ListPanel Id="ActionButtons" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="400" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginBottom="45" MarginRight="45" StackLayout.LayoutMethod="VerticalTopToBottom" >
+          <Children>
+            <ButtonWidget Command.Click="ExecuteApply" DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!SpectateButton.Width" SuggestedHeight="!SpectateButton.Height" Brush="WideButton.Flat" GamepadNavigationIndex="0">
+              <Children>
+                <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="200" SuggestedHeight="50" VerticalAlignment="Center" HorizontalAlignment="Center" Brush="MPTeamSelection.SpectateButton.Text" Text="@ApplyText">
+                  <Children>
+                    <Widget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-100" IsVisible="@AreHotkeysEnabled">
+                      <Children>
+                        <InputKeyVisualWidget DataSource="{DoneInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" KeyID="@KeyID" IsVisible="@IsVisible"/>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </TextWidget>
+              </Children>
+            </ButtonWidget>
+            <ButtonWidget Command.Click="ExecuteCancel" DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!SpectateButton.Width" SuggestedHeight="!SpectateButton.Height" Brush="WideButton.Flat" GamepadNavigationIndex="1">
+              <Children>
+                <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="200" SuggestedHeight="50" VerticalAlignment="Center" HorizontalAlignment="Center" Brush="MPTeamSelection.SpectateButton.Text" Text="@RevertText" >
+                  <Children>
+                    <Widget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-100" IsVisible="@AreHotkeysEnabled">
+                      <Children>
+                        <InputKeyVisualWidget DataSource="{ResetInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" KeyID="@KeyID" IsVisible="@IsVisible"/>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </TextWidget>
+              </Children>
+            </ButtonWidget>
+          </Children>
+        </ListPanel>
+
+      </Children>
+    </OptionsScreenWidget>
+  </Window>
+</Prefab>

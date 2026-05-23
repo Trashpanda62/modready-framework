@@ -1,0 +1,265 @@
+<Prefab>
+  <Constants>
+    <Constant Name="ButtonBrush.Width" BrushLayer="Default" BrushName="ButtonBrush4" BrushValueType="Width" />
+    <Constant Name="ButtonBrush.Height" BrushLayer="Default" BrushName="ButtonBrush4" BrushValueType="Height" />
+
+    <Constant Name="SPOptions.GameKeysgroup.ExpandIndicator.Width" BrushLayer="Default" BrushName="SPOptions.GameKeysgroup.ExpandIndicator" BrushValueType="Width" />
+    <Constant Name="SPOptions.GameKeysgroup.ExpandIndicator.Height" BrushLayer="Default" BrushName="SPOptions.GameKeysgroup.ExpandIndicator" BrushValueType="Height" />
+
+    <Constant Name="KeyVisual.Width" Value="60" />
+    <Constant Name="KeyVisual.Height" Value="60" />
+
+    <Constant Name="KeyVisual.HalfWidth" MultiplyResult="0.5" Value="!KeyVisual.Width" />
+    <Constant Name="KeyVisual.HalfHeight" MultiplyResult="0.5" Value="!KeyVisual.Height" />
+
+    <Constant Name="KeyVisual.HalfQuarterWidth" MultiplyResult="0.75" Value="!KeyVisual.Width" />
+    <Constant Name="KeyVisual.HalfQuarterHeight" MultiplyResult="0.75" Value="!KeyVisual.Height" />
+
+    <Constant Name="KeyVisual.HalfWidthNegative" MultiplyResult="-0.5" Value="!KeyVisual.Width" />
+    <Constant Name="KeyVisual.HalfHeightNegative" MultiplyResult="-0.5" Value="!KeyVisual.Height" />
+
+    <Constant Name="KeyPosition.Width" Value="10" />
+    <Constant Name="KeyPosition.Height" Value="10" />
+
+    <Constant Name="Indicator.AlphaFactor" Value="0.75" />
+
+    <Constant Name="Text.YOffset" Value="-7" />
+
+  </Constants>
+  <Window>
+    <!--Playstation4-->
+    <Widget Id="Playstation4Parent" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" >
+      <Children>
+        <!--Gamepad Image-->
+        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="714" SuggestedHeight="445" HorizontalAlignment="Center" Sprite="dualshock4">
+          <Children>
+
+
+            <OptionsGamepadVisualWidget DataSource="{OtherKeys}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" ParentAreaWidget="..\..\..\Playstation4Parent">
+              <!--ConnectorTemplateWidget="..\..\..\..\ConnectorTemplateWidget"-->
+              <ItemTemplate>
+                <OptionsGamepadOptionItemListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" KeyId="@KeyId" ActionText="@Action"/>
+              </ItemTemplate>
+            </OptionsGamepadVisualWidget>
+
+            <!--ControllerLTriggerAndBumber-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="230" NormalPositionXOffset="129" NormalPositionYOffset="-10" ForceVisible="true" >
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="125" SuggestedHeight="25" VerticalAlignment="Bottom" HorizontalFlip="true" HorizontalAlignment="Right" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="5" SuggestedHeight="5" VerticalAlignment="Top" HorizontalAlignment="Left">
+                      <Children>
+                        <ListPanel DataSource="{LeftTriggerAndBumperKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Right" StackLayout.LayoutMethod="VerticalTopToBottom">
+                          <ItemTemplate>
+                            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                              <Children>
+                                <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" Brush="Stage.Selection.Description.Text" Text="@Action" />
+                                <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                              </Children>
+                            </ListPanel>
+                          </ItemTemplate>
+                        </ListPanel>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerRTriggerAndBumber-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="231" NormalPositionXOffset="558" NormalPositionYOffset="-10" ForceVisible="true">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="125" SuggestedHeight="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="5" SuggestedHeight="5" VerticalAlignment="Top" HorizontalAlignment="Right">
+                      <Children>
+                        <ListPanel DataSource="{RightTriggerAndBumperKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Left" StackLayout.LayoutMethod="VerticalTopToBottom">
+                          <ItemTemplate>
+                            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                              <Children>
+                                <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" Brush="Stage.Selection.Description.Text" Text="@Action" />
+                                <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                              </Children>
+                            </ListPanel>
+                          </ItemTemplate>
+                        </ListPanel>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerLStick-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="230" NormalPositionXOffset="234" NormalPositionYOffset="270" ForceVisible="true" >
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="250" SuggestedHeight="125" VerticalAlignment="Top" HorizontalAlignment="Right" HorizontalFlip="true" VerticalFlip="true" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <ListPanel DataSource="{LeftAnalogKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Right" StackLayout.LayoutMethod="VerticalTopToBottom" PositionYOffset="50" PositionXOffset="-255">
+                      <ItemTemplate>
+                        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                          <Children>
+                            <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                            <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" VerticalAlignment="Center" Text="@Action"/>
+                          </Children>
+                        </ListPanel>
+                      </ItemTemplate>
+                    </ListPanel>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerRStick-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="231" NormalPositionXOffset="456" NormalPositionYOffset="270" ForceVisible="true">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="275" SuggestedHeight="125" VerticalAlignment="Top" HorizontalAlignment="Left" VerticalFlip="true" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <ListPanel DataSource="{RightAnalogKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Left" StackLayout.LayoutMethod="VerticalTopToBottom" PositionYOffset="50" PositionXOffset="285">
+                      <ItemTemplate>
+                        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                          <Children>
+                            <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" VerticalAlignment="Center" Text="@Action"/>
+                            <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                          </Children>
+                        </ListPanel>
+                      </ItemTemplate>
+                    </ListPanel>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerDpad-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="240" NormalPositionXOffset="87" NormalPositionYOffset="162" ForceVisible="true">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="110" SuggestedHeight="50" VerticalAlignment="Top" HorizontalAlignment="Right" VerticalFlip="true" HorizontalFlip="true" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <ListPanel DataSource="{DpadKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Right" StackLayout.LayoutMethod="VerticalTopToBottom" PositionYOffset="25" PositionXOffset="-110">
+                      <ItemTemplate>
+                        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                          <Children>
+                            <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                            <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" VerticalAlignment="Center" Text="@Action"/>
+                          </Children>
+                        </ListPanel>
+                      </ItemTemplate>
+                    </ListPanel>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerFaceKeys-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="244" NormalPositionXOffset="600" NormalPositionYOffset="156" ForceVisible="true">
+              <Children>
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="125" SuggestedHeight="50" VerticalAlignment="Top" HorizontalAlignment="Left" VerticalFlip="true" Sprite="controller_keybind_connector_9" AlphaFactor="!Indicator.AlphaFactor">
+                  <Children>
+                    <ListPanel DataSource="{FaceKeys}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" VerticalAlignment="Center" HorizontalAlignment="Left" StackLayout.LayoutMethod="VerticalTopToBottom" PositionYOffset="25" PositionXOffset="135">
+                      <ItemTemplate>
+                        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                          <Children>
+                            <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" Brush="Stage.Selection.Description.Text" Text="@Action" />
+                            <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" VerticalAlignment="Center" SuggestedHeight="!KeyVisual.Height" KeyID="@KeyIdAsString"/>
+                          </Children>
+                        </ListPanel>
+                      </ItemTemplate>
+                    </ListPanel>
+                  </Children>
+                </Widget>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerLOption-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="250" NormalPositionXOffset="270" NormalPositionYOffset="0">
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Center" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="5" SuggestedHeight="100" HorizontalFlip="true" Sprite="BlankWhiteSquare" AlphaFactor="!Indicator.AlphaFactor" />
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerLOption" PositionYOffset="!KeyVisual.HalfHeightNegative"/>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerLOption" VerticalAlignment="Top" PositionYOffset="-18"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerROption-->
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="251" NormalPositionXOffset="510" NormalPositionYOffset="75">
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerROption" VerticalAlignment="Top" PositionYOffset="-18"/>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerROption" PositionYOffset="!KeyVisual.HalfHeightNegative" />
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="225" SuggestedHeight="5" Sprite="BlankWhiteSquare_9" AlphaFactor="!Indicator.AlphaFactor"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            <!--ControllerLBumper-->
+            <!--
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="248" NormalPositionXOffset="150" NormalPositionYOffset="170" >
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="135" SuggestedHeight="5" HorizontalFlip="true" Sprite="BlankWhiteSquare_9" AlphaFactor="!Indicator.AlphaFactor"/>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerLBumper" PositionYOffset="!KeyVisual.HalfHeightNegative"/>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerLBumper" VerticalAlignment="Top" PositionYOffset="-18"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            -->
+            <!--ControllerRBumper-->
+            <!--
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="249" NormalPositionXOffset="820" NormalPositionYOffset="170" >
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Bottom" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerRBumper" VerticalAlignment="Top" PositionYOffset="-18"/>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerRBumper" PositionYOffset="!KeyVisual.HalfHeightNegative"/>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="135" SuggestedHeight="5" Sprite="BlankWhiteSquare_9" AlphaFactor="!Indicator.AlphaFactor"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            -->
+            <!--ControllerLTrigger-->
+            <!--
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="254" NormalPositionXOffset="150" NormalPositionYOffset="110" >
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="135" SuggestedHeight="5" HorizontalFlip="true" Sprite="BlankWhiteSquare_9" AlphaFactor="!Indicator.AlphaFactor"/>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerLTrigger" PositionYOffset="!KeyVisual.HalfHeightNegative"/>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerLTrigger" VerticalAlignment="Top" PositionYOffset="-18"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>
+
+            -->
+            <!--ControllerRTrigger-->
+            <!--
+            <OptionsGamepadKeyLocationWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyPosition.Width" SuggestedHeight="!KeyPosition.Height" KeyID="255" NormalPositionXOffset="820" NormalPositionYOffset="110" >
+              <Children>
+                <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Bottom" StackLayout.LayoutMethod="HorizontalRightToLeft">
+                  <Children>
+                    <TextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!KeyVisual.HalfQuarterHeight" Brush="Stage.Selection.Description.Text" Text="ControllerRTrigger" VerticalAlignment="Top" PositionYOffset="-18"/>
+                    <InputKeyVisualWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!KeyVisual.Width" SuggestedHeight="!KeyVisual.Height" KeyID="ControllerRTrigger" PositionYOffset="!KeyVisual.HalfHeightNegative"/>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="135" SuggestedHeight="5" Sprite="BlankWhiteSquare_9" AlphaFactor="!Indicator.AlphaFactor"/>
+                  </Children>
+                </ListPanel>
+              </Children>
+            </OptionsGamepadKeyLocationWidget>-->
+
+
+          </Children>
+        </Widget>
+      </Children>
+    </Widget>
+    
+  </Window>
+</Prefab>

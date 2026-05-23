@@ -1,0 +1,83 @@
+<Prefab>
+	<Window>
+
+		<TextQueryParentWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" TextInputWidget="TextQueryParent\TextQueryContentList\TextInputParent\TextInputWidget" TextQueryParent="TextQueryParent">
+			<Children>
+
+				<!--Text Query-->
+				<DimensionSyncWidget Id="TextQueryParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="512" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="-50" DimensionToSync="Vertical" WidgetToCopyHeightFrom="TextQueryContentList">
+					<Children>
+
+						<DimensionSyncWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="512" ClipContents="true" DimensionToSync="Vertical" WidgetToCopyHeightFrom="..\TextQueryContentList">
+							<Children>
+								<Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="512" SuggestedHeight="645" HorizontalAlignment="Center" VerticalAlignment="Top" Sprite="StdAssets\Popup\canvas" />
+							</Children>
+						</DimensionSyncWidget>
+
+						<ListPanel Id="TextQueryContentList" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="512" StackLayout.LayoutMethod="VerticalTopToBottom" MaxHeight="645">
+							<Children>
+
+								<!--Title-->
+								<AutoHideRichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="30" MarginRight="30" MarginTop="10" Brush="Popup.Title.Text" MinHeight="50" Text="@TitleText" WidgetToHideIfEmpty="..\TitleDivider" />
+
+								<!--Divider-->
+								<Widget Id="TitleDivider" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="23" Sprite="StdAssets\Popup\divider" />
+
+								<!--Description-->
+								<RichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="30" MarginRight="30" MarginTop="20" MarginBottom="20" Brush="Popup.Description.Text" MaxHeight="480" MinHeight="10" Text="@PopUpLabel" />
+
+								<!--Text Input-->
+								<Widget Id="TextInputParent" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="410" SuggestedHeight="70" Sprite="General\CharacterCreation\name_input_area" HorizontalAlignment="Center">
+									<Children>
+										<EditableTextWidget Id="TextInputWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="10" MarginRight="10" MarginTop="12" MarginBottom="12" Brush="Review.NameInput.Text" RealText="@InputText" IsObfuscationEnabled="@IsInputObfuscated" KeyboardInfoText="@TitleText"/>
+									</Children>
+								</Widget>
+
+								<!--Control Buttons-->
+								<NavigationForcedScopeCollectionTargeter CollectionParent="..\." />
+								<NavigationScopeTargeter ScopeID="TextQueryPopupScope" ScopeParent="..\ControlButtons" ScopeMovements="Horizontal" />
+								<ListPanel Id="ControlButtons" WidthSizePolicy="CoverChildren" SuggestedHeight="70" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginLeft="35" MarginRight="35" StackLayout.LayoutMethod="HorizontalLeftToRight">
+									<Children>
+
+										<ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" HorizontalAlignment="Right" VerticalAlignment="Center" Brush="Popup.Cancel.Button" Command.Click="ExecuteNegativeAction" IsVisible="@IsButtonCancelShown" GamepadNavigationIndex="0">
+											<Children>
+												<TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" VerticalAlignment="Center" MarginLeft="47" MarginRight="40" Brush="Popup.Button.Text" Text="@ButtonCancelLabel" />
+												<InputKeyVisualWidget DataSource="{CancelInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="12" KeyID="@KeyID" IsVisible="@IsVisible"/>
+											</Children>
+										</ButtonWidget>
+
+										<Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="251" SuggestedHeight="64" HorizontalAlignment="Right" VerticalAlignment="Center" GamepadNavigationIndex="1">
+											<Children>
+												<ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Done.Button" Command.Click="ExecuteAffirmativeAction" IsVisible="@IsButtonOkShown" IsEnabled="@IsButtonOkEnabled">
+													<Children>
+														<TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" VerticalAlignment="Center" MarginLeft="47" MarginRight="40" Brush="Popup.Button.Text" Text="@ButtonOkLabel" />
+														<InputKeyVisualWidget DataSource="{DoneInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="12" KeyID="@KeyID" IsVisible="@IsVisible"/>
+													</Children>
+												</ButtonWidget>
+												<Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsHidden="@IsButtonOkEnabled">
+													<Children>
+														<HintWidget DataSource="{DoneButtonDisabledReasonHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint"/>
+													</Children>
+												</Widget>
+											</Children>
+										</Widget>
+
+									</Children>
+								</ListPanel>
+
+							</Children>
+						</ListPanel>
+
+						<Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="StdAssets\Popup\canvas_gradient" IsEnabled="false" />
+
+						<!--Frame Border-->
+						<Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="frame_9" ExtendLeft="18" ExtendTop="18" ExtendRight="18" ExtendBottom="18" IsEnabled="false" />
+
+					</Children>
+				</DimensionSyncWidget>
+
+			</Children>
+		</TextQueryParentWidget>
+		
+	</Window>
+</Prefab>

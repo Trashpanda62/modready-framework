@@ -1,0 +1,9 @@
+<Window>
+  <Widget Id="SkillItemWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="50" MarginTop="5" MarginBottom="5" Sprite="StdAssets\DropdownMenuItem@2x">
+    <Children>
+      <SkillIconVisualWidget SkillId="@SkillId" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="40" SuggestedHeight="40" MarginTop="5" MarginLeft="5" />
+      <TextWidget Text="@Description" WidthSizePolicy="StretchToParent" VerticalAlignment="Center" HeightSizePolicy="CoverChildren" MarginLeft="55" Brush="LeftAlignedFont"/>
+      <!--<TextWidget Text="@Level" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="20" MarginTop="27" MarginLeft="55" Brush="LeftAlignedFont"/>-->
+    </Children>
+  </Widget>
+ </Window>

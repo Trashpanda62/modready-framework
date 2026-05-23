@@ -1,0 +1,47 @@
+<Prefab>
+  <Constants>
+
+    <!-- Class Brush Constants -->
+    <Constant Name="UnsetBrush"                 Value="OrderOfBattle.FormationClass.Unset" />
+    <Constant Name="InfantryBrush"              Value="OrderOfBattle.FormationClass.Infantry" />
+    <Constant Name="RangedBrush"                Value="OrderOfBattle.FormationClass.Ranged" />
+    <Constant Name="CavalryBrush"               Value="OrderOfBattle.FormationClass.Cavalry" />
+    <Constant Name="HorseArcherBrush"           Value="OrderOfBattle.FormationClass.HorseArcher" />
+    <Constant Name="InfantryAndRangedBrush"     Value="OrderOfBattle.FormationClass.InfantryAndRanged" />
+    <Constant Name="CavalryAndHorseArcherBrush" Value="OrderOfBattle.FormationClass.CavalryAndHorseArcher" />
+
+  </Constants>  
+  <Window>
+    <!-- Single Marker -->
+    <OrderOfBattleFormationMarkerBrushWidget UpdateChildrenStates="true" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="125" SuggestedHeight="55" IsAvailable="@IsMarkerShown" Position="@ScreenPosition" WSign="@WSign">
+      <Children>
+
+        <!-- Button -->
+        <ButtonWidget DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="OrderOfBattle.Formation.Canvas" IsSelected="@IsSelected" Command.Click="ExecuteSelection" IsEnabled="@IsControlledByPlayer">
+          <Children>
+
+            <!-- Formation Name as Title -->
+            <BrushWidget DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="100" SuggestedHeight="40" PositionYOffset="-20" HorizontalAlignment="Center" VerticalAlignment="Top" Brush="OrderOfBattle.FormationTypeSelection.Dropdown">
+              <Children>
+                <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" Text="@TitleText" Brush.FontSize="24" />
+              </Children>
+            </BrushWidget>
+
+            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" >
+              <Children>
+
+                <!-- Formation Type Icon -->
+                <OrderOfBattleFormationClassBrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="70" SuggestedHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center" MarginTop="20" FormationClass="@OrderOfBattleFormationClassInt" UnsetBrush="!UnsetBrush" InfantryBrush="!InfantryBrush" RangedBrush="!RangedBrush" CavalryBrush="!CavalryBrush" HorseArcherBrush="!HorseArcherBrush" InfantryAndRangedBrush="!InfantryAndRangedBrush" CavalryAndHorseArcherBrush="!CavalryAndHorseArcherBrush" />
+                <!-- Count Text -->
+                <TextWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren"  HorizontalAlignment="Left" MarginTop="25" IntText="@TroopCount" Brush.FontSize="24" />
+
+              </Children>
+            </ListPanel>
+            
+          </Children>
+        </ButtonWidget>
+        
+      </Children>
+    </OrderOfBattleFormationMarkerBrushWidget>
+  </Window>
+</Prefab>

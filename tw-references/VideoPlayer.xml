@@ -1,0 +1,12 @@
+<Prefab>
+  <Constants>
+
+  </Constants>
+  <Window>
+    <Widget Id="VideoPlayerScreen" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+      <Children>
+        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Bottom" Brush="SubTitle.Text" Text="@SubtitleText" MarginBottom="100" MarginLeft="50" MarginRight="50" ClipContents = "false"/>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

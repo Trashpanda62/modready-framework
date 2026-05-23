@@ -1,0 +1,26 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="ValueText" DefaultValue="-" />
+    <Parameter Name="IntText" DefaultValue="111" />
+    <Parameter Name="MaxInt" DefaultValue="112" />
+    <Parameter Name="MinInt" DefaultValue="0" />
+    <Parameter Name="MaxLength" DefaultValue="4" />
+  </Parameters>
+  <Window>
+    <ListPanel WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="80" StackLayout.LayoutMethod="HorizontalLeftToRight" MarginRight="10">
+      <Children>
+        <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Text="*ValueText" Brush="BannerBuilder.LayerProperties.Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+          <Children>
+            <ImageWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Brush.Color="#00000090" MarginTop="10" MarginBottom="10" MarginLeft="2" MarginRight="0" ClipContents="false"/>
+            <IntegerInputTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="20" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="BannerBuilder.LayerProperties.Text" IntText="*IntText" MaxInt="*MaxInt" MinInt="*MinInt" EnableClamp="true" ClipContents="false" IsDisabled="false" UpdateChildrenStates="true" DoNotPassEventsToChildren="true" MaxLength="*MaxLength" MarginLeft="5" Command.TextEntered="ExecuteUpdateBanner">
+              <Children>
+                <BrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="BannerBuilder.LayerValue.Frame" ClipContents="false"/>
+              </Children>
+            </IntegerInputTextWidget>
+          </Children>
+        </Widget>
+      </Children>
+    </ListPanel>
+  </Window>
+</Prefab>

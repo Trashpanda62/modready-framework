@@ -1,0 +1,79 @@
+<Prefab>
+  <Variables>
+  </Variables>
+  <Constants>
+    <Constant Name="Popup.CloseButton.Width" BrushLayer="Default" BrushName="Popup.CloseButton" BrushValueType="Width" />
+    <Constant Name="Popup.CloseButton.Height" BrushLayer="Default" BrushName="Popup.CloseButton" BrushValueType="Height" />
+  </Constants>
+  <Parameters>
+  </Parameters>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <Widget Id="SceneNotificationParentWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#000000CC" IsVisible="@IsShown">
+      <Children>
+
+        <!--Visual  Query-->
+        <DimensionSyncWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="1437" HorizontalAlignment="Center" VerticalAlignment="Center" DimensionToSync="Vertical" IsVisible="@IsShown" WidgetToCopyHeightFrom="SingleQueryContentList">
+          <Children>
+
+            <NavigationForcedScopeCollectionTargeter CollectionID="SceneNotificationCollection" CollectionParent="..\." />
+            <NavigationScopeTargeter ScopeID="SceneNotificationScope" ScopeParent="..\SingleQueryContentList" ScopeMovements="Horizontal" HasCircularMovement="true" />
+            <ListPanel Id="SingleQueryContentList" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
+              <Children>
+
+                <!--Description-->
+                <!--<Standard.TriplePopupCloseButtons Parameter.CancelButtonAction="ExecuteNegativeProcess" Parameter.CancelButtonText="@ButtonCancelLabel" Parameter.DoneButtonAction="ExecuteAffirmativeProcess" Parameter.DoneButtonText="@ButtonOkLabel" MarginTop="4" Parameter.ResetButtonAction="ExecuteReset"  />-->
+
+                <SceneWidget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="1500" SuggestedHeight="840" HorizontalAlignment="Center" Scene="@Scene" Command.Close="ExecuteClose" ClickToContinueTextWidget="ClickToContinueTextWidget" CancelButton="ActionsParent\CancelButton" AffirmativeButton="ActionsParent\AffirmativeButton" FadeImageWidget="FadeImageWidget" TitleTextWidget="TitleTextWidget" EndProgress="@EndProgress" IsCancelShown="@IsButtonCancelShown" IsOkShown="@IsButtonOkShown" AffirmativeTitleText="@AffirmativeTitleText" NegativeTitleText="@NegativeTitleText" PreparingVisualWidget="PreparingVisualWidget" IsReady="@IsReady" FadeInDuration="1.55" >
+                  <Children>
+
+                    <Widget Id="FadeImageWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare" Color="#000000FF"/>
+
+                    <Standard.CircleLoadingWidget HorizontalAlignment="Center" VerticalAlignment="Center" Id="PreparingVisualWidget"/>
+
+                    <!--Title-->
+                    <AutoHideTextWidget Id="TitleTextWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" VerticalAlignment="Top" SuggestedHeight="100" MarginLeft="30" MarginRight="30" MarginTop="20" Brush="SceneNotification.Title.Text" MinHeight="50" Text="@TitleText" WidgetToHideIfEmpty="..\TitleDivider" />
+
+                    <!--<RichTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="30" MarginRight="30" MarginBottom="20" Brush="Popup.Description.Text" MaxHeight="480" MinHeight="10" VerticalAlignment="Bottom" Text="@Description" IsEnabled="false" />-->
+
+                    <!--<Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="StdAssets\Popup\canvas_gradient" IsEnabled="false" />-->
+
+                    <!--Frame Border-->
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="frame_9" ExtendLeft="18" ExtendTop="18" ExtendRight="18" ExtendBottom="18" IsEnabled="false" />
+
+                    <ListPanel Id="ActionsParent" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" VerticalAlignment="Bottom" MarginLeft="60" MarginRight="60" MarginBottom="30" StackLayout.LayoutMethod="HorizontalSpaced" >
+                      <Children>
+                        <ButtonWidget Id="CancelButton" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="279" VerticalAlignment="Center" Brush="Popup.SceneNotificaton.Selection.Item" Command.Click="ExecuteNegativeProcess" GamepadNavigationIndex="0">
+                          <Children>
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="37" Brush="Popup.Button.Text" Text="@ButtonCancelLabel" />
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="65" MarginBottom="10" Brush="Popup.Description.Text" Brush.TextHorizontalAlignment="Center" Text="@CancelDescription" />
+                          </Children>
+                        </ButtonWidget>
+
+                        <ButtonWidget Id="AffirmativeButton" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed"  HeightSizePolicy="CoverChildren" SuggestedWidth="279" VerticalAlignment="Center" Brush="Popup.SceneNotificaton.Selection.Item" Command.Click="ExecuteAffirmativeProcess" GamepadNavigationIndex="1">
+                          <Children>
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="37" Brush="Popup.Button.Text" Text="@ButtonOkLabel" />
+							<SceneNotificationDescriptionTextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginLeft="5" MarginRight="5" MarginTop="57" MarginBottom="5" Brush="Popup.Description.Text" Text="@AffirmativeDescription" Brush.TextHorizontalAlignment="Center" MultiLineAlignment="Left"/>
+                            <HintWidget DataSource="{AffirmativeHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+                          </Children>
+                        </ButtonWidget>
+                      </Children>
+                    </ListPanel>
+
+                    <RichTextWidget Id="ClickToContinueTextWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Brush="Popup.Scene.ClickToContinue.Text" VerticalAlignment="Bottom" MarginBottom="50" Text="@ClickToContinueText" IsEnabled="false" GamepadNavigationIndex="0"/>
+
+                  </Children>
+                </SceneWidget>
+
+              </Children>
+            </ListPanel>
+
+
+          </Children>
+        </DimensionSyncWidget>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

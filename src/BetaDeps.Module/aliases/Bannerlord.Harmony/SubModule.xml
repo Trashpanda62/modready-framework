@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BetaDeps alias stub for Bannerlord.Harmony. This module folder exists so
+  that consumer mods which declare <DependedModule Id="Bannerlord.Harmony" />
+  in their own SubModule.xml find a module with that Id in the launcher.
+  All Harmony functionality is provided by Modules\BetaDeps\.
+  Version v2.4.0.99 - 4-part form satisfies CargoHolds's v2.4.0.* wildcard,
+  XorberaxLegacy's v2.4.* wildcard, and the BLSE v2.2.2 minimum.
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.Harmony" />
+  <Name value="Bannerlord.Harmony (provided by BetaDeps)" />
+  <Version value="v2.4.99.0" />
+  <DefaultModule value="false" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="true" />
+  <Official value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="BetaDeps" />
+  </DependedModules>
+
+  <DependedModuleMetadatas />
+
+  <SubModules>
+    <SubModule>
+      <Name value="Bannerlord.Harmony alias stub" />
+      <DLLName value="BetaDeps.Foundation.dll" />
+      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>

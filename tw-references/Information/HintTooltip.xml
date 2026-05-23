@@ -1,0 +1,37 @@
+<Prefab>
+  <Variables>
+  </Variables>
+  <Constants>
+  </Constants>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsDisabled="true">
+      <Children>
+
+        <TooltipWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren">
+          <Children>
+
+            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
+              <Children>
+                
+                <DimensionSyncWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="12" HorizontalAlignment="Center" PositionYOffset="5" Sprite="General\TooltipHint\tooltip_frame" ExtendLeft="4" ExtendRight="4" DimensionToSync="Horizontal" IsEnabled="false" PaddingAmount="8" WidgetToCopyHeightFrom="..\HintInnerPanel"/>
+            
+                <Widget Id="HintInnerPanel" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" Sprite="BlankWhiteSquare_9" Color="#000000D9">
+                  <Children>
+                    <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginLeft="13" MarginRight="13" MarginTop="2" MarginBottom="2" Brush="Tooltip.Description.Text" MaxWidth="200" Text="@Text"/>
+                  </Children>
+                </Widget>
+
+                <DimensionSyncWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="12" HorizontalAlignment="Center" PositionYOffset="-5" Sprite="General\TooltipHint\tooltip_frame" ExtendLeft="4" ExtendRight="4" DimensionToSync="Horizontal" IsEnabled="false" PaddingAmount="8" WidgetToCopyHeightFrom="..\HintInnerPanel"/>
+                
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </TooltipWidget>
+        
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

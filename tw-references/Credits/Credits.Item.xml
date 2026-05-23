@@ -1,0 +1,35 @@
+<Prefab>
+  <Variables>
+  </Variables>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <Widget WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren">
+      <Children>
+        <ListPanel  StackLayout.LayoutMethod = "VerticalTopToBottom" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" >
+          <Children>
+            <CreditsItemWidget WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" ItemType="@Type" CategoryWidget="Category" SectionWidget="Section" EntryWidget="Entry" EmptyLineWidget="EmptyLine" ImageWidget="Image">
+              <Children>
+                <CreditsTextWidget Id="Category" IsVisible="false" Brush="Credits.Category.Text" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" Text="@Text" MarginTop="30" MarginBottom="5" OverrideFont="FiraSansExtraCondensed-Regular"/>
+                <CreditsTextWidget Id="Section" IsVisible="false" Brush="Credits.Section.Text" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" Text="@Text" OverrideFont="FiraSansExtraCondensed-Regular"/>
+                <CreditsTextWidget Id="Entry" IsVisible="false" Brush="Credits.Entry.Text" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" Text="@Text" OverrideFont="FiraSansExtraCondensed-Regular"/>
+                <Widget Id="Image" IsVisible="false" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" HorizontalAlignment="Center" VerticalAlignment="Top" Sprite="@Text"/>
+                <Widget Id="EmptyLine"  IsVisible="false" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "Fixed" SuggestedHeight="20"/>
+              </Children>
+            </CreditsItemWidget>
+
+            <ListPanel DataSource = "{Items}" Id="MyInnerPanel" StackLayout.LayoutMethod = "VerticalTopToBottom" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" >
+              <ItemTemplate>
+                <Widget WidthSizePolicy = "StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment = "Center">
+                  <Children>
+                    <Credits.Item />
+                  </Children>
+                </Widget>
+              </ItemTemplate>
+            </ListPanel>
+          </Children>
+        </ListPanel>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

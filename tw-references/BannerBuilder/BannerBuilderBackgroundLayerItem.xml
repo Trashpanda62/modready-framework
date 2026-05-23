@@ -1,0 +1,35 @@
+<Prefab>
+  <Parameters>
+
+  </Parameters>
+  <Window>
+    <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="100" SuggestedHeight="50" Brush="Background.Layer.Card" IsSelected="@IsSelected" HorizontalAlignment="Left" MarginTop="5" MarginBottom="23" Command.Click="ExecuteSelection" AcceptDrag="true" DragWidget="DragWidget">
+      <Children>
+
+        <!--Layer Icon-->
+        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" VerticalAlignment="Center" Sprite="@IconIDAsString" MarginLeft="5" IsEnabled="false" />
+
+        <!--Colors-->
+        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginRight="5" MarginBottom="0" IsEnabled="false">
+          <Children>
+
+            <!--Color1-->
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" SuggestedHeight="10" Sprite="BlankWhiteSquare" Color="@Color1"/>
+
+            <!--Color2-->
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" SuggestedHeight="10" MarginLeft="2" Sprite="BlankWhiteSquare" Color="@Color2"/>
+          </Children>
+        </ListPanel>
+
+        <!--Remove Layer Button-->
+        <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" SuggestedHeight="10" HorizontalAlignment="Right" VerticalAlignment="Top" MarginRight="5" MarginTop="0" Command.Click="ExecuteDelete" IsVisible="@CanDeleteLayer" Brush="BannerBuilder.DeleteLayer.Button"/>
+
+        <Widget Id="DragWidget" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" VerticalAlignment="Center" Sprite="@IconIDAsString" MarginLeft="5" IsDisabled="true" IsVisible="false" />
+
+        <ImageWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="3" VerticalAlignment="Bottom" MarginBottom="0" PositionYOffset="17" Sprite="BlankWhiteSquare_9" Brush.Color="#a5854b80" />
+
+      </Children>
+    </ButtonWidget>
+
+  </Window>
+</Prefab>

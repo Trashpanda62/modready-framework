@@ -1,0 +1,62 @@
+<Prefab>
+  <Constants>
+    <Constant Name="NextButton.Width" BrushLayer="Default" BrushName="ButtonBrush1" BrushValueType="Width" />
+    <Constant Name="NextButton.Height" BrushLayer="Default" BrushName="ButtonBrush1" BrushValueType="Height" />
+
+    <Constant Name="PreviousButton.Width" BrushLayer="Default" BrushName="ButtonBrush2" BrushValueType="Width" />
+    <Constant Name="PreviousButton.Height" BrushLayer="Default" BrushName="ButtonBrush2" BrushValueType="Height" />
+
+    <Constant Name="FaceGen.PropertyButton.Width" Value="85" />
+    <Constant Name="FaceGen.PropertyButton.Height" Value="85" />
+
+    <Constant Name="FaceGen.ExtensionButton.Width" Value="54" />
+    <Constant Name="FaceGen.ExtensionButton.Height" Value="40" />
+    
+  </Constants>
+  <Window>
+    <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+      <Children>
+
+        <!--Right Panel-->
+        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="694" SuggestedHeight="1080" HorizontalAlignment="Right" Sprite="General\CharacterCreation\character_creation_panel" VerticalAlinment="Center" DoNotAcceptEvents="true">
+          <Children>
+
+            <!--Title-->
+            <RichTextWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="670" SuggestedHeight="55" HorizontalAlignment="Right" Brush="Stage.Title.Text" Text="@Title" />
+
+            <Widget WidthSizePolicy="Fixed" SuggestedWidth="650" HorizontalAlignment="Right" HeightSizePolicy="StretchToParent" MarginTop="95" MarginBottom="53">
+              <Children>
+
+                <!--Inner Panel-->
+                <TabControl Id="PropertyTab" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="573" SuggestedHeight="750" HorizontalAlignment="Right" VerticalAlignment="Top" MarginTop="105" MarginRight="37">
+                  <Children>
+                    <FaceGenHair  Id="HairProperties"  WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" />
+                  </Children>
+                </TabControl>
+
+
+              </Children>
+            </Widget>
+
+            <!--Done and Cancel Buttons-->
+            <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginBottom="50" MarginRight="40" >
+              <Children>
+
+                <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="125" SuggestedHeight="64" HorizontalAlignment="Right" VerticalAlignment="Center" MarginRight="20" Brush="Standard.BackButton" Command.Click="ExecuteCancel" UpdateChildrenStates="true" />
+
+                <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="400" SuggestedHeight="64" HorizontalAlignment="Right" VerticalAlignment="Center" MarginLeft="20" Brush="Popup.Done.Button.NineGrid" Command.Click="ExecuteDone" UpdateChildrenStates="true">
+                  <Children>
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Popup.Button.Text" Text="@DoneBtnLbl" />
+                  </Children>
+                </ButtonWidget>
+
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </Widget>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

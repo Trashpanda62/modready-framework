@@ -1,0 +1,29 @@
+<Prefab>
+  <Constants>
+    <Constant Name="Button.Width" Value="400"/>
+    <Constant Name="Button.Height" Value="233"/>
+  </Constants>
+  <VisualDefinitions>
+    <VisualDefinition Name="AnnouncementVisual" EaseType="EaseOut" EaseFunction="Quint" TransitionDuration="0.22">
+      <VisualState SuggestedWidth="400" SuggestedHeight="233" State="Default" />
+      <VisualState SuggestedWidth="402" SuggestedHeight="235" State="Hovered" />
+      <VisualState SuggestedWidth="398" SuggestedHeight="231" State="Pressed" />
+    </VisualDefinition>
+  </VisualDefinitions>
+  <Window>
+    <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" DoNotAcceptEvents="true" IsVisible="@IsVisible">
+      <Children>
+        <NavigationScopeTargeter ScopeID="AnnouncementButtonScope" ScopeParent="..\AnnouncementButton" IsScopeEnabled="@IsLinkAvailable" />
+        <ButtonWidget Id="AnnouncementButton" DoNotPassEventsToChildren="true" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Button.Width" SuggestedHeight="!Button.Height" ExtendCursorAreaLeft="-4" ExtendCursorAreaRight="-4" ExtendCursorAreaBottom="-4" ExtendCursorAreaTop="-28" IsEnabled="@IsLinkAvailable" Command.Click="ExecuteNavigateToLink" GamepadNavigationIndex="0">
+          <Children>
+            <Widget VisualDefinition="AnnouncementVisual" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Button.Width" SuggestedHeight="!Button.Height" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Children>
+                <OnlineImageTextureWidget ImageSizePolicy="Stretch" Brush="InitialScreen.Announcement.Visual" OnlineImageSourceUrl="@ImageSourcePath"/>
+              </Children>
+            </Widget>
+          </Children>
+        </ButtonWidget>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

@@ -1,0 +1,78 @@
+<Prefab>
+  <Constants>
+    <Constant Name="Crosshair.Size" BrushName="Crosshair.Top" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="Crosshair.Arrow.Width" Value="131"/>
+    <Constant Name="Crosshair.Arrow.Height" Value="31"/>
+    <Constant Name="Crosshair.Arrow.Offset" Value="350"/>
+    <Constant Name="Crosshair.Arrow.Offset.Negative" Value="!Crosshair.Arrow.Offset" MultiplyResult="-1"/>
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsDisabled="true">
+      <Children>
+        <CrosshairWidget IsVisible="@IsVisible" WidthSizePolicy = "Fixed" HeightSizePolicy = "Fixed" SuggestedWidth = "74" SuggestedHeight = "74" HorizontalAlignment = "Center" VerticalAlignment = "Center" TopArrowOpacity="@TopArrowOpacity" BottomArrowOpacity="@BottomArrowOpacity" RightArrowOpacity="@RightArrowOpacity" LeftArrowOpacity="@LeftArrowOpacity" IsTargetInvalid="@IsTargetInvalid" CrosshairAccuracy="@CrosshairAccuracy" CrosshairScale="@CrosshairScale" ShowHitMarker="@IsHitMarkerVisible" IsVictimDead="@IsVictimDead" TopArrow="..\TopArrow" BottomArrow="..\BottomArrow" LeftArrow="..\LeftArrow" RightArrow="..\RightArrow" HitMarker="..\HitMarker" HeadshotMarker="..\HeadshotMarker" IsHumanoidHeadshot="@IsHumanoidHeadshot">
+          <Children>
+
+            <!--Four Part Crosshair-->
+            <ValueBasedVisibilityWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" WatchType="Equal" IndexToBeVisible="0" IndexToWatch="@CrosshairType">
+              <Children>
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Center" VerticalAlignment="Top" Brush="Crosshair.Top" />
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Center" VerticalAlignment="Bottom" Brush="Crosshair.Bottom" />
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Left" VerticalAlignment="Center" Brush="Crosshair.Left.Square" />
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Right" VerticalAlignment="Center" Brush="Crosshair.Right.Square" />
+              </Children>
+            </ValueBasedVisibilityWidget>
+
+            <!--Three Part Crosshair-->
+            <ValueBasedVisibilityWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" WatchType="Equal" IndexToBeVisible="1" IndexToWatch="@CrosshairType">
+              <Children>
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Center" VerticalAlignment="Top" Brush="Crosshair.Top" />
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Left" VerticalAlignment="Bottom" Brush="Crosshair.Left" />
+                <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Right" VerticalAlignment="Bottom" Brush="Crosshair.Right" />
+                <!--<Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Center" VerticalAlignment="Top" Brush="Crosshair.Top" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Left" VerticalAlignment="Bottom" Brush="Crosshair.Left" />
+            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Right" VerticalAlignment="Bottom" Brush="Crosshair.Right" />-->
+                <!--<BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Center" VerticalAlignment="Top" Brush="Crosshair.Top" />
+            <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Left" VerticalAlignment="Bottom" Brush="Crosshair.Left" />
+            <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Size" SuggestedHeight = "!Crosshair.Size" HorizontalAlignment="Right" VerticalAlignment="Bottom" Brush="Crosshair.Right" />-->
+              </Children>
+            </ValueBasedVisibilityWidget>
+
+          </Children>
+        </CrosshairWidget>
+
+        <!--Reload Progress Vertical Bars-->
+        <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" PositionXOffset="80" IsVisible="@IsReloadPhasesVisible">
+          <Children>
+            <ListPanel DataSource="{ReloadPhases}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalBottomToTop">
+              <ItemTemplate>
+                <ReloadBarHeightAdjustmentWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" HorizontalAlignment="Center" VerticalAlignment="Center" MarginTop="5" MarginBottom="5" RelativeDurationToMaxDuration="@RelativeDurationToMaxDuration" FillWidget="FillBarVerticalClipWidget\ClipWidget\FillWidget">
+                  <Children>
+                    <FillBarVerticalClipWidget Id="FillBarVerticalClipWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" ClipWidget="ClipWidget" FillWidget="ClipWidget\FillWidget" InitialAmountAsFloat="@Progress" IsDirectionUpward="true" MaxAmountAsFloat="1" ValueFactor="0" SaturationFactor="-100">
+                      <Children>
+                        <!--Frame-->
+                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="1" MarginRight="1" MarginBottom="2" MarginTop="2" Sprite="BlankWhiteSquare_9" Color="#444444FF" />
+                        <Widget Id="ClipWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" ClipContents="true">
+                          <Children>
+                            <Widget Id="FillWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" MarginLeft="1" MarginRight="1" MarginBottom="2" MarginTop="2" Sprite="BlankWhiteSquare_9" Color="#F4E1C4FF" />
+                          </Children>
+                        </Widget>
+                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="reload_frame_9"/>
+                      </Children>
+                    </FillBarVerticalClipWidget>
+                  </Children>
+                </ReloadBarHeightAdjustmentWidget>
+              </ItemTemplate>
+            </ListPanel>
+          </Children>
+        </Widget>
+
+        <BrushWidget Id="TopArrow" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Arrow.Height" SuggestedHeight = "!Crosshair.Arrow.Width" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="!Crosshair.Arrow.Offset.Negative" Sprite="crosshair_arrow_vertical" />
+        <BrushWidget Id="BottomArrow" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Arrow.Height" SuggestedHeight = "!Crosshair.Arrow.Width" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="!Crosshair.Arrow.Offset" Sprite="crosshair_arrow_vertical" Brush.VerticalFlip="true"/>
+        <BrushWidget Id="LeftArrow" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Arrow.Width" SuggestedHeight = "!Crosshair.Arrow.Height" HorizontalAlignment="Center" VerticalAlignment="Center" PositionXOffset="!Crosshair.Arrow.Offset.Negative" Sprite="crosshair_arrow" />
+        <BrushWidget Id="RightArrow" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth = "!Crosshair.Arrow.Width" SuggestedHeight = "!Crosshair.Arrow.Height" HorizontalAlignment="Center" VerticalAlignment="Center" PositionXOffset="!Crosshair.Arrow.Offset" Sprite="crosshair_arrow" Brush.HorizontalFlip="true" />
+        <BrushWidget Id="HitMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="46" SuggestedHeight="46" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Crosshair.HitMarker"/>
+        <BrushWidget Id="HeadshotMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="6" SuggestedHeight="6" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Crosshair.HeadshotMarker"/>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

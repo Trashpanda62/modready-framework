@@ -1,0 +1,53 @@
+# Build artifacts -------------------------------------------------------------
+bin/
+obj/
+dist/
+*.dll
+*.pdb
+*.exe
+
+# Allow the bundled third-party DLLs we redistribute under their licenses
+!bundled-deps/**/*.dll
+
+# Logs ------------------------------------------------------------------------
+*.log
+*.log.*
+build.log
+build-debug.log
+blse-latest.log
+*.archive-*.log
+runtime-*.log
+
+# Ralph snapshot/report files -------------------------------------------------
+.ralph-snapshot/
+ralph-report-*.txt
+ralph-report-*.txt.build
+
+# Editor/IDE ------------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS noise --------------------------------------------------------------------
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Generated XML dumps from runtime --------------------------------------------
+PatchedOptions.dump.xml
+merged-Options.xml
+
+# NuGet -----------------------------------------------------------------------
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# CI / local secrets ----------------------------------------------------------
+.env
+.env.local
+*.local.json

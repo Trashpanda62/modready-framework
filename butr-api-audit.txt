@@ -1,0 +1,1845 @@
+﻿MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions :: AddSerilogLoggerProvider  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions :: GetTempServiceProvider  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__13`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__13`1<!!0> :: <>9__13_1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__13`1<!!0> :: <AddSubSystem>b__13_1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__13`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__13`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__DisplayClass13_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__DisplayClass13_0`1<!!0> :: <AddSubSystem>b__0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__DisplayClass13_0`1<!!0> :: instance  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions/<>c__DisplayClass13_0`1<!0> :: instance  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent1InvokeHandler`1/InvokeDelegate<!0> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent1InvokeHandler`1<!!0> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent1InvokeHandler`1<!0> :: <Delegate>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent1InvokeHandler`1<!0> :: get_Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent2InvokeHandler`2/InvokeDelegate<!0,!1> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent2InvokeHandler`2<!!0,!!1> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent2InvokeHandler`2<!0,!1> :: <Delegate>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent2InvokeHandler`2<!0,!1> :: get_Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent3InvokeHandler`3/InvokeDelegate<!0,!1,!2> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent3InvokeHandler`3<!!0,!!1,!!2> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent3InvokeHandler`3<!0,!1,!2> :: Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent4InvokeHandler`4/InvokeDelegate<!0,!1,!2,!3> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent4InvokeHandler`4<!!0,!!1,!!2,!!3> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent4InvokeHandler`4<!0,!1,!2,!3> :: Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent5InvokeHandler`5/InvokeDelegate<!0,!1,!2,!3,!4> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent5InvokeHandler`5<!!0,!!1,!!2,!!3,!!4> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent5InvokeHandler`5<!0,!1,!2,!3,!4> :: Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent6InvokeHandler`6/InvokeDelegate<!0,!1,!2,!3,!4,!5> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent6InvokeHandler`6<!!0,!!1,!!2,!!3,!!4,!!5> :: Invoke  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Common.Extensions.MbEventExtensions/MbEvent6InvokeHandler`6<!0,!1,!2,!3,!4,!5> :: Delegate  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__1`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__1`1<!!0> :: <>9__1_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__1`1<!!0> :: <SubscribeToIsDownEvent>b__1_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__1`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__1`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__2`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__2`1<!!0> :: <>9__2_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__2`1<!!0> :: <SubscribeToOnPressedEvent>b__2_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__2`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__2`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__3`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__3`1<!!0> :: <>9__3_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__3`1<!!0> :: <SubscribeToOnReleasedEvent>b__3_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__3`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__3`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__4`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__4`1<!!0> :: <>9__4_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__4`1<!!0> :: <SubscribeToIsDownAndReleasedEvent>b__4_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__4`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__4`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__5`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__5`1<!!0> :: <>9__5_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__5`1<!!0> :: <IsHotKeyDown>b__5_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__5`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__5`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__6`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__6`1<!!0> :: <>9__6_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__6`1<!!0> :: <IsHotKeyPressed>b__6_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__6`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__6`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__7`1<!!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__7`1<!!0> :: <>9__7_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__7`1<!!0> :: <IsHotKeyReleased>b__7_0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__7`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__7`1<!0> :: <>9  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!!0> :: <SubscribeToIsDownEvent>b__1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass1_0`1<!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!!0> :: <SubscribeToOnPressedEvent>b__1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass2_0`1<!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!!0> :: <SubscribeToOnReleasedEvent>b__1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass3_0`1<!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!!0> :: <SubscribeToIsDownAndReleasedEvent>b__1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!0> :: action  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Extensions.IInputContextExtensions/<>c__DisplayClass4_0`1<!0> :: hotKey  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyBase :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyBase :: OnReleased  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyBase :: set_Predicate  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyManager :: Add  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyManager :: Build  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.HotKeys.HotKeyManager :: CreateWithOwnCategory  <-  Bannerlord.FluidCombatLite.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_0`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_0`1<!!0> :: jo  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_0`1<!!0> :: subSystem  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_0`1<!0> :: jo  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_0`1<!0> :: subSystem  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <pi>5__2  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <pi>5__3  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <pi>5__5  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <pi>5__6  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <pi>5__7  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <Read>b__0  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <Read>b__1  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <Read>b__2  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <Read>b__3  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <Read>b__4  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: <sp>5__4  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!!0> :: CS$<>8__locals7  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <pi>5__2  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <pi>5__3  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <pi>5__5  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <pi>5__6  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <pi>5__7  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: <sp>5__4  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.Options.SettingsProvider/<>c__DisplayClass1_1`1<!0> :: CS$<>8__locals7  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.ISubSystemSettings`1<!!0> :: get_Declarations  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: <Description>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: <Name>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: get_Description  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: get_EqualityContract  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: get_Name  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsDeclaration`1<!0> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!!0,System.Boolean> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!!0,System.Collections.Generic.IList`1<System.String>> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!!0,System.Int32> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!!0,System.Single> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!!0,System.String> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,!1> :: <Property>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,!1> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,!1> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,!1> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Boolean> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Boolean> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Boolean> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Boolean> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Boolean> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Collections.Generic.IList`1<System.String>> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Collections.Generic.IList`1<System.String>> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Collections.Generic.IList`1<System.String>> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Collections.Generic.IList`1<System.String>> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Collections.Generic.IList`1<System.String>> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Int32> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Int32> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Int32> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Int32> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Int32> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Single> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Single> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Single> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Single> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.Single> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.String> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.String> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.String> :: get_Property  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.String> :: GetHashCode  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsProperty`2<!0,System.String> :: PrintMembers  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyBool`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyBool`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyBool`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyBool`1<Bannerlord.ButterLib.ExceptionHandler.ExceptionHandlerSubSystem> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: <SelectedIndex>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: get_SelectedIndex  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyDropdown`1<!0> :: set_SelectedIndex  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: <MaxValue>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: <MinValue>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: get_MaxValue  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: get_MinValue  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyFloat`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: <MaxValue>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: <MinValue>k__BackingField  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: get_MaxValue  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: get_MinValue  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyInt`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyText`1<!0> :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyText`1<!0> :: Equals  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.ButterLib.SubSystems.Settings.SubSystemSettingsPropertyText`1<!0> :: op_Equality  <-  Bannerlord.ButterLib.dll
+MEMBR Bannerlord.UIExtenderEx.Attributes.PrefabExtensionAttribute :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.Attributes.PrefabExtensionAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute :: .ctor  <-  RealisticWeatherNaval.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: _vm  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: <.ctor>b__5_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: <SetVMProperty>b__11_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: get_ViewModel  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: OnPropertyChangedWithValue  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.BUTRViewModelMixin`2<!0,!1> :: SetVMProperty  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ConditionalWeakTableExtensions/<>c__DisplayClass0_0`2<!!0,!!1> :: .ctor  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ConditionalWeakTableExtensions/<>c__DisplayClass0_0`2<!!0,!!1> :: <GetOrAdd>b__0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ConditionalWeakTableExtensions/<>c__DisplayClass0_0`2<!!0,!!1> :: valueFactory  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ConditionalWeakTableExtensions/<>c__DisplayClass0_0`2<!0,!1> :: valueFactory  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!!0> :: <>9  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!!0> :: <>9__5_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!!0> :: <>9__5_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!!0> :: <PrivateValue>b__5_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!!0> :: <PrivateValue>b__5_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: .ctor  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: <>9  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: <>9__5_2  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: <>9__5_3  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: <PrivateValue>b__5_2  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__5`1<!0> :: <PrivateValue>b__5_3  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!!0> :: <>9  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!!0> :: <>9__6_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!!0> :: <>9__6_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!!0> :: <PrivateValueSet>b__6_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!!0> :: <PrivateValueSet>b__6_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: .ctor  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: <>9  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: <>9__6_2  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: <>9__6_3  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: <PrivateValueSet>b__6_2  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/<>c__6`1<!0> :: <PrivateValueSet>b__6_3  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/GetMemberValue`1<!!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Extensions.ReflectionHelpers/SetMemberValue`1<!!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs.CustomPatch`1<System.Xml.XmlDocument> :: Apply  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs.CustomPatch`1<System.Xml.XmlNode> :: Apply  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch :: .ctor  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch/PrefabExtensionFileNameAttribute :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch/PrefabExtensionTextAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionSetAttributePatch :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionSetAttributePatch/Attribute :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Create  <-  BetterSmithingContinued.Main.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Create  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Enable  <-  BetterSmithingContinued.Main.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Enable  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Register  <-  BetterSmithingContinued.Main.dll
+MEMBR Bannerlord.UIExtenderEx.UIExtender :: Register  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/<>c<!0> :: .ctor  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/<>c<!0> :: <>9  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/<>c<!0> :: <>9__22_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/<>c<!0> :: <OnPropertyChangedWithValue>b__22_1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/<>O<!0> :: <0>__ValueFactory  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate0<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate2<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate3<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate4<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate5<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate6<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate7<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1/OnPropertyChangedWithValueDelegate8<!0> :: Invoke  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: _vm  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: <OnPropertyChangedWithValue>g__ValueFactory|22_0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: get_ViewModel  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChanged  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue0  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue1  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue2  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue3  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue4  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue5  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue6  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue7  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<!0> :: OnPropertyChangedWithValue8  <-  Bannerlord.UIExtenderEx.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<NavalDLC.CustomBattle.CustomBattle.NavalCustomBattleMapSelectionGroupVM> :: .ctor  <-  RealisticWeatherNaval.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<NavalDLC.CustomBattle.CustomBattle.NavalCustomBattleMapSelectionGroupVM> :: get_ViewModel  <-  RealisticWeatherNaval.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.CampaignSystem.ViewModelCollection.WeaponCrafting.CraftingAvailableHeroItemVM> :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.CampaignSystem.ViewModelCollection.WeaponCrafting.CraftingAvailableHeroItemVM> :: get_ViewModel  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.CampaignSystem.ViewModelCollection.WeaponCrafting.WeaponDesign.WeaponDesignVM> :: .ctor  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.CampaignSystem.ViewModelCollection.WeaponCrafting.WeaponDesign.WeaponDesignVM> :: get_ViewModel  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.CampaignSystem.ViewModelCollection.WeaponCrafting.WeaponDesign.WeaponDesignVM> :: OnFinalize  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.MountAndBlade.CustomBattle.CustomBattle.MapSelectionGroupVM> :: .ctor  <-  RealisticWeather.dll
+MEMBR Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1<TaleWorlds.MountAndBlade.CustomBattle.CustomBattle.MapSelectionGroupVM> :: get_ViewModel  <-  RealisticWeather.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: Create  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: Create  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: get_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: get_AvailableAssemblies  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: get_LoadedModules  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: ToModel  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.CrashReportInfo :: ToModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Extensions.AssemblyModelExtensions :: GetFullName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Extensions.ModuleModelExtensions :: ContainsAssemblyReferences  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Extensions.ModuleModelExtensions :: ContainsTypeReferences  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: Equals  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: FromAssembly  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Name  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_PublicKeyToken  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_PublicKeyToken  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Version  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Version  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: get_Version  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_Name  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_PublicKeyToken  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_PublicKeyToken  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyIdModel :: set_Version  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: get_Culture  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: get_Name  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: get_PublicKeyToken  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: get_Version  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: set_Culture  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: set_Name  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: set_PublicKeyToken  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedReferenceModel :: set_Version  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel :: get_FullName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel :: set_FullName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel :: set_Name  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel :: set_Namespace  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_AnonymizedPath  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_AnonymizedPath  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Architecture  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Architecture  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_CultureName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_CultureName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Hash  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Hash  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Id  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Id  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Id  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_ImportedAssemblyReferences  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_ImportedTypeReferences  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_LoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_ModuleId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_ModuleId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_ModuleId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Type  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Type  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: get_Type  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_AnonymizedPath  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_Architecture  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_CultureName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_Hash  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_ImportedAssemblyReferences  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_ImportedTypeReferences  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_LoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_ModuleId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.AssemblyModel :: set_Type  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CapabilityModuleOrPluginModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CapabilityModuleOrPluginModel :: get_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CapabilityModuleOrPluginModel :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CapabilityModuleOrPluginModel :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_GameName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_GameName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LauncherType  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LauncherType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LauncherVersion  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LauncherVersion  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LoaderPluginProviderName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LoaderPluginProviderName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_LoaderPluginProviderVersion  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_OperatingSystemType  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_OperatingSystemType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_OperatingSystemVersion  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_OperatingSystemVersion  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_Runtime  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_Runtime  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: get_Runtime  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_GameName  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_GameVersion  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_LauncherType  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_LauncherVersion  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_LoaderPluginProviderName  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_LoaderPluginProviderVersion  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_OperatingSystemType  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_OperatingSystemVersion  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_Runtime  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportMetadataModel :: set_Runtime  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Assemblies  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Assemblies  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Assemblies  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_EnhancedStacktrace  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_EnhancedStacktrace  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Exception  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Exception  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_HarmonyPatches  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_HarmonyPatches  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_InvolvedLoaderPlugins  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_InvolvedLoaderPlugins  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_InvolvedModules  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_InvolvedModules  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_LoaderPlugins  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_LoaderPlugins  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Metadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Metadata  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Modules  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Modules  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_NativeModules  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_NativeModules  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: get_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Assemblies  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_EnhancedStacktrace  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Exception  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_HarmonyPatches  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_InvolvedLoaderPlugins  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_InvolvedModules  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_LoaderPlugins  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Metadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Modules  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_NativeModules  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.CrashReportModel :: set_Version  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_IsOptional  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_IsOptional  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_ModuleOrPluginId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_ModuleOrPluginId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_Type  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_Type  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_Version  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_Version  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_VersionRange  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: get_VersionRange  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_IsOptional  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_ModuleOrPluginId  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_Type  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.DependencyMetadataModel :: set_VersionRange  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_ExecutingMethod  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_ExecutingMethod  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_FrameDescription  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_FrameDescription  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_ILOffset  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_ILOffset  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_MethodFromStackframeIssue  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_MethodFromStackframeIssue  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_NativeOffset  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_NativeOffset  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_OriginalMethod  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_OriginalMethod  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_PatchMethods  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: get_PatchMethods  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_ExecutingMethod  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_FrameDescription  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_ILOffset  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_MethodFromStackframeIssue  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_NativeOffset  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_OriginalMethod  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.EnhancedStacktraceFrameModel :: set_PatchMethods  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_CallStack  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_CallStack  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_InnerException  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_InnerException  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_Message  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_Message  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_SourceLoaderPluginId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_SourceLoaderPluginId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_SourceModuleId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_SourceModuleId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_Type  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: get_Type  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_CallStack  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_InnerException  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_Message  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_SourceAssemblyId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_SourceLoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_SourceModuleId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ExceptionModel :: set_Type  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_After  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_Before  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_Index  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_Owner  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_PatchMethod  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_Priority  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatch :: set_Type  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatches :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatches :: set_Finalizers  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatches :: set_Postfixes  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatches :: set_Prefixes  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatches :: set_Transpilers  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_OriginalMethodDeclaredTypeName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_OriginalMethodDeclaredTypeName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_OriginalMethodName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_OriginalMethodName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_Patches  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: get_Patches  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: set_OriginalMethodDeclaredTypeName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: set_OriginalMethodName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchesModel :: set_Patches  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_After  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_After  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Before  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Before  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Index  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Index  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_LoaderPluginId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_LoaderPluginId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_ModuleId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_ModuleId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Namespace  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Namespace  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Owner  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Owner  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Priority  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Priority  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Type  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: get_Type  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_After  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_AssemblyId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Before  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Index  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_LoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_ModuleId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Namespace  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Owner  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Priority  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.HarmonyPatchModel :: set_Type  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ILoaderPluginInfo :: get_Id  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.IModuleInfo :: get_Id  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: get_EnhancedStacktraceFrameName  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: get_EnhancedStacktraceFrameName  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: get_ModuleOrLoaderPluginId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: get_ModuleOrLoaderPluginId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: set_EnhancedStacktraceFrameName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.InvolvedModuleOrPluginModel :: set_ModuleOrLoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Capabilities  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Id  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Id  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_UpdateInfo  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_UpdateInfo  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Version  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: get_Version  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_Capabilities  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_Dependencies  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_Id  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_UpdateInfo  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LoaderPluginModel :: set_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Date  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Date  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Level  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Level  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Message  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Message  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Type  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: get_Type  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: set_Date  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: set_Level  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: set_Message  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogEntry :: set_Type  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: get_Logs  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: get_Logs  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: set_Logs  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.LogSource :: set_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Key  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Key  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Key  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Value  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Value  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: get_Value  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: set_Key  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: set_Key  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: set_Value  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MetadataModel :: set_Value  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodEntry :: get_LoaderPluginInfo  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MethodEntry :: get_Method  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MethodEntry :: get_ModuleInfo  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.MethodExecuting :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodExecuting :: get_NativeInstructions  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodExecuting :: get_NativeInstructions  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodExecuting :: set_NativeInstructions  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: <Clone>$  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_CSharpILMixedInstructions  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_CSharpILMixedInstructions  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_CSharpInstructions  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_CSharpInstructions  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_ILInstructions  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_ILInstructions  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_LoaderPluginId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_LoaderPluginId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_MethodFullDescription  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_MethodFullDescription  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_ModuleId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: get_ModuleId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_AssemblyId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_CSharpILMixedInstructions  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_CSharpInstructions  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_ILInstructions  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_LoaderPluginId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_MethodDeclaredTypeName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_MethodFullDescription  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_MethodName  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_MethodParameters  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.MethodSimple :: set_ModuleId  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Capabilities  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Capabilities  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_DependencyMetadatas  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_DependencyMetadatas  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Id  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Id  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsExternal  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsExternal  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsMultiplayer  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsMultiplayer  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsOfficial  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsOfficial  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsSingleplayer  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_IsSingleplayer  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_SubModules  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_SubModules  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_UpdateInfo  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_UpdateInfo  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Url  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Url  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Version  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: get_Version  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_Capabilities  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_DependencyMetadatas  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_Id  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_IsExternal  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_IsMultiplayer  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_IsOfficial  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_IsSingleplayer  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_SubModules  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_UpdateInfo  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_Url  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleModel :: set_Version  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_AdditionalMetadata  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_AssemblyId  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_AssemblyId  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_Entrypoint  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_Entrypoint  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_Name  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: get_Name  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: set_AdditionalMetadata  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: set_AssemblyId  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: set_Entrypoint  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.ModuleSubModuleModel :: set_Name  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_AnonymizedPath  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_AnonymizedPath  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_Architecture  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_Architecture  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_Hash  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_Id  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: get_Id  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: set_AdditionalMetadata  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: set_AnonymizedPath  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: set_Architecture  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: set_Hash  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.NativeAssemblyModel :: set_Id  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Models.StacktraceEntry :: <Clone>$  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.StacktraceEntry :: get_Method  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.StacktraceEntry :: get_ModuleInfo  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.StacktraceEntry :: get_PatchMethods  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.StacktraceEntry :: set_PatchMethods  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: .ctor  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: .ctor  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: get_Provider  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: get_Value  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Provider  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Provider  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Provider  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Value  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Value  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin :: set_Value  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Renderer.Html.CrashReportHtml :: AddData  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.Html.CrashReportHtml :: Build  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.Html.Extensions.EnumExtensions/<>c__DisplayClass0_0`1<!!0> :: .ctor  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Renderer.Html.Extensions.EnumExtensions/<>c__DisplayClass0_0`1<!!0> :: <GetFlags>b__0  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Renderer.Html.Extensions.EnumExtensions/<>c__DisplayClass0_0`1<!!0> :: input  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Renderer.Html.Extensions.EnumExtensions/<>c__DisplayClass0_0`1<!0> :: input  <-  BUTR.CrashReport.Renderer.Html.dll
+MEMBR BUTR.CrashReport.Renderer.ImGui.CrashReportImGui :: ShowAndWait  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.ImGui.ICrashReportRendererUtilities :: CopyAsHtml  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.ImGui.Utils.IListEnumerator`1<!!0> :: .ctor  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Renderer.ImGui.Utils.IListEnumerator`1<!0> :: _curr  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Renderer.ImGui.Utils.IListEnumerator`1<!0> :: _list  <-  BUTR.CrashReport.Renderer.ImGui.dll
+MEMBR BUTR.CrashReport.Renderer.WinForms.CrashReportWinForms :: .ctor  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.WinForms.ICrashReportRendererUtilities :: CopyAsHtml  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Renderer.Zip.CrashReportZip :: Build  <-  Bannerlord.ButterLib.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__1`1<!!0> :: <>9  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__1`1<!!0> :: <>9__1_0  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__1`1<!!0> :: <Join>b__1_0  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__1`1<!0> :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__1`1<!0> :: <>9  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!!0> :: .ctor  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!!0> :: <Join>b__1  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!!0> :: converter  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!!0> :: delimiter  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!0> :: converter  <-  BUTR.CrashReport.dll
+MEMBR BUTR.CrashReport.Utils.HarmonyUtils/<>c__DisplayClass1_0`1<!0> :: delimiter  <-  BUTR.CrashReport.dll
+MEMBR BUTR.DependencyInjection.Logger.DefaultBUTRLogger`1<MCM.Implementation.JsonSettingsPreset> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.Logger.DefaultBUTRLogger`1<MCM.MCMSubModule> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.Logger.LoggerExtensions :: LogWarning  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__11`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__11`1<!!0> :: <>9__11_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__11`1<!!0> :: <RegisterScoped>b__11_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__11`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__11`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__13`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__13`2<!!0,!!1> :: <>9__13_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__13`2<!!0,!!1> :: <RegisterScoped>b__13_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__13`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__13`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__17`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__17`1<!!0> :: <>9__17_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__17`1<!!0> :: <RegisterTransient>b__17_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__17`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__17`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__19`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__19`2<!!0,!!1> :: <>9__19_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__19`2<!!0,!!1> :: <RegisterTransient>b__19_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__19`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__19`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__5`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__5`1<!!0> :: <>9__5_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__5`1<!!0> :: <RegisterSingleton>b__5_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__5`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__5`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__7`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__7`2<!!0,!!1> :: <>9__7_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__7`2<!!0,!!1> :: <RegisterSingleton>b__7_0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__7`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__7`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass12_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass12_0`1<!!0> :: <RegisterScoped>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass12_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass12_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass14_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass14_0`2<!!0,!!1> :: <RegisterScoped>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass14_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass14_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass18_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass18_0`1<!!0> :: <RegisterTransient>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass18_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass18_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass20_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass20_0`2<!!0,!!1> :: <RegisterTransient>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass20_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass20_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass6_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass6_0`1<!!0> :: <RegisterSingleton>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass6_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass6_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass8_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass8_0`2<!!0,!!1> :: <RegisterSingleton>b__0  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass8_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR BUTR.DependencyInjection.WithHistoryGenericServiceContainer/<>c__DisplayClass8_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  ArtemsLivelyAnimations.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Bandit Black Hole MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  DynaCulture.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  EnhancedTournaments.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  IB Custom Horn MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Immersive Battlefields MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  KeepYourClanMembersAfterMarriage.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Perfect Fire Arrows MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Raise your Banner MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Raise your Banner RYT MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Raise your Torch MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  Reinforcement System MCM.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Attributes.SettingPropertyGroupAttribute :: get_Default  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Attributes.v1.SettingPropertyAttribute :: .ctor  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Attributes.v1.SettingPropertyAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Bandit Black Hole MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  DynaCulture.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  EnhancedTournaments.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  IB Custom Horn MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Immersive Battlefields MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  KeepYourClanMembersAfterMarriage.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Perfect Fire Arrows MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Raise your Banner MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Raise your Torch MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  Reinforcement System MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyButtonAttribute :: .ctor  <-  ArtemsLivelyAnimations.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyButtonAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  ArtemsLivelyAnimations.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Bandit Black Hole MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  DynaCulture.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  EnhancedTournaments.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  IB Custom Horn MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Immersive Battlefields MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Perfect Fire Arrows MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Raise your Banner MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Raise your Banner RYT MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Raise your Torch MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  Reinforcement System MCM.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Attributes.v2.SettingPropertyTextAttribute :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: add_PropertyChanged  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: get_DisplayName  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: get_FolderName  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: get_FormatType  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: get_Id  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.BaseSettings :: OnPropertyChanged  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<AILordsEnhanced.ScoutingFog.ScoutingFogSettings> :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<ArtemsLivelyAnimations.ArtemsLivelyAnimationsSettings> :: .ctor  <-  ArtemsLivelyAnimations.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Bandit_Black_Hole.MCM_BBH> :: .ctor  <-  Bandit Black Hole MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Bannerlord.FluidCombatNext.FluidCombatSettings> :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<BattleSizeResized.ResizedMCMSettings> :: .ctor  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<BetterSmithingContinued.Settings.MCMBetterSmithingSettings> :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<BloodMod1313.MySettings> :: .ctor  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<DismembermentPlus.Settings.Settings> :: .ctor  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<DynaCulture.Settings.MCMDynaCultureSettings> :: .ctor  <-  DynaCulture.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<EnhancedTournaments.MCMSettings> :: .ctor  <-  EnhancedTournaments.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<FasterTime.Settings.ModSettings> :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<IDontCare.Menu.IDontCareMenu> :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Immersive_Battlefields.MCM_IB_Addon> :: .ctor  <-  IB Custom Horn MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Immersive_Battlefields.MCM_IB> :: .ctor  <-  Immersive Battlefields MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<KeepYourClanMembersAfterMarriage.Configs> :: .ctor  <-  KeepYourClanMembersAfterMarriage.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<MCM.Internal.MCMSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Perfect_Fire_Arrows.MCM_PFA> :: .ctor  <-  Perfect Fire Arrows MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Raise_your_Banner.MCM_RYB_RYT> :: .ctor  <-  Raise your Banner RYT MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Raise_your_Banner.MCM_RYB> :: .ctor  <-  Raise your Banner MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Raise_your_Torch.MCM_RYT> :: .ctor  <-  Raise your Torch MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<RealisticWeather.RealisticWeatherSettings> :: .ctor  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<Reinforcement_System.MCM_RS> :: .ctor  <-  Reinforcement System MCM.dll
+MEMBR MCM.Abstractions.Base.Global.AttributeGlobalSettings`1<XorberaxLegacy.Settings.Settings> :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Base.Global.FluentGlobalSettings :: Register  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<AILordsEnhanced.ScoutingFog.ScoutingFogSettings> :: get_Instance  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<ArtemsLivelyAnimations.ArtemsLivelyAnimationsSettings> :: get_Instance  <-  ArtemsLivelyAnimations.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Bandit_Black_Hole.MCM_BBH> :: get_Instance  <-  Bandit Black Hole.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Bannerlord.FluidCombatNext.FluidCombatSettings> :: get_Instance  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<BattleSizeResized.ResizedMCMSettings> :: get_Instance  <-  BattleSizeResized.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<BetterSmithingContinued.Settings.MCMBetterSmithingSettings> :: get_Instance  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<BloodMod1313.MySettings> :: get_Instance  <-  BloodMod1313.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<DismembermentPlus.Settings.Settings> :: get_Instance  <-  DismembermentPlus.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<DynaCulture.Settings.MCMDynaCultureSettings> :: get_Instance  <-  DynaCulture.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<EnhancedTournaments.MCMSettings> :: get_Instance  <-  EnhancedTournaments.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<FasterTime.Settings.ModSettings> :: get_Instance  <-  FasterTime.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<IDontCare.Menu.IDontCareMenu> :: get_Instance  <-  IDontCare.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Immersive_Battlefields.MCM_IB_Addon> :: get_Instance  <-  Immersive Battlefields.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Immersive_Battlefields.MCM_IB> :: get_Instance  <-  Immersive Battlefields.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<KeepYourClanMembersAfterMarriage.Configs> :: get_Instance  <-  KeepYourClanMembersAfterMarriage.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<MCM.Abstractions.Base.Global.EmptyGlobalSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Perfect_Fire_Arrows.MCM_PFA> :: get_Instance  <-  Perfect Fire Arrows.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Raise_your_Banner.MCM_RYB_RYT> :: get_Instance  <-  Raise your Banner.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Raise_your_Banner.MCM_RYB> :: get_Instance  <-  Raise your Banner.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Raise_your_Torch.MCM_RYT> :: get_Instance  <-  Raise your Torch.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<RealisticWeather.RealisticWeatherSettings> :: get_Instance  <-  RealisticWeather.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<Reinforcement_System.MCM_RS> :: get_Instance  <-  Reinforcement System.dll
+MEMBR MCM.Abstractions.Base.Global.GlobalSettings`1<XorberaxLegacy.Settings.Settings> :: get_Instance  <-  XorberaxLegacy.dll
+MEMBR MCM.Abstractions.Base.Global.SettingsWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Base.PerCampaign.PerCampaignSettings`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.PerCampaign.PerCampaignSettings`1<MCM.Abstractions.Base.PerCampaign.EmptyPerCampaignSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.PerSave.PerSaveSettings`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.Base.PerSave.PerSaveSettings`1<MCM.Abstractions.Base.PerSave.EmptyPerSaveSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: get_SettingsDefinitions  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: GetPresets  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: GetSettings  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: OverrideSettings  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: ResetSettings  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.BaseSettingsProvider :: SaveSettings  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.FluentBuilder.BaseSettingsBuilder :: Create  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsBuilder :: BuildAsGlobal  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsBuilder :: CreateGroup  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsBuilder :: SetFormat  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBoolBuilder> :: SetHintText  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyButtonBuilder> :: SetHintText  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsPropertyGroupBuilder :: AddBool  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.FluentBuilder.ISettingsPropertyGroupBuilder :: AddButton  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__0`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__0`2<!!0,!!1> :: <>9__0_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__0`2<!!0,!!1> :: <AddSettingsProvider>b__0_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__0`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__0`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__1`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__1`1<!!0> :: <>9__1_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__1`1<!!0> :: <AddSettingsProvider>b__1_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__1`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__1`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__2`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__2`2<!!0,!!1> :: <>9__2_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__2`2<!!0,!!1> :: <AddSettingsFormat>b__2_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__2`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__2`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__3`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__3`1<!!0> :: <>9__3_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__3`1<!!0> :: <AddSettingsFormat>b__3_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__3`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__3`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__4`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__4`2<!!0,!!1> :: <>9__4_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__4`2<!!0,!!1> :: <AddSettingsPropertyDiscoverer>b__4_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__4`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__4`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__5`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__5`1<!!0> :: <>9__5_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__5`1<!!0> :: <AddSettingsPropertyDiscoverer>b__5_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__5`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__5`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__6`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__6`2<!!0,!!1> :: <>9__6_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__6`2<!!0,!!1> :: <AddSettingsContainer>b__6_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__6`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__6`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_1  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_2  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_3  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_4  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_5  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <>9__7_6  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_1  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_2  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_3  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_4  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_5  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!!0> :: <AddSettingsContainer>b__7_6  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__7`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__8`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__8`1<!!0> :: <>9__8_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__8`1<!!0> :: <AddExternalSettingsProvider>b__8_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__8`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__8`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__9`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__9`1<!!0> :: <>9__9_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__9`1<!!0> :: <AddSettingsBuilderFactory>b__9_0  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__9`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Abstractions.ServiceCollectionExtensions/<>c__9`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsDefinition :: get_SettingsId  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1/GetIdDelegate<!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1/GetNameDelegate<!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1/GetSettingsIdDelegate<!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1/LoadPresetDelegate<!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1/SavePresetDelegate<!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: _methodGetIdDelegate  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: _methodGetNameDelegate  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: _methodGetSettingsIdDelegate  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: _methodLoadPresetDelegate  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: _methodSavePresetDelegate  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: <Object>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<!0> :: Create  <-  MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<MCM.UI.Adapter.MCMv5.Base.MCMv5AttributeSettingsWrapper> :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPresetWrapper`1<MCM.UI.Adapter.MCMv5.Base.MCMv5FluentSettingsWrapper> :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsPropertyDefinition :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsProviderWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsUtils :: CheckIsValid  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.SettingsUtils :: GetAllSettingPropertyDefinitions  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionBoolWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionButtonWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionDropdownWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionGroupToggleWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionTextWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithActionFormatWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithCustomFormatterWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithEditableMinMaxWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithFormatWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithIdWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyDefinitionWithMinMaxWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.PropertyGroupDefinitionWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Abstractions.Wrapper.SettingsPropertyGroupDefinitionWrapper :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: _selectedIndex  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: _selectedValue  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: Equals  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: get_SelectedIndex  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: GetHashCode  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: OnPropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: PropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: set_SelectedIndex  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<!0> :: SetField  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<BetterSmithingContinued.Settings.CharacterCycleDropdownOption> :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Common.Dropdown`1<BetterSmithingContinued.Settings.CharacterCycleDropdownOption> :: get_SelectedValue  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR MCM.Common.Dropdown`1<BetterSmithingContinued.Settings.KeybindingDropdownOption> :: .ctor  <-  BetterSmithingContinued.Settings.dll
+MEMBR MCM.Common.Dropdown`1<BetterSmithingContinued.Settings.KeybindingDropdownOption> :: get_SelectedValue  <-  BetterSmithingContinued.MainFrame.dll
+MEMBR MCM.Common.Dropdown`1<FasterTime.Settings.KeyOption> :: .ctor  <-  FasterTime.dll
+MEMBR MCM.Common.Dropdown`1<FasterTime.Settings.KeyOption> :: get_SelectedValue  <-  FasterTime.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: .ctor  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: .ctor  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: .ctor  <-  IDontCare.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: .ctor  <-  XorberaxLegacy.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: add_PropertyChanged  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: get_SelectedIndex  <-  AILordsEnhanced.ScoutingFog.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: get_SelectedIndex  <-  Bannerlord.FluidCombatLite.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: get_SelectedIndex  <-  IDontCare.dll
+MEMBR MCM.Common.Dropdown`1<System.String> :: get_SelectedValue  <-  XorberaxLegacy.dll
+MEMBR MCM.Common.IWrapper :: get_Object  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Common.PropertyRef :: .ctor  <-  MCM.UI.Adapter.MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<!0> :: _getter  <-  MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<!0> :: _setter  <-  MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<!0> :: Equals  <-  MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<!0> :: OnPropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<!0> :: PropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.ProxyRef`1<System.Action> :: .ctor  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Common.ProxyRef`1<System.Boolean> :: .ctor  <-  BetterExceptionWindowConfigUI.dll
+MEMBR MCM.Common.ProxyRef`1<System.Object> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<!0> :: _value  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<!0> :: <Type>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<!0> :: OnPropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<!0> :: PropertyChanged  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<MCM.Common.Dropdown`1<System.String>> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<System.Boolean> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<System.Int32> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<System.Single> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Common.StorageRef`1<System.String> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass10_0<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass10_0<!0> :: <>9__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass10_0<!0> :: <SaveSettings>b__0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass10_0<!0> :: <SaveSettings>b__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass10_0<!0> :: settings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass8_0<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass8_0<!0> :: <>9__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass8_0<!0> :: <RegisterSettings>b__0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass8_0<!0> :: <RegisterSettings>b__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c__DisplayClass8_0<!0> :: settings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <>9__16_0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <>9__16_1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <>9__7_0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <get_SettingsDefinitions>b__7_0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <LoadAvailableSnapshots>b__16_0  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<>c<!0> :: <LoadAvailableSnapshots>b__16_1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>1__state  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>2__current  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>3__settingsId  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>7__wrap2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>7__wrap3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>l__initialThreadId  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>s__5  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <>s__6  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <filePath>5__7  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <fileSystemProvider>5__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <preset>5__8  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <presetsDirectory>5__3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <settings>5__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <settings>5__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: <settingsDirectory>5__4  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: settingsId  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<GetPresets>d__13<!0> :: System.Collections.Generic.IEnumerable<MCM.Abstractions.ISettingsPreset>.GetEnumerator  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>1__state  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>2__current  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>3__snapshots  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>7__wrap3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>l__initialThreadId  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>m__Finally1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <>s__3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <folderName>5__5  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <json>5__8  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <jsonFormat>5__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <jsonFormat>5__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <path>5__7  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <setting>5__4  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <snapshotDict>5__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <snapshotDict>5__3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: <subFolderName>5__6  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: snapshots  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: System.Collections.Generic.IEnumerable<MCM.Abstractions.Base.BaseSettings>.GetEnumerator  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<LoadAvailableSnapshots>d__16<!0> :: System.IDisposable.Dispose  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>1__state  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>2__current  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>7__wrap2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>l__initialThreadId  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>m__Finally1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <>s__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <folderName>5__5  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <json>5__4  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <jsonFormat>5__1  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <jsonFormat>5__2  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <path>5__7  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <setting>5__3  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: <subFolderName>5__6  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: System.Collections.Generic.IEnumerable<MCM.Abstractions.SettingSnapshot>.GetEnumerator  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1/<SaveAvailableSnapshots>d__15<!0> :: System.IDisposable.Dispose  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<!0> :: <LoadedSettings>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<!0> :: <RootFolder>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<!0> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<!0> :: get_RootFolder  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.FluentGlobalSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.FluentGlobalSettings> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.FluentGlobalSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.GlobalSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.GlobalSettings> :: get_RootFolder  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.Global.GlobalSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings> :: get_RootFolder  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.PerCampaignSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.PerCampaignSettings> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.PerCampaignSettings> :: get_RootFolder  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerCampaign.PerCampaignSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.FluentPerSaveSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.FluentPerSaveSettings> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.FluentPerSaveSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.PerSaveSettings> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.PerSaveSettings> :: get_LoadedSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.BaseSettingsContainer`1<MCM.Abstractions.Base.PerSave.PerSaveSettings> :: RegisterSettings  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <HintText>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <Id>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <Name>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <Order>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <PropertyReference>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <RequireRestart>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: <SettingsPropertyBuilder>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: get_Name  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: get_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: set_HintText  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: set_Order  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<!0> :: set_RequireRestart  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBoolBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBoolBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyButtonBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyButtonBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyDropdownBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyDropdownBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyFloatingIntegerBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyFloatingIntegerBuilder> :: get_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyFloatingIntegerBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyGroupToggleBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyGroupToggleBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyIntegerBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyIntegerBuilder> :: get_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyIntegerBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyTextBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.Implementation.FluentBuilder.Models.BaseDefaultSettingsPropertyBuilder`1<MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyTextBuilder> :: set_SettingsPropertyBuilder  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!!0> :: <CreateScopedGenericFunc>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass5_0`1<!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!!0> :: <CreateScopedGenericNamedFunc>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.FuncHelper/<>c__DisplayClass6_0`1<!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!!0,!!1> :: Buckets  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!!0,!!1> :: Divisor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: AddExistingValues  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: Buckets  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: Count  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: Divisor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<!0,!1> :: InitializeBuckets  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Buckets  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Divisor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTable`2<System.ValueTuple`2<System.Type,System.String>,MCM.LightInject.GetInstanceDelegate> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Duplicates  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: HashCode  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Height  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: IsEmpty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Left  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Right  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!!0,!!1> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Duplicates  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: HashCode  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Height  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: IsEmpty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: IsLeftHeavy  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: IsRightHeavy  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Left  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Right  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: RotateLeft  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: RotateRight  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<!0,!1> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Duplicates  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: HashCode  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Height  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Left  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Right  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTree`2<System.Type,System.Func`4<System.Object[],MCM.LightInject.Scope,System.Object,System.Object>> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!!0,!!1> :: <>3__hashTree  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>1__state  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>2__current  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>3__hashTree  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>7__wrap1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>l__initialThreadId  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>m__Finally1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>m__Finally2  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>s__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <>s__4  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <i>5__3  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <left>5__2  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: <right>5__5  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: hashTree  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: System.Collections.Generic.IEnumerable<MCM.LightInject.KeyValue<TKey,TValue>>.GetEnumerator  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableHashTreeExtensions/<InOrder>d__2`2<!0,!1> :: System.IDisposable.Dispose  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<!0> :: Count  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<!0> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<!0> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<MCM.LightInject.KeyValue`2<!!0,!!1>> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<MCM.LightInject.KeyValue`2<!0,!1>> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<MCM.LightInject.KeyValue`2<!0,!1>> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<MCM.LightInject.KeyValue`2<!0,!1>> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableList`1<MCM.LightInject.KeyValue`2<System.Type,MCM.LightInject.GetInstanceDelegate>> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: Height  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: IsEmpty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: Left  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: Right  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!!0> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Height  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: IsEmpty  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: IsLeftHeavy  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: IsRightHeavy  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Left  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Right  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: RotateLeft  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: RotateRight  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<!0> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ImmutableMapTree`1<System.Object> :: Empty  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<!0> :: <Argument>k__BackingField  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<!0> :: get_Argument  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<!0> :: set_Argument  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<MCM.LightInject.LocalBuilder> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Byte> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Int32> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Int64> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Object> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Reflection.ConstructorInfo> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Reflection.MethodInfo> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.String> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Instruction`1<System.Type> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<!!0,!!1> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<!!0,!!1> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<!0,!1> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<!0,!1> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Key  <-  MCMv5.dll
+MEMBR MCM.LightInject.KeyValue`2<System.Type,MCM.LightInject.GetInstanceDelegate> :: Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_0<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_0<!0,!1> :: <GetOrAdd>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_0<!0,!1> :: valueFactory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_1<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_1<!0,!1> :: <GetOrAdd>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_1<!0,!1> :: CS$<>8__locals1  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2/<>c__DisplayClass2_1<!0,!1> :: k  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2<!0,!1> :: concurrentDictionary  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2<MCM.LightInject.ServiceRegistration,System.Int32> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2<MCM.LightInject.ServiceRegistration,System.Int32> :: ContainsUninitializedValue  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2<MCM.LightInject.ServiceRegistration,System.Int32> :: GetOrAdd  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyConcurrentDictionary`2<MCM.LightInject.ServiceRegistration,System.Int32> :: Remove  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!!0> :: <CreateScopedLazy>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass3_0`1<!0> :: serviceContainer  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!!0> :: <CreateScopedLazyFromDelegate>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!!0> :: constants  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!!0> :: getInstanceDelegate  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!0> :: constants  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!0> :: getInstanceDelegate  <-  MCMv5.dll
+MEMBR MCM.LightInject.LazyHelper/<>c__DisplayClass4_0`1<!0> :: scope  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/<>c__7`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/<>c__7`1<!!0> :: <>9__7_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/<>c__7`1<!!0> :: <GetService>b__7_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/<>c__7`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/<>c__7`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectGenericServiceProvider/OfTypeDelegate`1<!!0> :: Invoke  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass11_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass11_0`2<!!0,!!1> :: <RegisterScoped>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass11_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass11_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass15_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass15_0`1<!!0> :: <RegisterTransient>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass15_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass15_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass17_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass17_0`2<!!0,!!1> :: <RegisterTransient>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass17_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass17_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass3_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass3_0`1<!!0> :: <RegisterSingleton>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass3_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass3_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass5_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass5_0`2<!!0,!!1> :: <RegisterSingleton>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass5_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass5_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass9_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass9_0`1<!!0> :: <RegisterScoped>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass9_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LightInjectServiceContainer/<>c__DisplayClass9_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.LogicalThreadStorage`1<!0> :: asyncLocal  <-  MCMv5.dll
+MEMBR MCM.LightInject.LogicalThreadStorage`1<MCM.LightInject.Scope> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.LogicalThreadStorage`1<MCM.LightInject.Scope> :: get_Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.LogicalThreadStorage`1<MCM.LightInject.Scope> :: set_Value  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!!0,!!1> :: <CreateGenericGetNamedParameterizedInstanceDelegate>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!!0,!!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!!0,!!1> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!0,!1> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass6_0`2<!0,!1> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!!0,!!1,!!2> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!!0,!!1,!!2> :: <CreateGenericGetNamedParameterizedInstanceDelegate>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!!0,!!1,!!2> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!!0,!!1,!!2> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!0,!1,!2> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass7_0`3<!0,!1,!2> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!!0,!!1,!!2,!!3> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!!0,!!1,!!2,!!3> :: <CreateGenericGetNamedParameterizedInstanceDelegate>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!!0,!!1,!!2,!!3> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!!0,!!1,!!2,!!3> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!0,!1,!2,!3> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass8_0`4<!0,!1,!2,!3> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!!0,!!1,!!2,!!3,!!4> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!!0,!!1,!!2,!!3,!!4> :: <CreateGenericGetNamedParameterizedInstanceDelegate>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!!0,!!1,!!2,!!3,!!4> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!!0,!!1,!!2,!!3,!!4> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!0,!1,!2,!3,!4> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ReflectionHelper/<>c__DisplayClass9_0`5<!0,!1,!2,!3,!4> :: serviceName  <-  MCMv5.dll
+MEMBR MCM.LightInject.Scope/ReferenceEqualityComparer`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.Scope/ReferenceEqualityComparer`1<!0> :: Default  <-  MCMv5.dll
+MEMBR MCM.LightInject.Scope/ReferenceEqualityComparer`1<System.IDisposable> :: Default  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__94`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__94`1<!!0> :: <>9__94_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__94`1<!!0> :: <Decorate>b__94_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__94`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__94`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!!0> :: <RegisterConstructorDependency>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!!0> :: <RegisterConstructorDependency>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass87_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!!0> :: <RegisterConstructorDependency>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!!0> :: <RegisterConstructorDependency>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass88_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!!0> :: <RegisterPropertyDependency>b__0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!!0> :: <RegisterPropertyDependency>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!0> :: <>4__this  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/<>c__DisplayClass89_0`1<!0> :: factory  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/ServiceRegistry`1<MCM.LightInject.ServiceRegistration> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/ServiceRegistry`1<System.Action`1<MCM.LightInject.IEmitter>> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/ServiceRegistry`1<System.Delegate> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<!0> :: AddValue  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<!0> :: CreateSnapshot  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<!0> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<!0> :: lockObject  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<!0> :: TryAddValue  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.DecoratorRegistration> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.DecoratorRegistration> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.DecoratorRegistration> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ILifetime> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ILifetime> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ILifetime> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/FactoryRule> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/FactoryRule> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/FactoryRule> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/Initializer> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/Initializer> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/Initializer> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/ServiceOverride> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/ServiceOverride> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<MCM.LightInject.ServiceContainer/ServiceOverride> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<System.Object> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<System.Object> :: Add  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceContainer/Storage`1<System.Object> :: Items  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!!0,!!1> :: <>9__34_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!!0,!!1> :: <>9__34_1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!!0,!!1> :: <Override>b__34_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!!0,!!1> :: <Override>b__34_1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__34`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__35`2<!!0,!!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__35`2<!!0,!!1> :: <>9__35_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__35`2<!!0,!!1> :: <Override>b__35_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__35`2<!0,!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__35`2<!0,!1> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__36`1<!!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__36`1<!!0> :: <>9__36_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__36`1<!!0> :: <Initialize>b__36_0  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__36`1<!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__36`1<!0> :: <>9  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass35_0`2<!!0,!!1> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass35_0`2<!!0,!!1> :: <Override>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass35_0`2<!!0,!!1> :: lifetime  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass35_0`2<!0,!1> :: lifetime  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass36_0`1<!!0> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass36_0`1<!!0> :: <Initialize>b__1  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass36_0`1<!!0> :: processor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ServiceRegistryExtensions/<>c__DisplayClass36_0`1<!0> :: processor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<MCM.LightInject.Registration,MCM.LightInject.ConstructionInfo> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.Reflection.Assembly,System.Type[]> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.String,MCM.LightInject.ServiceRegistration> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.String,System.Action`1<MCM.LightInject.IEmitter>> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.String,System.Delegate> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.Type,MCM.LightInject.ThreadSafeDictionary`2<System.String,!0>> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.Type,System.Reflection.MethodInfo> :: .ctor  <-  MCMv5.dll
+MEMBR MCM.LightInject.ThreadSafeDictionary`2<System.Type,System.Type> :: .ctor  <-  MCMv5.dll
+TYPE  Bannerlord.ButterLib.Common.Extensions.DependencyInjectionExtensions  <-  Bannerlord.FluidCombatLite.dll
+TYPE  Bannerlord.ButterLib.HotKeys.HotKeyBase  <-  Bannerlord.FluidCombatLite.dll
+TYPE  Bannerlord.ButterLib.HotKeys.HotKeyManager  <-  Bannerlord.FluidCombatLite.dll
+TYPE  Bannerlord.UIExtenderEx.Attributes.PrefabExtensionAttribute  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Attributes.PrefabExtensionAttribute  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.Attributes.ViewModelMixinAttribute  <-  RealisticWeatherNaval.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.InsertType  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.InsertType  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch/PrefabExtensionFileNameAttribute  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionInsertPatch/PrefabExtensionTextAttribute  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionSetAttributePatch  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.Prefabs2.PrefabExtensionSetAttributePatch/Attribute  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.UIExtender  <-  BetterSmithingContinued.Main.dll
+TYPE  Bannerlord.UIExtenderEx.UIExtender  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1  <-  RealisticWeather.dll
+TYPE  Bannerlord.UIExtenderEx.ViewModels.BaseViewModelMixin`1  <-  RealisticWeatherNaval.dll
+TYPE  BUTR.CrashReport.CrashReportInfo  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.CrashReportInfo  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Decompilers.Utils.MethodDecompiler  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Decompilers.Utils.ReferenceImporter  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Extensions.AssemblyModelExtensions  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Extensions.ModuleModelExtensions  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IAssemblyUtilities  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IAssemblyUtilities  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.ICrashReportMetadataProvider  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.ICrashReportMetadataProvider  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.IHarmonyProvider  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IHarmonyProvider  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.ILoaderPluginProvider  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.ILoaderPluginProvider  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.IModelConverter  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IModelConverter  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.IModuleProvider  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IModuleProvider  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.IPathAnonymizer  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IPathAnonymizer  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Interfaces.IStacktraceFilter  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Interfaces.IStacktraceFilter  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.AssemblyArchitectureType  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyArchitectureType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.AssemblyArchitectureType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.AssemblyIdModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.AssemblyIdModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyIdModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.AssemblyIdModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.AssemblyImportedReferenceModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyImportedTypeReferenceModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModelType  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModelType  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModelType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.AssemblyModelType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.CapabilityModuleOrPluginModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.CapabilityModuleOrPluginModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.CapabilityModuleOrPluginModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.CrashReportMetadataModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.CrashReportMetadataModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.CrashReportMetadataModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.CrashReportMetadataModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.CrashReportModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.CrashReportModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.CrashReportModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.CrashReportModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.CrashReportModel  <-  BUTR.CrashReport.Renderer.WinForms.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModelType  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModelType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.DependencyMetadataModelType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.EnhancedStacktraceFrameModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.EnhancedStacktraceFrameModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.EnhancedStacktraceFrameModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.ExceptionModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.ExceptionModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.ExceptionModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatch  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatch  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatches  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchesModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchesModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchesModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchType  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchType  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.HarmonyPatchType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.ILoaderPluginInfo  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.IModuleInfo  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.IModuleSubModuleInfo  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.InvolvedModuleOrPluginModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.InvolvedModuleOrPluginModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.InvolvedModuleOrPluginModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.LoaderPluginModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.LoaderPluginModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.LoaderPluginModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.LoaderPluginModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.LogEntry  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.LogEntry  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.LogEntry  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.LogLevel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.LogLevel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.LogLevel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.LogSource  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.LogSource  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.LogSource  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.LogSource  <-  BUTR.CrashReport.Renderer.WinForms.dll
+TYPE  BUTR.CrashReport.Models.MetadataModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.MetadataModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.MetadataModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.MetadataModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.MethodEntry  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.MethodExecuting  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.MethodExecuting  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.MethodExecuting  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.MethodSimple  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.MethodSimple  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.MethodSimple  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.ModuleModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.ModuleModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.ModuleModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.ModuleModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.ModuleSubModuleModel  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.ModuleSubModuleModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.ModuleSubModuleModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyArchitectureType  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyArchitectureType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyArchitectureType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyModel  <-  BUTR.CrashReport.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyModel  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.NativeAssemblyModel  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.OperatingSystemType  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.OperatingSystemType  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.OperatingSystemType  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Models.StacktraceEntry  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin  <-  BUTR.CrashReport.Renderer.Html.dll
+TYPE  BUTR.CrashReport.Models.UpdateInfoModuleOrLoaderPlugin  <-  BUTR.CrashReport.Renderer.ImGui.dll
+TYPE  BUTR.CrashReport.Renderer.Html.CrashReportHtml  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Renderer.ImGui.CrashReportImGui  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Renderer.ImGui.ICrashReportRendererUtilities  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Renderer.WinForms.CrashReportWinForms  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Renderer.WinForms.ICrashReportRendererUtilities  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.CrashReport.Renderer.Zip.CrashReportZip  <-  Bannerlord.ButterLib.dll
+TYPE  BUTR.DependencyInjection.Logger.IBUTRLogger  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  BUTR.DependencyInjection.Logger.IBUTRLogger`1  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  BUTR.DependencyInjection.Logger.LoggerExtensions  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  ArtemsLivelyAnimations.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Bandit Black Hole MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  BloodMod1313.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  DynaCulture.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  EnhancedTournaments.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  IB Custom Horn MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Immersive Battlefields MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  KeepYourClanMembersAfterMarriage.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Perfect Fire Arrows MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Raise your Banner MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Raise your Banner RYT MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Raise your Torch MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  Reinforcement System MCM.dll
+TYPE  MCM.Abstractions.Attributes.SettingPropertyGroupAttribute  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Attributes.v1.SettingPropertyAttribute  <-  BloodMod1313.dll
+TYPE  MCM.Abstractions.Attributes.v1.SettingPropertyAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Bandit Black Hole MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  DynaCulture.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  EnhancedTournaments.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  IB Custom Horn MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Immersive Battlefields MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  KeepYourClanMembersAfterMarriage.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Perfect Fire Arrows MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Raise your Banner MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Raise your Torch MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  Reinforcement System MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyBoolAttribute  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyButtonAttribute  <-  ArtemsLivelyAnimations.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyButtonAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyDropdownAttribute  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyFloatingIntegerAttribute  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  ArtemsLivelyAnimations.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Bandit Black Hole MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  DynaCulture.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  EnhancedTournaments.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  IB Custom Horn MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Immersive Battlefields MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Perfect Fire Arrows MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Raise your Banner MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Raise your Banner RYT MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Raise your Torch MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  Reinforcement System MCM.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyIntegerAttribute  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Attributes.v2.SettingPropertyTextAttribute  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Base.BaseSettings  <-  BloodMod1313.dll
+TYPE  MCM.Abstractions.Base.BaseSettings  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Base.BaseSettings  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  ArtemsLivelyAnimations.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Bandit Black Hole MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  BloodMod1313.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  DynaCulture.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  EnhancedTournaments.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  IB Custom Horn MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Immersive Battlefields MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  KeepYourClanMembersAfterMarriage.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Perfect Fire Arrows MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Raise your Banner MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Raise your Banner RYT MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Raise your Torch MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  Reinforcement System MCM.dll
+TYPE  MCM.Abstractions.Base.Global.AttributeGlobalSettings`1  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Base.Global.FluentGlobalSettings  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  ArtemsLivelyAnimations.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Bandit Black Hole.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  BattleSizeResized.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  BloodMod1313.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  DismembermentPlus.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  DynaCulture.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  EnhancedTournaments.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  FasterTime.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  IDontCare.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Immersive Battlefields.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  KeepYourClanMembersAfterMarriage.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Perfect Fire Arrows.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Raise your Banner.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Raise your Torch.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  RealisticWeather.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  Reinforcement System.dll
+TYPE  MCM.Abstractions.Base.Global.GlobalSettings`1  <-  XorberaxLegacy.dll
+TYPE  MCM.Abstractions.Base.Global.SettingsWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.BaseSettingsProvider  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.FluentBuilder.BaseSettingsBuilder  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.FluentBuilder.ISettingsBuilder  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder`1  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.FluentBuilder.ISettingsPropertyGroupBuilder  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBoolBuilder  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyButtonBuilder  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Abstractions.IExternalSettingsProvider  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.IPropertyDefinitionBase  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.IPropertyGroupDefinition  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.ISettingsPreset  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.ISettingsPropertyDefinition  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Properties.IAttributeSettingsPropertyDiscoverer  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Properties.ISettingsPropertyDiscoverer  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsDefinition  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingSnapshot  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsPresetWrapper`1  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsPropertyDefinition  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsPropertyGroupDefinition  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsProviderWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.SettingsUtils  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.UnavailableSetting  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionBoolWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionButtonWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionDropdownWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionGroupToggleWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionTextWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithActionFormatWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithCustomFormatterWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithEditableMinMaxWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithFormatWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithIdWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyDefinitionWithMinMaxWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.PropertyGroupDefinitionWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Abstractions.Wrapper.SettingsPropertyGroupDefinitionWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Common.Dropdown`1  <-  AILordsEnhanced.ScoutingFog.dll
+TYPE  MCM.Common.Dropdown`1  <-  Bannerlord.FluidCombatLite.dll
+TYPE  MCM.Common.Dropdown`1  <-  BetterSmithingContinued.MainFrame.dll
+TYPE  MCM.Common.Dropdown`1  <-  BetterSmithingContinued.Settings.dll
+TYPE  MCM.Common.Dropdown`1  <-  FasterTime.dll
+TYPE  MCM.Common.Dropdown`1  <-  IDontCare.dll
+TYPE  MCM.Common.Dropdown`1  <-  XorberaxLegacy.dll
+TYPE  MCM.Common.IRef  <-  BetterExceptionWindowConfigUI.dll
+TYPE  MCM.Common.IRef  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Common.IWrapper  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Common.PropertyRef  <-  MCM.UI.Adapter.MCMv5.dll
+TYPE  MCM.Common.ProxyRef`1  <-  BetterExceptionWindowConfigUI.dll

@@ -1,0 +1,70 @@
+// BetaDeps.UIExtenderEx -- SubModule entry point.
+//
+// Lifecycle hook that installs the global UIExtenderEx Harmony patches
+// once, before any consumer mod calls UIExtender.Enable.
+//
+// Phase 2 status: WidgetPrefabHook installed here (task #12). The VM
+// mixin proxy (task #13) lands here too once wired up.
+//
+// Original work. MIT, copyright 2026 Maxfield Management Group.
+
+using System;
+using System.Reflection;
+
+using Bannerlord.UIExtenderEx.ResourceManager;
+using Bannerlord.UIExtenderEx.Runtime;
+
+using BetaDeps.Foundation;
+
+using TaleWorlds.MountAndBlade;
+
+namespace Bannerlord.UIExtenderEx;
+
+/// <summary>
+/// MBSubModuleBase that hosts the global UIExtenderEx hooks. Registered
+/// in Modules\BetaDeps\SubModule.xml.
+/// </summary>
+public class BetaDepsUIExtenderExSubModule : MBSubModuleBase
+{
+    private const string Tag = "BetaDeps.UIExtenderEx";
+
+    private static readonly global::HarmonyLib.Harmony _harmony =
+        new("betadeps.uiextenderex");
+
+    protected override void OnSubModuleLoad()
+    {
+        base.OnSubModuleLoad();
+        try
+        {
+            var asmName = typeof(BetaDepsUIExtenderExSubModule).Assembly.GetName();
+            DiagLog.Log(Tag, $"OnSubModuleLoad: {asmName.Name} v{asmName.Version}");
+
+            // WidgetPrefab.LoadFrom -> prefab XML patcher engine.
+            WidgetPrefabHook.Install();
+            // Plus the named transpiler at Bannerlord.UIExtenderEx.Patches.WidgetPrefabPatch
+            // that CrestPatchSelfTest discovers by namespace string match.
+            Bannerlord.UIExtenderEx.Patches.WidgetPrefabPatch.Patch(_harmony);
+
+            // ViewModel..ctor -> mixin attachment proxy.
+            ViewModelMixinHook.Install();
+
+            // Mixin binding integration (task #8): patch ViewModel.GetPropertyValue,
+            // GetPropertyType, SetPropertyValue, ExecuteCommand so XML @bindings to
+            // mixin members resolve correctly.
+            ViewModelBindingPatch.Install();
+
+            // WidgetFactory hooks (GetCustomType, CreateBuiltinWidget,
+            // GetWidgetTypes, IsCustomType) + WidgetTemplate.CreateWidgets
+            // transpiler + GauntletMovie.LoadMovie transpiler. CrestPatchSelfTest
+            // verifies all of these are present.
+            WidgetFactoryManager.Patch(_harmony);
+
+            // BrushFactory.GetBrush hook for custom Gauntlet brushes.
+            BrushFactoryManager.Patch(_harmony);
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnSubModuleLoad", ex);
+        }
+    }
+}

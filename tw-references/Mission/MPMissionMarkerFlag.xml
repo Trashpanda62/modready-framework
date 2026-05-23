@@ -1,0 +1,45 @@
+<Prefab>
+  <Constants>
+    <Constant Name="PowerBar.Flag.Width" BrushLayer="Default" BrushName="MPHUD.PowerBar.Flag" BrushValueType="Width" />
+    <Constant Name="PowerBar.Flag.Height" BrushLayer="Default" BrushName="MPHUD.PowerBar.Flag" BrushValueType="Height" />
+
+    <Constant Name="Flag.Identifier.Dimension" Value="40" />
+  </Constants>
+  <Window>
+    <MultiplayerMissionMarkerListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" CloseDistanceCutoff="25" Distance="@Distance" FarAlphaTarget="0.5" FarDistanceCutoff="250" FlagWidget="FlagWidget" SiegeEngineWidget="SiegeEngineWidget" IsMarkerEnabled="@IsEnabled" StackLayout.LayoutMethod="VerticalTopToBottom" MarkerType="@MarkerType" PeerWidget="PeerWidget" Position="@ScreenPosition" IsSpawnFlag="@IsSpawnAffectorFlag" SpawnFlagIconWidget="FlagWidget\SiegeContainer\SpawnFlagIconWidget" KeepFlagIconWidget="FlagWidget\SiegeContainer\KeepFlagIconWidget" RemovalTimeVisiblityWidget="FlagWidget\SiegeContainer\RemovalTimeVisiblityWidget" >
+      <Children>
+
+        <Widget Id="FlagWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!PowerBar.Flag.Width" SuggestedHeight="!PowerBar.Flag.Height"  HorizontalAlignment="Center" VerticalAlignment="Center" >
+          <Children>
+            <FillBarVerticalClipWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!PowerBar.Flag.Width" SuggestedHeight="!PowerBar.Flag.Height" Color="@Color2" ClipWidget="ClipWidget" FillWidget="ClipWidget\FillWidget" InitialAmountAsFloat="@FlagProgress" IsDirectionUpward="true" MaxAmountAsFloat="1"> 
+              <Children>
+                <ImageWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="47" SuggestedHeight="73" HorizontalAlignment="Center" VerticalAlignment="Center" Brush.GlobalColor="@Color2" Brush="MPHUD.PowerBar.Flag.Background" Brush.GlobalAlphaFactor="0.6" IsDisabled="@IsKeepFlag" ForcePixelPerfectRenderPlacement="true"/>
+                <ImageWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="MPHUD.PowerBar.Flag" IsDisabled="@IsKeepFlag"  Brush.GlobalColor="@Color2" Brush.GlobalAlphaFactor="0.0" ForcePixelPerfectRenderPlacement="true"/>
+                <Widget Id="ClipWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!PowerBar.Flag.Width" SuggestedHeight="!PowerBar.Flag.Height" AlphaFactor="0">
+                  <Children>
+                    <ImageWidget Id="FillWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!PowerBar.Flag.Width" SuggestedHeight="!PowerBar.Flag.Height" Brush="MPHUD.PowerBar.Flag" Brush.GlobalColor="@Color" IsDisabled="@IsKeepFlag" ForcePixelPerfectRenderPlacement="true"/>
+                  </Children>
+                </Widget>
+              </Children>
+            </FillBarVerticalClipWidget>
+            <TextWidget Id="NameTextWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="FlagMarker.TextBrush" Brush.FontColor="@Color2" ClipContents="false" OverrideDefaultStateSwitchingEnabled="true" Text="@Name" />
+            <Widget Id="SpawnFlagIconWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Flag.Identifier.Dimension" SuggestedHeight="!Flag.Identifier.Dimension" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="45"  />
+
+            <ListPanel Id="SiegeContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" StackLayout.LayoutMethod="VerticalTopToBottom" PositionYOffset="75">
+              <Children>
+
+                <ValueBasedVisibilityWidget Id="RemovalTimeVisiblityWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" IndexToWatch="@RemainingRemovalTime" IndexToBeVisible="-1" VerticalAlignment="Bottom" HorizontalAlignment="Center" WatchType="BiggerThan" IsVisible="false">
+                  <Children>
+                    <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" Brush="MPHUD.Flag.RemovalTime.Text" IntText="@RemainingRemovalTime"/>
+                  </Children>
+                </ValueBasedVisibilityWidget>
+                
+              </Children>
+            </ListPanel>
+          </Children>
+        </Widget>
+
+      </Children>
+    </MultiplayerMissionMarkerListPanel>    
+  </Window>
+</Prefab>

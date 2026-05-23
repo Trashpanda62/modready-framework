@@ -1,0 +1,22 @@
+<Prefab>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteSquare_9" Color="#000000FF" IsVisible="@IsNoticeActive">
+      <Children>
+        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginTop="50" StackLayout.LayoutMethod="VerticalTopToBottom">
+          <Children>
+            <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" MarginBottom="20" Brush="FullScreenNotice.Title" Text="@NoticeTitleText"/>
+            <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MaxWidth="1000" HorizontalAlignment="Center" Brush="FullScreenNotice.Text" Text="@NoticeContentText"/>
+
+            <NavigationScopeTargeter ScopeID="NoticeCloseButtonScope" ScopeParent="..\NoticeCloseButton" />
+            <ButtonWidget Id="NoticeCloseButton" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="86" SuggestedHeight="86" HorizontalAlignment="Center" MarginTop="50" Brush="FullScreenNotice.CloseButton" Command.Click="ExecuteCloseNotice" GamepadNavigationIndex="0">
+              <Children>
+                <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="85" Brush="FullScreenNotice.CloseButton.Text" Text="@ConfirmText"/>
+                <InputKeyVisualWidget DataSource="{DoneInputKey}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="55" SuggestedHeight="55" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-25" KeyID="@KeyID" IsVisible="@IsVisible" />
+              </Children>
+            </ButtonWidget>
+          </Children>
+        </ListPanel>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

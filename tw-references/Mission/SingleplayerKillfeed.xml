@@ -1,0 +1,73 @@
+<Prefab>
+  <Constants>
+    <Constant Name="KillNotification.Background.Width" BrushName="SPHUD.KillNotification.Background" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="KillNotification.Background.Height" BrushName="SPHUD.KillNotification.Background" BrushLayer="Default" BrushValueType="Height"/>
+
+    <Constant Name="SPHUD.KillFeed.Background.Height" BrushName="SPHUD.KillFeed.Background" BrushLayer="Default" BrushValueType="Height"/>
+    <Constant Name="SPHUD.KillFeed.Background.Width" BrushName="SPHUD.KillFeed.Background" BrushLayer="Default" BrushValueType="Width"/>
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+      <Children>
+
+        <SingleplayerGeneralKillFeedWidget DataSource="{GeneralCasualty\NotificationList}" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" MarginTop="20" MarginRight="20">
+          <ItemTemplate>
+
+            <SingleplayerGeneralKillFeedItemWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="29" HorizontalAlignment="Right" MurdererName="@MurdererName" MurdererType="@MurdererType" VictimName="@VictimName" VictimType="@VictimType" IsUnconscious="@IsUnconscious" IsHeadshot="@IsHeadshot" IsSuicide="@IsSuicide" IsDrowning="@IsDrowning" IsPaused="@IsPaused" VictimTypeWidget="BackgroundWidget\ItemContainer\VictimTypeBackgroundWidget" MurdererTypeWidget="BackgroundWidget\ItemContainer\MurdererTypeBackgroundWidget" Command.OnRemove="ExecuteRemove" FadeInTime="0.5" StayTime="3" FadeOutTime="0.5" VerticalPaddingAmount="5" ActionIconWidget="BackgroundWidget\ItemContainer\ActionIconWidget" BackgroundWidget="BackgroundWidget" VictimNameWidget="BackgroundWidget\ItemContainer\VictimNameWidget" MurdererNameWidget="BackgroundWidget\ItemContainer\MurdererNameWidget" TroopTypeIconBrush="Compass.Type.Icons">
+              <Children>
+
+                <Widget Id="BackgroundWidget" Sprite="BlankWhiteSquare" AlphaFactor="0.5" Color="@BackgroundColor" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="29" HorizontalAlignment="Right" VerticalAlignment="Center" >
+                  <Children>
+                    <ListPanel Id="ItemContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center">
+                      <Children>
+                        <Widget Id="MurdererTypeBackgroundWidget" Sprite="MPHud\class_icon_bg" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="38" SuggestedWidth="38" AlphaFactor="0.5" HorizontalAlignment = "Center" VerticalAlignment = "Center" MarginLeft = "10" MarginRight = "10">
+                          <Children>
+                            <Widget Id="MurdererTypeWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="38" SuggestedWidth="38" AlphaFactor="0.9" HorizontalAlignment = "Center" VerticalAlignment = "Center" MarginLeft = "10" MarginRight = "10"/>
+                          </Children>
+                        </Widget>
+                        <TextWidget Id="MurdererNameWidget" WidthSizePolicy="CoverChildren" MaxWidth="450" HeightSizePolicy="StretchToParent" Brush="SPHUD.KillFeed.Text" Text="@MurdererName" />
+                        <Widget Id="ActionIconWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="27" SuggestedWidth="29" HorizontalAlignment = "Center" VerticalAlignment = "Center" MarginLeft = "10" MarginRight = "10" Sprite="General\Mission\PersonalKillfeed\kill_feed_skull"/>
+                        <TextWidget Id="VictimNameWidget" WidthSizePolicy="CoverChildren" MaxWidth="450" HeightSizePolicy="StretchToParent" Brush="SPHUD.KillFeed.Text" Text="@VictimName" />
+                        <Widget Id="VictimTypeBackgroundWidget" Sprite="MPHud\class_icon_bg" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="38" SuggestedWidth="38" AlphaFactor="0.5" HorizontalAlignment = "Center" VerticalAlignment = "Center" MarginLeft = "10" MarginRight = "10">
+                          <Children>
+                            <Widget Id="VictimTypeWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="38" SuggestedWidth="38" AlphaFactor="0.9" HorizontalAlignment = "Center" VerticalAlignment = "Center" MarginLeft = "10" MarginRight = "10"/>
+                          </Children>
+                        </Widget>
+                      </Children>
+                    </ListPanel>
+                  </Children>
+                </Widget>
+
+              </Children>
+            </SingleplayerGeneralKillFeedItemWidget>
+
+          </ItemTemplate>
+        </SingleplayerGeneralKillFeedWidget>
+
+        <SingleplayerPersonalKillFeedWidget Id="PersonalKillFeedWidget" DataSource="{PersonalFeed\NotificationList}" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="150" >
+          <ItemTemplate>
+
+            <SingleplayerPersonalKillFeedItemWidget Id="PersonalKillFeedWidgetItem" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="306" SuggestedHeight="40" Brush="MPHUD.PersonalNotification.Background" AmountTextWidget="NotificationBackgroundWidget\ItemContainer\AmountTextWidget" NotificationTypeIconWidget="NotificationBackgroundWidget\ItemContainer\TypeWidget" TroopTypeWidget="NotificationBackgroundWidget\ItemContainer\TroopTypeWidget" TypeID="@VictimType" Command.OnRemove="ExecuteRemove" FadeInTime="0.5" StayTime="3" FadeOutTime="0.5" MessageTextWidget="NotificationBackgroundWidget\ItemContainer\MessageTextWidget" Amount="@Amount" Message="@Message" ItemType="@ItemType" IsPaused="@IsPaused" NotificationBackgroundWidget="NotificationBackgroundWidget" IconBrush="Compass.Type.Icons">
+              <Children>
+                <BrushWidget Id="NotificationBackgroundWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="Fixed" SuggestedHeight="70" Brush="MPHUD.PersonalNotification.Background" HorizontalAlignment="Center" MinWidth="306">
+                  <Children>
+                    <ListPanel Id="ItemContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" HorizontalAlignment="Center" MarginLeft="100" MarginRight="100">
+                      <Children>
+                        <TextWidget Id="AmountTextWidget" IntText="@Amount" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" MarginRight="3" Brush="MPHUD.PersonalNotification.AmountText" ClipContents="false"/>
+                        <Widget Id="TroopTypeWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="38" SuggestedHeight="38" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="5" AlphaFactor = "0.9"/>
+                        <BrushWidget Id="TypeWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="30" SuggestedHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="2" PositionYOffset="1" Brush="MPHUD.PersonalNotification.TypeIcon" />
+                        <RichTextWidget Id="MessageTextWidget" WidthSizePolicy="CoverChildren" HeightSizePolicy="StretchToParent" VerticalAlignment="Center" MarginLeft="3" Brush="MPHUD.PersonalNotification.MessageText" ClipContents="false"/>
+                      </Children>
+                    </ListPanel>
+                  </Children>
+                </BrushWidget>
+              </Children>
+            </SingleplayerPersonalKillFeedItemWidget>
+
+          </ItemTemplate>
+        </SingleplayerPersonalKillFeedWidget>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

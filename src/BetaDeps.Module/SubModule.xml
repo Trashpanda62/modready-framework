@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="BetaDeps" />
+  <Name value="Bannerlord Beta Dependencies" />
+  <Version value="v0.3.4" />
+  <DefaultModule value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+  <Url value="" />
+
+  <DependedModules />
+
+  <!-- BetaDeps must load before:
+       1. The official TaleWorlds stack (so Mission / Module / ApplicationVersion
+          are reflectable for VersionProbe).
+       2. Every BUTR-consuming community mod that might ship a bundled copy of
+          MCMv5 / 0Harmony / UIExtenderEx / ButterLib / Newtonsoft.Json. The
+          first MCMv5.dll to win the AppDomain slot wins for the entire session;
+          if a consumer mod's bundled v5.10.x upstream copy wins, our MCMSubModule
+          class doesn't exist in the loaded assembly and BetaDeps fails silently.
+       Listing them here guarantees the launcher constructs BetaDeps first so
+       BetaDeps.Foundation's [ModuleInitializer] installs the AssemblyResolve
+       hook BEFORE any consumer mod's bundled copy is touched. -->
+  <ModulesToLoadAfterThis>
+    <!-- TaleWorlds stack -->
+    <Module Id="Native" />
+    <Module Id="SandBoxCore" />
+    <Module Id="Sandbox" />
+    <Module Id="StoryMode" />
+    <Module Id="CustomBattle" />
+    <!-- BUTR alias modules (also DependedModule us, redundant but explicit) -->
+    <Module Id="Bannerlord.Harmony" />
+    <Module Id="Bannerlord.UIExtenderEx" />
+    <Module Id="Bannerlord.ButterLib" />
+    <Module Id="Bannerlord.MBOptionScreen" />
+    <!-- Consumer mods known to bundle MCMv5 / 0Harmony copies. Adding here
+         pins our load order ahead of theirs regardless of dependency graph. -->
+    <Module Id="DismembermentPlus" />
+    <Module Id="XorberaxLegacy" />
+    <Module Id="DynaCulture" />
+    <Module Id="ArtemsLivelyAnimations" />
+    <!-- Major BUTR consumers in the user's mod list. Pinning order here costs
+         nothing if they're not installed - the launcher just ignores
+         unknown Ids. -->
+    <Module Id="FluidCombatLite" />
+    <Module Id="Fluid_Combat_Lite" />
+    <Module Id="BetterSmithing" />
+    <Module Id="FasterTime" />
+    <Module Id="BanditBlackHole" />
+    <Module Id="PerfectFireArrows" />
+    <Module Id="IDontCare" />
+    <Module Id="ArtemsLivelyAnimations" />
+    <Module Id="ImprovedGarrisons" />
+    <Module Id="DistinguishedService" />
+    <Module Id="CulturedStartV2" />
+    <Module Id="DiplomacyFixes" />
+    <Module Id="Diplomacy" />
+    <Module Id="CalradiaExpanded" />
+    <Module Id="CalradiaExpandedKingdoms" />
+    <Module Id="CargoHolds" />
+    <Module Id="CrashDoctor" />
+    <Module Id="AchievementUnblocker" />
+    <Module Id="CREST" />
+    <Module Id="Crest" />
+  </ModulesToLoadAfterThis>
+
+  <DependedModuleMetadatas />
+
+  <SubModules>
+    <SubModule>
+      <Name value="BetaDeps Harmony" />
+      <DLLName value="BetaDeps.Harmony.dll" />
+      <SubModuleClassType value="BetaDeps.Harmony.BetaDepsHarmonySubModule" />
+      <Assemblies>
+        <!-- BetaDeps.Foundation.dll FIRST so its [ModuleInitializer] runs
+             before any of the other assemblies in this block get JIT'd.
+             That [ModuleInitializer] installs the AssemblyResolve hook
+             which redirects all subsequent MCMv5/0Harmony/etc. requests
+             to our copies. -->
+        <Assembly value="BetaDeps.Foundation.dll" />
+        <!-- Andreas Pardeike's Harmony, MIT, unmodified NuGet artifact. -->
+        <Assembly value="0Harmony.dll" />
+        <!-- Harmony 2.3.x transitive dependencies. Listed so the launcher
+             preloads them and consumer mods don't get partial-load surprises.
+             All MIT-licensed; copyright JB Evain (Cecil) and 0x0ade et al (MonoMod). -->
+        <Assembly value="Mono.Cecil.dll" />
+        <!-- Mono.Cecil.Mdb/Pdb/Rocks intentionally NOT shipped. They're symbol-
+             reader / syntactic-sugar layers that Harmony's hot path doesn't
+             touch. Saves ~160 KB on the public zip; if a future consumer mod
+             needs them, re-add locally. -->
+
+        <Assembly value="MonoMod.Backports.dll" />
+        <Assembly value="MonoMod.Core.dll" />
+        <Assembly value="MonoMod.Iced.dll" />
+        <Assembly value="MonoMod.ILHelpers.dll" />
+        <Assembly value="MonoMod.Utils.dll" />
+      </Assemblies>
+      <Tags />
+    </SubModule>
+    <SubModule>
+      <Name value="BetaDeps UIExtenderEx" />
+      <DLLName value="Bannerlord.UIExtenderEx.dll" />
+      <SubModuleClassType value="Bannerlord.UIExtenderEx.BetaDepsUIExtenderExSubModule" />
+      <Tags />
+    </SubModule>
+    <SubModule>
+      <Name value="BetaDeps ButterLib" />
+      <DLLName value="Bannerlord.ButterLib.dll" />
+      <SubModuleClassType value="Bannerlord.ButterLib.ButterLibSubModule" />
+      <Assemblies>
+        <!-- Microsoft.Extensions.DependencyInjection runtime + transitive deps.
+             All MIT-licensed Microsoft Foundation Libraries. Listed so the
+             launcher preloads them; ButterLibSubModule builds the DI container
+             at OnSubModuleLoad and these must be in the AppDomain by then. -->
+        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.dll" />
+        <Assembly value="Microsoft.Extensions.Options.dll" />
+        <Assembly value="Microsoft.Extensions.Primitives.dll" />
+        <!-- System.* facade DLLs (Buffers / DiagnosticSource / Memory / Numerics.Vectors
+             / Runtime.CompilerServices.Unsafe / Threading.Tasks.Extensions) ship in the
+             .NET Framework 4.7.2 BCL by default. Listing them here makes the launcher
+             show "Cannot load <name>.dll" popups on every start; type forwarders in
+             mscorlib / System.dll already resolve them at JIT time. Don't list them. -->
+        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
+        <!-- Serilog: ship our v2.10.0 so consumer mods (FCL etc.) compiled against
+             arbitrary Serilog versions resolve to our copy via AssemblyVersionShim,
+             matching the Action<Serilog.LoggerConfiguration> parameter type in our
+             AddSerilogLoggerProvider overloads. -->
+        <Assembly value="Serilog.dll" />
+      </Assemblies>
+      <Tags />
+    </SubModule>
+    <SubModule>
+      <Name value="BetaDeps MCM" />
+      <DLLName value="MCMv5.dll" />
+      <SubModuleClassType value="MCM.MCMSubModule" />
+      <Assemblies>
+        <Assembly value="Newtonsoft.Json.dll" />
+      </Assemblies>
+      <Tags />
+    </SubModule>
+    <SubModule>
+      <Name value="BetaDeps MCM UI" />
+      <DLLName value="MCMv5.dll" />
+      <SubModuleClassType value="MCM.UI.MCMUISubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>

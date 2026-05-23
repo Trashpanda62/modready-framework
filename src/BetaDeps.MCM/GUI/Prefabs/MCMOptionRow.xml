@@ -1,0 +1,217 @@
+<Prefab>
+  <!--
+    BetaDeps MCM v0.4.4: single row prefab for the Mod Config tab.
+    Each slot row is a separate instance of this prefab, providing
+    independent scope for SliderWidget / Filler / Handle references.
+    Vanilla Options uses the same pattern via OptionItem.xml.
+
+    Data source: a SettingsPropertyVM (or a placeholder VM for empty slots).
+    The page-level prefab passes Slot{N}_VM as DataSource.
+  -->
+  <Window>
+    <Widget IsVisible="@IsVisible"
+            WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+            SuggestedWidth="1000" SuggestedHeight="50"
+            MarginTop="4">
+      <Children>
+
+        <!-- Header mode: centered group title -->
+        <RichTextWidget IsVisible="@IsHeader"
+                        WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Brush="SPOptions.GameKeysGroup.Title.Text"
+                        Text="@HeaderText" />
+
+        <!-- Property mode: label on the left, value control on the right -->
+        <ListPanel IsVisible="@IsProperty"
+                   WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                   StackLayout.LayoutMethod="HorizontalLeftToRight">
+          <Children>
+            <TextWidget DoNotAcceptEvents="true"
+                        WidthSizePolicy="Fixed" SuggestedWidth="500"
+                        HeightSizePolicy="CoverChildren"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Brush="SPOptions.OptionName.Text"
+                        Text="@DisplayName" />
+
+            <Widget WidthSizePolicy="Fixed" SuggestedWidth="480" HeightSizePolicy="StretchToParent"
+                    VerticalAlignment="Center">
+              <Children>
+
+                <!-- Bool toggle button -->
+                <ButtonWidget IsVisible="@IsBool"
+                              Command.Click="ExecuteToggleBool"
+                              WidthSizePolicy="Fixed" SuggestedWidth="120" HeightSizePolicy="Fixed" SuggestedHeight="40"
+                              HorizontalAlignment="Left" VerticalAlignment="Center"
+                              Brush="Popup.Cancel.Button" UpdateChildrenStates="true">
+                  <Children>
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                DoNotAcceptEvents="true"
+                                Brush="Popup.Button.Text"
+                                Text="@BoolText" />
+                  </Children>
+                </ButtonWidget>
+
+                <!-- Int slider. Each instance lives in its own prefab scope so
+                     Filler="Filler" and Handle="SliderHandle" resolve safely
+                     against this prefab's children only (no global ID collisions). -->
+                <ListPanel IsVisible="@IsInteger"
+                           WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                           StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <SliderWidget Id="IntSlider" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                  SuggestedWidth="338" SuggestedHeight="42"
+                                  VerticalAlignment="Center"
+                                  DoNotUpdateHandleSize="true"
+                                  Filler="Filler" Handle="SliderHandle"
+                                  IsDiscrete="@IsDiscreteTrue" DiscreteIncrementInterval="@IncrementOne"
+                                  MinValueFloat="@MinValueAsFloat" MaxValueFloat="@MaxValueAsFloat"
+                                  ValueFloat="@IntValueAsFloat"
+                                  UpdateValueContinuously="@UpdateFalse">
+                      <Children>
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="362" SuggestedHeight="38"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_canvas"
+                                DoNotAcceptEvents="true" />
+                        <Widget Id="Filler" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="345" SuggestedHeight="35"
+                                VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_fill"
+                                ClipContents="true">
+                          <Children>
+                            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                    SuggestedWidth="345" SuggestedHeight="35"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Sprite="SPGeneral\SPOptions\standart_slider_fill" />
+                          </Children>
+                        </Widget>
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="400" SuggestedHeight="65"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_frame"
+                                DoNotAcceptEvents="true" />
+                        <ImageWidget Id="SliderHandle" DoNotAcceptEvents="true"
+                                     WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                     SuggestedWidth="14" SuggestedHeight="38"
+                                     HorizontalAlignment="Left" VerticalAlignment="Center"
+                                     Brush="SPOptions.Slider.Handle" />
+                      </Children>
+                    </SliderWidget>
+                    <RichTextWidget WidthSizePolicy="Fixed" SuggestedWidth="90"
+                                    HeightSizePolicy="Fixed" SuggestedHeight="32"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    MarginLeft="20"
+                                    Brush="SPOptions.OptionName.Text"
+                                    Text="@ValueText" />
+                  </Children>
+                </ListPanel>
+
+                <!-- Float slider. Same structure, different IsDiscrete/binding. -->
+                <ListPanel IsVisible="@IsFloating"
+                           WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                           StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <SliderWidget Id="FloatSlider" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                  SuggestedWidth="338" SuggestedHeight="42"
+                                  VerticalAlignment="Center"
+                                  DoNotUpdateHandleSize="true"
+                                  Filler="FloatFiller" Handle="FloatSliderHandle"
+                                  IsDiscrete="@IsDiscreteFalse" DiscreteIncrementInterval="@IncrementOne"
+                                  MinValueFloat="@MinValueAsFloat" MaxValueFloat="@MaxValueAsFloat"
+                                  ValueFloat="@FloatValue"
+                                  UpdateValueContinuously="@UpdateFalse">
+                      <Children>
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="362" SuggestedHeight="38"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_canvas"
+                                DoNotAcceptEvents="true" />
+                        <Widget Id="FloatFiller" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="345" SuggestedHeight="35"
+                                VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_fill"
+                                ClipContents="true">
+                          <Children>
+                            <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                    SuggestedWidth="345" SuggestedHeight="35"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Sprite="SPGeneral\SPOptions\standart_slider_fill" />
+                          </Children>
+                        </Widget>
+                        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                SuggestedWidth="400" SuggestedHeight="65"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Sprite="SPGeneral\SPOptions\standart_slider_frame"
+                                DoNotAcceptEvents="true" />
+                        <ImageWidget Id="FloatSliderHandle" DoNotAcceptEvents="true"
+                                     WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                     SuggestedWidth="14" SuggestedHeight="38"
+                                     HorizontalAlignment="Left" VerticalAlignment="Center"
+                                     Brush="SPOptions.Slider.Handle" />
+                      </Children>
+                    </SliderWidget>
+                    <RichTextWidget WidthSizePolicy="Fixed" SuggestedWidth="90"
+                                    HeightSizePolicy="Fixed" SuggestedHeight="32"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    MarginLeft="20"
+                                    Brush="SPOptions.OptionName.Text"
+                                    Text="@ValueText" />
+                  </Children>
+                </ListPanel>
+
+                <!-- Text (read-only display) -->
+                <RichTextWidget IsVisible="@IsText"
+                                WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Brush="SPOptions.Dropdown.Center.Text"
+                                Text="@TextValue" />
+
+                <!-- Dropdown cycle [&lt;] [value] [&gt;] -->
+                <ListPanel IsVisible="@IsDropdown"
+                           WidthSizePolicy="Fixed" SuggestedWidth="400" HeightSizePolicy="Fixed" SuggestedHeight="42"
+                           HorizontalAlignment="Left" VerticalAlignment="Center"
+                           StackLayout.LayoutMethod="HorizontalLeftToRight">
+                  <Children>
+                    <ButtonWidget Command.Click="ExecuteDropdownPrev"
+                                  WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                  SuggestedWidth="40" SuggestedHeight="40"
+                                  VerticalAlignment="Center"
+                                  Brush="Popup.Cancel.Button" UpdateChildrenStates="true">
+                      <Children>
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    DoNotAcceptEvents="true"
+                                    Brush="Popup.Button.Text" Text="&lt;" />
+                      </Children>
+                    </ButtonWidget>
+                    <RichTextWidget WidthSizePolicy="Fixed" SuggestedWidth="300"
+                                    HeightSizePolicy="StretchToParent"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Brush="SPOptions.Dropdown.Center.Text"
+                                    Text="@DropdownDisplayText" />
+                    <ButtonWidget Command.Click="ExecuteDropdownNext"
+                                  WidthSizePolicy="Fixed" HeightSizePolicy="Fixed"
+                                  SuggestedWidth="40" SuggestedHeight="40"
+                                  VerticalAlignment="Center"
+                                  Brush="Popup.Cancel.Button" UpdateChildrenStates="true">
+                      <Children>
+                        <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    DoNotAcceptEvents="true"
+                                    Brush="Popup.Button.Text" Text="&gt;" />
+                      </Children>
+                    </ButtonWidget>
+                  </Children>
+                </ListPanel>
+
+              </Children>
+            </Widget>
+          </Children>
+        </ListPanel>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

@@ -1,0 +1,41 @@
+<Prefab>
+  <Window>
+    <Widget Id="OptionsInnerPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="10" MarginBottom="10" StackLayout.LayoutMethod="VerticalTopToBottom">
+      <Children>
+
+        <ListPanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom">
+          <Children>
+
+            <OptionsGamepadCategoryWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" CurrentGamepadType="@CurrentGamepadType" Playstation4LayoutParentWidget="Playstation4Parent" Playstation5LayoutParentWidget="Playstation5Parent" XboxLayoutParentWidget="XboxParent">
+              <Children>
+
+                <!--Xbox-->
+                <XboxBinds Id="XboxParent" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="100"/>
+
+                <!--Playstation4-->
+                <Playstation4Binds Id="Playstation4Parent" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="100"/>
+
+                <!--Playstation5-->
+                <Playstation5Binds Id="Playstation5Parent" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" MarginTop="100"/>
+
+              </Children>
+            </OptionsGamepadCategoryWidget>
+
+            <NavigationScopeTargeter ScopeID="ControllerSchemeScope" ScopeParent="..\GamepadOptions" ScopeMovements="Vertical" IsDefaultNavigationScope="true" />
+            <ListPanel Id="GamepadOptions" DataSource="{Actions}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginTop="100">
+              <ItemTemplate>
+                <Standard.DropdownWithHorizontalControl Id="GamepadCategoriesDropdown" Parameter.SelectorDataSource="{Categories}" GamepadNavigationIndex="0" />
+              </ItemTemplate>
+            </ListPanel>
+
+          </Children>
+        </ListPanel>
+
+        <!--Connector Template Widget-->
+        <Widget Id="ConnectorTemplateWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="0" SuggestedHeight="0" IsVisible="false" Sprite="controllerkeybindconnector_9"/>
+
+      </Children>
+    </Widget>
+
+  </Window>
+</Prefab>

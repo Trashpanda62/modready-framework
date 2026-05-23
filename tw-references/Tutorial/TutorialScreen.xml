@@ -1,0 +1,91 @@
+<Prefab>
+  <Constants>
+    <Constant Name="TutorialItem.EdgePadding.Positive" Value="30"/>
+    <Constant Name="TutorialItem.EdgePadding.Negative" Value="-30"/>
+    <Constant Name="CloseButton.Icon.Padding" Value="18"/>
+  </Constants>
+  <VisualDefinitions>
+    <VisualDefinition Name="LeftPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionXOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" />
+      <VisualState State = "Disabled" PositionXOffset = "-330" />
+    </VisualDefinition>
+    <VisualDefinition Name="RightPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionXOffset = "!TutorialItem.EdgePadding.Negative"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" />
+      <VisualState State = "Disabled" PositionXOffset = "330" />
+    </VisualDefinition>
+    <VisualDefinition Name="BottomPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "8"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" />
+      <VisualState State = "Disabled" PositionYOffset = "330" />
+    </VisualDefinition>
+    <VisualDefinition Name="TopPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" />
+      <VisualState State = "Disabled" PositionYOffset = "-330" />
+    </VisualDefinition>
+
+    <VisualDefinition Name="LeftTopPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "!TutorialItem.EdgePadding.Positive" PositionXOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" PositionYOffset = "!TutorialItem.EdgePadding.Positive" PositionXOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Disabled" PositionYOffset = "-330" PositionXOffset = "-330" />
+    </VisualDefinition>
+    <VisualDefinition Name="RightTopPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "!TutorialItem.EdgePadding.Positive" PositionXOffset = "!TutorialItem.EdgePadding.Negative"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" PositionYOffset = "!TutorialItem.EdgePadding.Positive" PositionXOffset = "!TutorialItem.EdgePadding.Negative"/>
+      <VisualState State = "Disabled" PositionYOffset = "-330" PositionXOffset = "330" />
+    </VisualDefinition>
+    <VisualDefinition Name="LeftBottomPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "!TutorialItem.EdgePadding.Negative" PositionXOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" PositionYOffset = "!TutorialItem.EdgePadding.Negative" PositionXOffset = "!TutorialItem.EdgePadding.Positive"/>
+      <VisualState State = "Disabled" PositionYOffset = "330" PositionXOffset = "-330"/>
+    </VisualDefinition>
+    <VisualDefinition Name="RightBottomPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "!TutorialItem.EdgePadding.Negative" PositionXOffset = "!TutorialItem.EdgePadding.Negative"/>
+      <VisualState State = "Pressed" />
+      <VisualState State = "Hovered" PositionYOffset = "!TutorialItem.EdgePadding.Negative" PositionXOffset = "!TutorialItem.EdgePadding.Negative"/>
+      <VisualState State = "Disabled" PositionYOffset = "330" PositionXOffset = "330" />
+    </VisualDefinition>
+
+    <VisualDefinition Name="CenterPanel" TransitionDuration = "0.2" EaseType="EaseOut" EaseFunction="Quint">
+      <VisualState State = "Default" PositionYOffset = "0"/>
+      <VisualState State = "Pressed"/>
+      <VisualState State = "Hovered" PositionYOffset = "0"/>
+      <VisualState State = "Disabled" PositionYOffset = "-330"/>
+    </VisualDefinition>
+  </VisualDefinitions>
+  <Window>
+    <TutorialScreenWidget HeightSizePolicy ="StretchToParent" WidthSizePolicy="StretchToParent" DoNotAcceptEvents="true" LeftItem="LeftItem" RightItem="RightItem" BottomItem="BottomItem" TopItem="TopItem" LeftTopItem="LeftTopItem" RightTopItem="RightTopItem" LeftBottomItem="LeftBottomItem" RightBottomItem="RightBottomItem" CenterItem="CenterItem" ArrowWidget="ArrowWidget" IsVisible="@IsVisible">
+      <Children>
+
+        <TutorialItemPanel Id="LeftItem" DataSource="{LeftItem}" VisualDefinition="LeftPanel" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-330" IsEnabled="false"/>
+
+        <TutorialItemPanel Id="RightItem" DataSource="{RightItem}" VisualDefinition="RightPanel" HorizontalAlignment="Right" VerticalAlignment="Center" PositionXOffset="330" IsEnabled="false"/>
+
+        <TutorialItemPanel Id="BottomItem" DataSource="{BottomItem}" VisualDefinition="BottomPanel" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="330" IsEnabled="false"/>
+
+        <TutorialItemPanel Id="TopItem" DataSource="{TopItem}" VisualDefinition="TopPanel" HorizontalAlignment="Center" VerticalAlignment="Top" PositionYOffset="-330" IsEnabled="false"/>
+        
+        <TutorialItemPanel Id="LeftTopItem" DataSource="{LeftTopItem}" VisualDefinition="LeftTopPanel" HorizontalAlignment="Left" VerticalAlignment="Top" PositionYOffset="-330" PositionXOffset="-330" IsEnabled="false"/>
+        
+        <TutorialItemPanel Id="RightTopItem" DataSource="{RightTopItem}" VisualDefinition="RightTopPanel" HorizontalAlignment="Right" VerticalAlignment="Top" PositionYOffset="-330" PositionXOffset="330" IsEnabled="false"/>
+        
+        <TutorialItemPanel Id="LeftBottomItem" DataSource="{LeftBottomItem}" VisualDefinition="LeftBottomPanel" HorizontalAlignment="Left" VerticalAlignment="Bottom" PositionYOffset="330" PositionXOffset="-330" IsEnabled="false"/>
+        
+        <TutorialItemPanel Id="RightBottomItem" DataSource="{RightBottomItem}" VisualDefinition="RightBottomPanel" HorizontalAlignment="Right" VerticalAlignment="Bottom" PositionYOffset="330" PositionXOffset="330" IsEnabled="false"/>
+
+        <TutorialItemPanel Id="CenterItem" DataSource="{CenterItem}" VisualDefinition="CenterPanel" HorizontalAlignment="Center" VerticalAlignment="Center" PositionYOffset="-330" IsEnabled="false"/>
+
+        <TutorialArrowWidget Id="ArrowWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" IsVisible="false" IsEnabled="false" BigCircleRadius="35" SmallCircleRadius="10" />
+      </Children>
+    </TutorialScreenWidget>
+  </Window>
+</Prefab>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BetaDeps alias stub for Bannerlord.ButterLib. Same pattern as the
+  Bannerlord.Harmony and Bannerlord.UIExtenderEx aliases: this folder
+  exists so consumer mods declaring DependedModule on Bannerlord.ButterLib
+  find a module with that Id in the launcher. The actual ButterLib work
+  is done by Bannerlord.ButterLib.dll inside Modules\BetaDeps\.
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.ButterLib" />
+  <Name value="Bannerlord.ButterLib (provided by BetaDeps)" />
+  <Version value="v2.10.4" />
+  <DefaultModule value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="BetaDeps" />
+    <DependedModule Id="Bannerlord.Harmony" />
+  </DependedModules>
+
+  <ModulesToLoadAfterThis>
+    <Module Id="BetaDeps" />
+  </ModulesToLoadAfterThis>
+
+  <DependedModuleMetadatas />
+
+  <SubModules />
+</Module>

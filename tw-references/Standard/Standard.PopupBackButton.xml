@@ -1,0 +1,38 @@
+<Prefab>
+
+  <Constants>
+    <Constant Name="Standard.PopupBackButton.Width" BrushName="Standard.PopupBackButton" BrushLayer="Default" BrushValueType="Width"/>
+    <Constant Name="Standard.PopupBackButton.Height" BrushName="Standard.PopupBackButton" BrushLayer="Default" BrushValueType="Height"/>
+  </Constants>
+
+  <Parameters>
+    <Parameter Name="ButtonText" DefaultValue="- Missing -" />
+    <Parameter Name="ButtonAction" DefaultValue="" />
+    <Parameter Name="IsEnabled" DefaultValue="true" />
+    <Parameter Name="InputKeyDataSource" DefaultValue="" />
+    <Parameter Name="DisabledHintDataSource" DefaultValue="" />
+  </Parameters>
+
+  <Window>
+    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Standard.PopupBackButton.Width" SuggestedHeight="!Standard.PopupBackButton.Height" HorizontalAlignment="Center" VerticalAlignment="Top">
+      <Children>
+        <ButtonWidget Id="ButtonWidget" DoNotPassEventsToChildren="true" Command.Click="*ButtonAction" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsEnabled="*IsEnabled" Brush="Standard.PopupBackButton" UpdateChildrenStates="true">
+          <Children>
+            <TextWidget Text="*ButtonText" DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="Standard.DialogCloseButtons.ButtonText">
+              <Children>
+                <InputKeyVisualWidget DataSource="*InputKeyDataSource" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="40" SuggestedHeight="40" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-40" PositionYOffset="-1" KeyID="@KeyID" IsVisible="@IsVisible"/>
+              </Children>
+            </TextWidget>
+          </Children>
+        </ButtonWidget>
+        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsDisabled="*IsEnabled">
+          <Children>
+            <HintWidget DataSource="*DisabledHintDataSource" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+          </Children>
+        </Widget>
+      </Children>
+    </Widget>
+
+  </Window>
+
+</Prefab>

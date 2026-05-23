@@ -1,0 +1,62 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="DataSource" DefaultValue="" />
+    <Parameter Name="IsRightSide" DefaultValue="false" />
+  </Parameters>
+  <Constants>
+    <Constant Name="HorizontalAlignment" BooleanCheck="*IsRightSide" OnFalse="Left" OnTrue="Right" />
+  </Constants>
+  <Window>
+    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="150" VerticalAlignment="Top" HorizontalAlignment="!HorizontalAlignment">
+      <Children>
+
+        <ScrollablePanel WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" AutoHideScrollBars="true" ClipRect="ClipRect" InnerPanel="ClipRect\ShipsGrid" HorizontalScrollbar="..\HorizontalScrollbar">
+          <Children>
+            <Widget Id="ClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" ClipContents="true">
+              <Children>
+                <NavigationScopeTargeter ScopeID="ShipsGridScope" ScopeParent="..\ShipsGrid" ScopeMovements="Vertical" AlternateScopeMovements="Horizontal" AlternateMovementStepSize="3" />
+                <ScoreboardShipsNavigatableGridWidget Id="ShipsGrid" DataSource="*DataSource" DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" RegularHorizontalAlignment="!HorizontalAlignment" OverflowHorizontalAlignment="Left" GridLayout.Direction="ColumnFirst" RowCount="3" DefaultCellWidth="60" DefaultCellHeight="45">
+                  <ItemTemplate>
+                    <Widget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="35" SuggestedHeight="35" HorizontalAlignment="Center" VerticalAlignment="Center" GamepadNavigationIndex="0">
+                      <Children>
+                        <IconBrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Naval.Scoreboard.Ship.Icon.Base" IconBrush="Naval.Scoreboard.Ship.Icons" IconID="@ShipType">
+                          <Children>
+                            <FillBarVerticalWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" InitialAmountAsFloat="@CurrentHealth" MaxAmountAsFloat="@MaxHealth" FillWidget="FillWidget" IsDirectionUpward="true">
+                              <Children>
+                                <Widget Id="FillWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" ClipContents="true">
+                                  <Children>
+                                    <IconBrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="35" Brush="Naval.Scoreboard.Ship.Icon.Player" IconBrush="Naval.Scoreboard.Ship.Icons" IconID="@ShipType" VerticalAlignment="Bottom" IsVisible="@IsPlayerTeam"/>
+                                    <IconBrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="35" Brush="Naval.Scoreboard.Ship.Icon.Ally" IconBrush="Naval.Scoreboard.Ship.Icons" IconID="@ShipType" VerticalAlignment="Bottom" IsVisible="@IsPlayerAllyTeam"/>
+                                    <IconBrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="35" Brush="Naval.Scoreboard.Ship.Icon.Enemy" IconBrush="Naval.Scoreboard.Ship.Icons" IconID="@ShipType" VerticalAlignment="Bottom" IsVisible="@IsEnemyTeam"/>
+                                  </Children>
+                                </Widget>
+                              </Children>
+                            </FillBarVerticalWidget>
+                          </Children>
+                        </IconBrushWidget>
+
+                        <BoolStateChangerWidget BooleanCheck="@IsInactive" TrueState="Inactive" FalseState="Default" TargetWidget="..\." IncludeChildren="true"/>
+
+                        <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="General\MenuElements\Cross" Color="#CC1212FF" AlphaFactor="0.7" IsVisible="@IsDestroyed"/>
+
+                        <HintWidget DataSource="{Tooltip}" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" IsEnabled="false" />
+                      </Children>
+                    </Widget>
+                  </ItemTemplate>
+                </ScoreboardShipsNavigatableGridWidget>
+              </Children>
+            </Widget>
+          </Children>
+        </ScrollablePanel>
+
+        <ScrollbarWidget Id="HorizontalScrollbar" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="6" VerticalAlignment="Bottom" AlignmentAxis="Horizontal" Handle="HorizontalScrollbarHandle" MaxValue="100" MinValue="0">
+          <Children>
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="2" VerticalAlignment="Center" Sprite="BlankWhiteSquare_9" AlphaFactor="0.8" Color="#5A4033FF" />
+            <ImageWidget Id="HorizontalScrollbarHandle" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" Brush="FaceGen.Scrollbar.Handle" />
+          </Children>
+        </ScrollbarWidget>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

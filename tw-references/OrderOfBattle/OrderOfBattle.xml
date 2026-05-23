@@ -1,0 +1,223 @@
+<Prefab>
+  <Constants>
+    <Constant Name="FormationList.MarginSide" Value="15" />
+    <Constant Name="FormationList.MarginTop" Value="10" />
+    <Constant Name="CaptainsList.MinWidth" Value="250" />
+
+    <!-- Action Buttons Constants -->
+    <Constant Name="DoneButton.Width" BrushLayer="Default" BrushName="ButtonBrush1" BrushValueType="Width" />
+    <Constant Name="DoneButton.Height" BrushLayer="Default" BrushName="ButtonBrush1" BrushValueType="Height" />
+    <Constant Name="AutoDeployButton.Width" BrushLayer="Default" BrushName="ButtonBrush2" BrushValueType="Width" />
+    <Constant Name="AutoDeployButton.Height" BrushLayer="Default" BrushName="ButtonBrush2" BrushValueType="Height" />
+
+    <!-- Class Brush Constants -->
+    <Constant Name="UnsetBrush"                 Value="OrderOfBattle.FormationClass.Unset" />
+    <Constant Name="InfantryBrush"              Value="OrderOfBattle.FormationClass.Infantry" />
+    <Constant Name="RangedBrush"                Value="OrderOfBattle.FormationClass.Ranged" />
+    <Constant Name="CavalryBrush"               Value="OrderOfBattle.FormationClass.Cavalry" />
+    <Constant Name="HorseArcherBrush"           Value="OrderOfBattle.FormationClass.HorseArcher" />
+    <Constant Name="InfantryAndRangedBrush"     Value="OrderOfBattle.FormationClass.InfantryAndRanged" />
+    <Constant Name="CavalryAndHorseArcherBrush" Value="OrderOfBattle.FormationClass.CavalryAndHorseArcher" />
+
+    <Constant Name="AssignIcon.Width" Value="61" />
+    <Constant Name="AssignIcon.Height" Value="48" />
+  </Constants>
+  <Window>
+    <OrderOfBattleScreenWidget UpdateChildrenStates="true" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsVisible="@IsEnabled" AreCameraControlsEnabled="@AreCameraControlsEnabled" CameraEnabledAlpha="0.30" AlphaChangeDuration="0.1" Markers="Markers" LeftSideFormations="LeftSideFormations" RightSideFormations="RightSideFormations" CaptainPool="CaptainPool" CanToggleHeroSelection="@CanToggleHeroSelection">
+      <Children>
+        <!-- Formation Markers -->
+        <Widget Id="Markers" UpdateChildrenStates="true" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+          <Children>
+
+            <!-- First Half Markers -->
+            <BasicContainer DataSource="{FormationsFirstHalf}" UpdateChildrenStates="true" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+              <ItemTemplate>
+
+                <OrderOfBattle.Formation.Marker />
+
+              </ItemTemplate>
+            </BasicContainer>
+
+            <!-- Second Half Markers -->
+            <BasicContainer DataSource="{FormationsSecondHalf}" UpdateChildrenStates="true" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+              <ItemTemplate>
+
+                <OrderOfBattle.Formation.Marker />
+
+              </ItemTemplate>
+            </BasicContainer>
+
+          </Children>
+        </Widget>
+
+        <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" MarginTop="35" StackLayout.LayoutMethod="VerticalTopToBottom">
+          <Children>
+
+            <!-- Captain Pool -->
+            <ListPanel Id="CaptainPool" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" StackLayout.LayoutMethod="VerticalBottomToTop" IsVisible="true">
+              <Children>
+                <Widget Id="CaptainPoolArea" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren">
+                  <Children>
+                    <ListPanel Id="CaptainPoolAndPaginationContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                      <Children>
+                        <NavigationScopeTargeter ScopeID="OrderOfBattleCaptainPrevPageButtonScope" ScopeParent="..\PrevPageButton" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                        <ButtonWidget Id="PrevPageButton" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="43" SuggestedHeight="56" HorizontalAlignment="Left" VerticalAlignment="Center" Command.Click="ExecutePreviousTip" Brush="ButtonRightArrowBrush1" MarginLeft="3" GamepadNavigationIndex="0"/>
+                        
+                        <NavigationScopeTargeter ScopeID="OrderOfBattleCaptainListScope" ScopeParent="..\CaptainsParent" ScopeMovements="Horizontal" IsDefaultNavigationScope="true" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                        <Widget Id="CaptainsParent" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MinWidth="!CaptainsList.MinWidth" HorizontalAlignment="Center" VerticalAlignment="Top" Sprite="card_canvas_default_9" AlphaFactor="0.7">
+                          <Children>
+                            <!-- List of Unassigned Heroes -->
+                            <NavigatableListPanel Id="CaptainsList" DataSource="{UnassignedHeroes}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MinHeight="70" HorizontalAlignment="Center" VerticalAlignment="Top" MarginTop="10" MarginBottom="10" StackLayout.LayoutMethod="HorizontalCentered" EmptyNavigationWidget="..\.">
+                              <ItemTemplate>
+                                <OrderOfBattle.Hero MarginLeft="5" MarginRight="5" IsVisible="@IsShown" Parameter.DragWidgetDataSource="{..\..}" />
+                              </ItemTemplate>
+                            </NavigatableListPanel>
+                          </Children>
+                        </Widget>
+                        
+                        <NavigationScopeTargeter ScopeID="OrderOfBattleCaptainNextPageButtonScope" ScopeParent="..\NextPageButton" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                        <ButtonWidget Id="NextPageButton" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="43" SuggestedHeight="56" HorizontalAlignment="Right" VerticalAlignment="Center" Command.Click="ExecuteNextTip" Brush="ButtonLeftArrowBrush1" MarginRight="3" GamepadNavigationIndex="0"/>
+                      </Children>
+                    </ListPanel>
+
+                    <!-- Captain Drag/Drop Accept Area -->
+                    <DimensionSyncWidget WidgetToCopyHeightFrom="..\CaptainPoolAndPaginationContainer\CaptainsParent" DimensionToSync="HorizontalAndVertical" HorizontalAlignment="Center" VerticalAlignment="Top" IsVisible="@IsPoolAcceptingCaptain">
+                      <Children>
+                        <NavigationScopeTargeter ScopeID="CaptainAcceptAreaScope" ScopeParent="..\CaptainAcceptArea" IsDefaultNavigationScope="true" IsScopeEnabled="@IsPoolAcceptingCaptain"/>
+                        <ButtonWidget Id="CaptainAcceptArea" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="OrderOfBattle.Formation.HeroSlot" UpdateChildrenStates="true" AcceptDrop="true" Command.Click="ExecuteAcceptHeroes" Command.Drop="ExecuteAcceptHeroes" GamepadNavigationIndex="0">
+                          <Children>
+                            <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!AssignIcon.Width" SuggestedHeight="!AssignIcon.Height" Brush="OrderOfBattle.Remove.Captain.Icon" HorizontalAlignment="Center" VerticalAlignment="Center" DoNotAcceptEvents="true" />
+                          </Children>
+                        </ButtonWidget>
+                      </Children>
+                    </DimensionSyncWidget>
+
+                    <!-- Hero Troop Drag/Drop Accept Area -->
+                    <DimensionSyncWidget WidgetToCopyHeightFrom="..\CaptainPoolAndPaginationContainer\CaptainsParent" DimensionToSync="HorizontalAndVertical" HorizontalAlignment="Center" VerticalAlignment="Top" IsVisible="@IsPoolAcceptingHeroTroops">
+                      <Children>
+                        <NavigationScopeTargeter ScopeID="HeroTroopsAcceptAreaScope" ScopeParent="..\HeroTroopsAcceptArea" IsDefaultNavigationScope="true" IsScopeEnabled="@IsPoolAcceptingHeroTroops"/>
+                        <ButtonWidget Id="HeroTroopsAcceptArea" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="OrderOfBattle.Formation.HeroSlot" UpdateChildrenStates="true" AcceptDrop="true" Command.Click="ExecuteAcceptHeroes" Command.Drop="ExecuteAcceptHeroes" GamepadNavigationIndex="0">
+                          <Children>
+                            <BrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!AssignIcon.Width" SuggestedHeight="!AssignIcon.Height" Brush="OrderOfBattle.Remove.HeroTroop.Icon" HorizontalAlignment="Center" VerticalAlignment="Center" DoNotAcceptEvents="true" />
+                          </Children>
+                        </ButtonWidget>
+                      </Children>
+                    </DimensionSyncWidget>
+                  </Children>
+                </Widget>
+
+                <!-- Captain List Page Controller, Invisible -->
+                <ContainerPageControlButtonListWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" PreviousPageButton="..\CaptainPoolArea\CaptainPoolAndPaginationContainer\PrevPageButton" NextPageButton="..\CaptainPoolArea\CaptainPoolAndPaginationContainer\NextPageButton" Container="..\CaptainPoolArea\CaptainPoolAndPaginationContainer\CaptainsParent\CaptainsList" ItemPerPage="6" LoopNavigation="true" PageButtonItemsListPanel="..\PageControlsContainer\PageButtonItemsListPanel" PageButtonTemplate="PageButtonTemplate" FullButtonBrush="OrderOfBattle.CaptainList.PageButton.Full" EmptyButtonBrush="OrderOfBattle.CaptainList.PageButton.Empty" PageButtonsContext="..\PageControlsContainer\PageButtonsScope">
+                  <Children>
+                    <!-- Page Selection Circle Button Template -->
+                    <ButtonWidget Id="PageButtonTemplate" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="10" SuggestedHeight="10" MarginLeft="3" MarginRight="3" MarginTop="3" MarginBottom="3" Brush="OrderOfBattle.CaptainList.PageButton" />
+                  </Children>
+                </ContainerPageControlButtonListWidget>
+
+                <ListPanel Id="PageControlsContainer" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" StackLayout.LayoutMethod="HorizontalLeftToRight" Sprite="BlankWhiteSquare_9" Color="#00000088" IsVisible="@IsPlayerGeneral">
+                  <Children>
+                    <!-- Select All Button -->
+                    <NavigationScopeTargeter ScopeID="SelectAllScope" ScopeParent="..\SelectAllButton" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                    <ButtonWidget Id="SelectAllButton" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="30" SuggestedHeight="30" MarginLeft="10" MarginRight="10" Brush="OrderOfBattle.CaptainList.SelectAllButton" Command.Click="ExecuteSelectAllHeroes" IsEnabled="@IsPlayerGeneral" DoNotPassEventsToChildren="true" UpdateChildrenStates="true" GamepadNavigationIndex="0">
+                      <Children>
+                        <HintWidget DataSource="{SelectAllHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+                      </Children>
+                    </ButtonWidget>
+
+                    <!-- Page Selection Buttons -->
+                    <NavigationScopeTargeter ScopeID="PageButtonsScope" ScopeParent="..\PageButtonItemsListPanel" ScopeMovements="Horizontal" ExtendChildrenCursorAreaLeft="10" ExtendChildrenCursorAreaRight="10" ExtendChildrenCursorAreaTop="10" ExtendChildrenCursorAreaBottom="10" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                    <NavigatableListPanel Id="PageButtonItemsListPanel" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MarginLeft="3" MarginRight="3" VerticalAlignment="Center" StackLayout.LayoutMethod="HorizontalLeftToRight">
+                      <Children>
+                      </Children>
+                    </NavigatableListPanel>
+
+                    <!-- Clear Selection Button -->
+                    <NavigationScopeTargeter ScopeID="ClearSelectionScope" ScopeParent="..\ClearSelectionButton" IsScopeDisabled="@IsPoolAcceptingAny"/>
+                    <ButtonWidget Id="ClearSelectionButton" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="30" SuggestedHeight="30" MarginLeft="10" MarginRight="10" Brush="OrderOfBattle.CaptainList.ClearSelectionButton" Command.Click="ExecuteClearHeroSelection" IsEnabled="@IsPlayerGeneral" DoNotPassEventsToChildren="true" UpdateChildrenStates="true" GamepadNavigationIndex="0">
+                      <Children>
+                        <HintWidget DataSource="{ClearSelectionHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+                      </Children>
+                    </ButtonWidget>
+
+                  </Children>
+                </ListPanel>
+
+                <!-- Selection Count Text -->
+                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="25" SuggestedHeight="25" HorizontalAlignment="Center" PositionYOffset="-5" IsVisible="@IsPlayerGeneral">
+                  <Children>
+                    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="BlankWhiteCircle" Color="#00000099" IsVisible="@HasSelectedHeroes">
+                      <Children>
+                        <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" Brush="OrderOfBattle.HeroLevel.Text" Brush.FontSize="16" IntText="@SelectedHeroCount" />
+                      </Children>
+                    </Widget>
+                  </Children>
+                </Widget>
+
+              </Children>
+            </ListPanel>
+
+          </Children>
+        </ListPanel>
+
+        <!-- List of Formations (Left Side) -->
+        <ListPanel Id="LeftSideFormations" DataSource="{FormationsFirstHalf}" DoNotAcceptEvents="false" UpdateChildrenStates="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" MarginLeft="15" MarginTop="!FormationList.MarginTop" StackLayout.LayoutMethod="VerticalTopToBottom">
+          <ItemTemplate>
+            <OrderOfBattle.Formation/>
+          </ItemTemplate>
+        </ListPanel>
+
+        <!-- List of Formations (Right Side) -->
+        <ListPanel Id="RightSideFormations" DataSource="{FormationsSecondHalf}" DoNotAcceptEvents="false" UpdateChildrenStates="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Center" MarginRight="15" MarginTop="!FormationList.MarginTop" StackLayout.LayoutMethod="VerticalTopToBottom">
+          <ItemTemplate>
+            <OrderOfBattle.Formation/>
+          </ItemTemplate>
+        </ListPanel>
+
+        <!-- Action (Deploy & Ready) Buttons -->
+        <NavigationScopeTargeter ScopeID="OrderOfBattleActionButtonsScope" ScopeParent="..\ActionButtons" ScopeMovements="Horizontal"/>
+        <ListPanel Id="ActionButtons" WidthSizePolicy="Fixed" HeightSizePolicy="CoverChildren" SuggestedWidth="500" HorizontalAlignment="Center" VerticalAlignment="Bottom" MarginBottom="20" StackLayout.LayoutMethod="HorizontalSpaced">
+          <Children>
+
+            <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!AutoDeployButton.Width" SuggestedHeight="!AutoDeployButton.Height" Brush="ButtonBrush2" Command.Click="ExecuteAutoDeploy" IsVisible="@IsPlayerGeneral" GamepadNavigationIndex="0">
+              <Children>
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Order.Siege.MainButton.Text" Text="@AutoDeployText" />
+                <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-30" IsVisible="@AreHotkeysEnabled">
+                  <Children>
+                    <InputKeyVisualWidget DataSource="{ResetInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" KeyID="@KeyID" IsVisible="@IsVisible"/>
+                  </Children>
+                </Widget>
+              </Children>
+            </ButtonWidget>
+
+            <Widget  WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!DoneButton.Width" SuggestedHeight="!DoneButton.Height" UpdateChildrenStates="true">
+              <Children>
+                <ButtonWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsHidden="@CanStartMission" UpdateChildrenStates="true">
+                  <Children>
+                    <HintWidget DataSource="{MissingFormationsHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" />
+                  </Children>
+                </ButtonWidget>
+
+                <ButtonWidget DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="ButtonBrush1" Command.Click="ExecuteBeginMission" IsEnabled="@CanStartMission" GamepadNavigationIndex="1">
+                  <Children>
+                    <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Order.Siege.MainButton.Text" Text="@BeginMissionText" />
+                    <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Left" VerticalAlignment="Center" PositionXOffset="-30" IsVisible="@AreHotkeysEnabled">
+                      <Children>
+                        <InputKeyVisualWidget DataSource="{DoneInputKey}" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="45" KeyID="@KeyID" IsVisible="@IsVisible"/>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </ButtonWidget>
+
+              </Children>
+            </Widget>
+
+          </Children>
+        </ListPanel>
+
+        <NavigationScopeTargeter ScopeID="OrderOfBattleScreenCenterScope" ScopeParent="..\OrderOfBattleScreenCenter" ScopeMovements="Horizontal" ExtendDiscoveryAreaTop="100" ExtendDiscoveryAreaRight="150" ExtendDiscoveryAreaBottom="100" ExtendDiscoveryAreaLeft="150"/>
+        <Widget Id="OrderOfBattleScreenCenter" DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="50" SuggestedHeight="50" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="false" GamepadNavigationIndex="0" />
+
+      </Children>
+    </OrderOfBattleScreenWidget>
+  </Window>
+</Prefab>

@@ -1,0 +1,50 @@
+<Prefab>
+  <Constants>
+    <Constant Name="Indicator.Highlight.Width" Value="10"/>
+    <Constant Name="Indicator.Highlight.Height" Value="8"/>
+    <Constant Name="Marker.Size" Value="18" />
+    <Constant Name="Marker.Size.Negative" Value="-18" />
+  </Constants>
+  <Window>
+    <Widget DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" IsEnabled="false" >
+      <Children>
+
+        <!--Gamepad Cursor--> 
+        <GamepadCursorParentWidget Id="CursorParentWidget" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HasTarget="@HasTarget" XOffset="@CursorPositionX" YOffset="@CursorPositionY" CursorMarkerWidget="CursorMarkerWidget" CursorOverlayWidget="CursorOverlayWidget" CenterWidget="CenterWidgetParent\CenterWidget" ActiveScopeRectDebugWidget="..\ActiveScopeRectDebugWidget" ActiveScopeDiscoveryRectDebugWidget="..\ActiveScopeDiscoveryRectDebugWidget" IsVisible="@IsGamepadCursorVisible">
+          <Children>
+            <Widget Id="CenterWidgetParent" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="1" SuggestedHeight="1" VerticalAlignment="Top" HorizontalAlignment="Left">
+              <Children>
+                <BrushWidget Id="CenterWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="18" SuggestedHeight="18" VerticalAlignment="Center" HorizontalAlignment="Center" Brush="Gamepad.Cursor.Center" />
+              </Children>
+            </Widget>
+
+            <GamepadCursorWidget Id="CursorMarkerWidget" UpdateChildrenStates="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" DefaultSizeX="50" DefaultSizeY="50" HorizontalAlignment="Left" VerticalAlignment="Top" ActionAnimationTime="0.26" DefaultOffset="3" HoverOffset="8" DefaultTargetlessOffset="5" PressOffset="0" HasTarget="@HasTarget" TargetHasAction="@TargetHasAction" CursorParentWidget="..\." TopLeftMarker="TopLeftMarker" TopRightMarker="TopRightMarker" BottomLeftMarker="BottomLeftMarker" BottomRightMarker="BottomRightMarker" MarkerSizeX="!Marker.Size" MarkerSizeY="!Marker.Size" >
+              <Children>
+                <GamepadCursorMarkerWidget Id="TopLeftMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!Marker.Size" SuggestedWidth="!Marker.Size" Brush="Gamepad.Cursor.Marker.Above" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                <GamepadCursorMarkerWidget Id="TopRightMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!Marker.Size" SuggestedWidth="!Marker.Size" Brush="Gamepad.Cursor.Marker.Above" VerticalAlignment="Top" HorizontalAlignment="Right" FlipVisual="true" />
+                <GamepadCursorMarkerWidget Id="BottomLeftMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!Marker.Size" SuggestedWidth="!Marker.Size" Brush="Gamepad.Cursor.Marker.Below" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                <GamepadCursorMarkerWidget Id="BottomRightMarker" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedHeight="!Marker.Size" SuggestedWidth="!Marker.Size" Brush="Gamepad.Cursor.Marker.Below" VerticalAlignment="Bottom" HorizontalAlignment="Right" FlipVisual="true" />
+              </Children>
+            </GamepadCursorWidget>
+
+          </Children>
+        </GamepadCursorParentWidget>
+
+        <Widget Id="ActiveScopeRectDebugWidget" Sprite="BlankWhiteSquare_9" Color="#00FFFFFF" AlphaFactor="0.1" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" HorizontalAlignment="Left" VerticalAlignment="Top">
+          <Children>
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="rounded_frame_9" Color="#00FFFFFF"/>
+          </Children>
+        </Widget>
+        <Widget Id="ActiveScopeDiscoveryRectDebugWidget" Sprite="BlankWhiteSquare_9" Color="#FF00FFFF" AlphaFactor="0.1" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" HorizontalAlignment="Left" VerticalAlignment="Top">
+          <Children>
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Sprite="rounded_frame_9" Color="#FF00FFFF"/>
+          </Children>
+        </Widget>
+
+        <!--Mouse Cursor on Consoles-->
+        <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="32" SuggestedHeight="32" ScaledPositionXOffset="@CursorPositionX" ScaledPositionYOffset="@CursorPositionY" Sprite="default_cursor" IsVisible="@IsConsoleMouseVisible"/>
+
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

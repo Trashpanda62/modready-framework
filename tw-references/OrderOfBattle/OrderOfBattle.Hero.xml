@@ -1,0 +1,47 @@
+<Prefab>
+  <Parameters>
+    <Parameter Name="IsSmall" DefaultValue="false" />
+    <Parameter Name="DragWidgetDataSource" DefaultValue="{.}" />
+  </Parameters>
+  <Constants>
+    <Constant Name="BorderWidth" BooleanCheck="*IsSmall" OnTrue="46.25" OnFalse="92.5" />
+    <Constant Name="BorderHeight" BooleanCheck="*IsSmall" OnTrue="35" OnFalse="70" />
+    <Constant Name="ImageIdentifierWidth" BooleanCheck="*IsSmall" OnTrue="41.25" OnFalse="82.5" />
+    <Constant Name="ImageIdentifierHeight" BooleanCheck="*IsSmall" OnTrue="30" OnFalse="60" />
+    <Constant Name="ImageIdentifierMargin" BooleanCheck="*IsSmall" OnTrue="2.5" OnFalse="5" />
+  </Constants>
+  <Window>
+    <OrderOfBattleHeroButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!BorderWidth" SuggestedHeight="!BorderHeight" Command.Click="ExecuteSelection" Brush="OrderOfBattle.CaptainSlot.Frame" IsSelected="@IsSelected" IsDisabled="@IsDisabled" AcceptDrag="true" DragWidget="DragWidget" Command.DragBegin="ExecuteBeginAssignment" Command.DragEnd="ExecuteEndAssignment" IsMainHero="@IsMainHero" MainHeroHueFactor="130" DoNotPassEventsToChildren="true" UpdateChildrenStates="true">
+      <Children>
+        <!-- Background -->
+        <BrushWidget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="!ImageIdentifierHeight" HorizontalAlignment="Center" MarginLeft="!ImageIdentifierMargin" MarginTop="!ImageIdentifierMargin" MarginRight="!ImageIdentifierMargin" MarginBottom="!ImageIdentifierMargin" Brush="OrderOfBattle.CaptainSlot.Background"/>
+
+        <!-- Leader Visual -->
+        <ImageIdentifierWidget DoNotAcceptEvents="true" DataSource="{ImageIdentifier}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!ImageIdentifierWidth" SuggestedHeight="!ImageIdentifierHeight" MarginLeft="!ImageIdentifierMargin" MarginTop="!ImageIdentifierMargin" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" />
+
+        <!-- Skills Tooltip -->
+        <HintWidget DataSource="{Tooltip}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint"/>
+
+        <!-- Dragged Widget -->
+        <OrderOfBattleHeroDragWidget Id="DragWidget" DataSource="*DragWidgetDataSource" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" IsVisible="false" StackCount="@SelectedHeroCount" StackDragWidget="..\StackDragWidget" StackThumbnailWidget="..\StackThumbnailParent\StackThumbnailHero\StackThumbnailWidget" InnerBrushName="OrderOfBattle.CaptainSlot.Background" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true">
+          <Children>
+          </Children>
+        </OrderOfBattleHeroDragWidget>
+
+        <BrushWidget Id="StackDragWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="92.5" SuggestedHeight="70" Brush="OrderOfBattle.CaptainSlot.Frame" Brush.AlphaFactor="1" IsVisible="false" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true"/>
+        <Widget Id="StackThumbnailParent" DataSource="*DragWidgetDataSource" IsVisible="false" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true">
+          <Children>
+            <Widget Id="StackThumbnailHero" DataSource="{LastSelectedHeroItem}">
+              <Children>
+
+                <ImageIdentifierWidget Id="StackThumbnailWidget" DoNotAcceptEvents="true" DataSource="{ImageIdentifier}" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="82.5" SuggestedHeight="60" MarginLeft="5" MarginTop="5" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" IsVisible="false" />
+              </Children>
+            </Widget>
+          </Children>
+        </Widget>
+
+        <TutorialHighlightItemBrushWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="TutorialHighlightBrush" IsHighlightEnabled="@IsHighlightActive" IsVisible="false" DoNotAcceptEvents="true"/>
+      </Children>
+    </OrderOfBattleHeroButtonWidget>
+  </Window>
+</Prefab>

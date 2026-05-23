@@ -1,0 +1,78 @@
+<Window>
+  <Widget DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" DataSource="{InteractionInterface}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" >
+    <Children>
+      <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="-40" StackLayout.LayoutMethod="VerticalTopToBottom" IsVisible="@DisplayInteractionText">
+        <Children>
+
+          <!-- Secondary Interaction Messages-->
+          <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsVisible="@HasSecondaryMessages">
+            <Children>
+              
+              <ListPanel DataSource="{SecondaryInteractionMessages}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" StackLayout.LayoutMethod="VerticalTopToBottom">
+                <ItemTemplate>
+
+                  <!-- Secondary Interaction Template-->
+                  <DisabledAlphaChangerWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsDisabled="@IsDisabled" DisabledAlpha="0.2" UpdateChildrenAlphas="true">
+                    <Children>
+                      <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="7" MarginRight="7" MarginTop="5" Brush="AgentHUD.Interaction.Text" Text="@Message" />
+                    </Children>
+                  </DisabledAlphaChangerWidget>
+
+                </ItemTemplate>
+              </ListPanel>
+              
+            </Children>
+          </Widget>
+
+          <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsHidden="@HasForcedMessages">
+            <Children>
+              <!-- Primary Interaction Messages-->
+              <ListPanel DataSource="{PrimaryInteractionMessages}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom" IsVisible="@IsActive">
+                <ItemTemplate>
+
+                  <!-- Primary Interaction Template-->
+                  <DisabledAlphaChangerWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsDisabled="@IsDisabled" DisabledAlpha="0.2" UpdateChildrenAlphas="true">
+                    <Children>
+                      <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MinHeight="42" HorizontalAlignment="Center">
+                        <Children>
+                          <DefaultLayerSpriteChangerBrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="56" SuggestedHeight="42" VerticalAlignment="Center" Brush="AgentHUD.Interaction.Icon" SpriteBrush="AgentHUD.Interaction.Icon" SpriteBrushLayerName="@FocusTypeString"/>
+                          <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="7" MarginRight="7" MarginTop="5" Brush="AgentHUD.Interaction.Text" Text="@Message" />
+                        </Children>
+                      </ListPanel>
+                    </Children>
+                  </DisabledAlphaChangerWidget>
+
+                </ItemTemplate>
+              </ListPanel>
+            </Children>
+          </Widget>
+          <Widget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsVisible="@HasForcedMessages">
+            <Children>
+              <!-- Forced Interaction Messages-->
+              <ListPanel DataSource="{ForcedInteractionMessages}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" StackLayout.LayoutMethod="VerticalTopToBottom" IsVisible="@IsActive">
+                <ItemTemplate>
+
+                  <!-- Primary Interaction Template-->
+                  <DisabledAlphaChangerWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" IsDisabled="@IsDisabled" DisabledAlpha="0.2" UpdateChildrenAlphas="true">
+                    <Children>
+                      <ListPanel WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" MinHeight="42" HorizontalAlignment="Center">
+                        <Children>
+                          <DefaultLayerSpriteChangerBrushWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="56" SuggestedHeight="42" VerticalAlignment="Center" Brush="AgentHUD.Interaction.Icon" SpriteBrush="AgentHUD.Interaction.Icon" SpriteBrushLayerName="@FocusTypeString"/>
+                          <RichTextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" VerticalAlignment="Center" MarginLeft="7" MarginRight="7" MarginTop="5" Brush="AgentHUD.Interaction.Text" Text="@Message" />
+                        </Children>
+                      </ListPanel>
+                    </Children>
+                  </DisabledAlphaChangerWidget>
+
+                </ItemTemplate>
+              </ListPanel>
+            </Children>
+          </Widget>
+
+        </Children>
+      </ListPanel>
+      <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="220" SuggestedHeight="18" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="-145" Sprite="SelectionBorder@2x_9" Color="#CCCCCCFF" IsVisible="@ShowHealthBar" />
+      <FillBar WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="210" SuggestedHeight="8" HorizontalAlignment="Center" VerticalAlignment="Bottom" PositionYOffset="-150" Brush="HealthBarBrush" InitialAmount="@TargetHealth" IsVertical="false" IsVisible="@ShowHealthBar" MaxAmount="100" />
+    </Children>
+  </Widget>
+</Window>

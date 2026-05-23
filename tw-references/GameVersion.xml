@@ -1,0 +1,13 @@
+<Prefab>
+  <Window>
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true">
+      <Children>
+        <ListPanel DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" DataSource="{GameVersionTexts}" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginBottom="15" MarginRight="15" StackLayout.LayoutMethod="VerticalBottomToTop">
+          <ItemTemplate>
+            <TextWidget WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" HorizontalAlignment="Right" Brush="GameVersion.Text" Text="@Item" MarginTop="10"/>
+          </ItemTemplate>
+        </ListPanel>
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>
