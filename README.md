@@ -4,17 +4,17 @@
 [![Latest release](https://img.shields.io/badge/release-v0.5.8-green.svg)](https://github.com/Trashpanda62/Betadeps/releases)
 [![Game version](https://img.shields.io/badge/Bannerlord-e1.4.5-orange.svg)](https://store.steampowered.com/app/261550/Mount__Blade_II_Bannerlord/)
 
-A single drop-in dependency module for **Mount & Blade II: Bannerlord** that replaces the entire BUTR foundation stack (Harmony + UIExtenderEx + ButterLib + MCM) with one folder, one load entry, and one settings UI.
+A single drop-in dependency module for **Mount & Blade II: Bannerlord** that replaces the entire BUTR dependency stack (Harmony + UIExtenderEx + ButterLib + MCM) with one folder, one load entry, and one settings UI.
 
 ## What it does
 
-If you've ever fought your launcher about Harmony version conflicts, missing ButterLib, broken UIExtenderEx, or MCM crashing on the beta branch — BetaDeps exists to make that go away. Install it, enable it at the top of your load order, and every mod that depends on the BUTR foundation will resolve against BetaDeps transparently. No recompilation, no updates to other mods, no patching.
+If you've ever fought your launcher about Harmony version conflicts, missing ButterLib, broken UIExtenderEx, or MCM crashing on the beta branch — BetaDeps exists to make that go away. Install it, enable it at the top of your load order, and every mod that depends on the BUTR dependency stack will resolve against BetaDeps transparently. No recompilation, no updates to other mods, no patching.
 
 ## Install
 
 The easiest way is from Nexus Mods:
 
-1. Download the latest release from [Nexus Mods](https://www.nexusmods.com/mountandblade2bannerlord) (search "BetaDeps").
+1. Download the latest release from [Nexus Mods](https://www.nexusmods.com/mountandblade2bannerlord/mods/11274).
 2. Extract the zip into your Bannerlord `Modules\` folder.
 3. Launch the game through BLSE LauncherEx (or your preferred launcher) and enable **BetaDeps** at the top of your load order, above any mod that needs Harmony, ButterLib, UIExtenderEx, or MCM.
 4. Make sure the upstream BUTR mods (Bannerlord.Harmony, Bannerlord.ButterLib, Bannerlord.UIExtenderEx, MCMv5) are **disabled or uninstalled** — BetaDeps replaces them.
@@ -27,6 +27,14 @@ The easiest way is from Nexus Mods:
 - **Compatibility shims.** Type-forwarding DLLs (`Bannerlord.Harmony.dll`, `Bannerlord.ButterLib.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll`) so existing mods that were compiled against the upstream BUTR names resolve against BetaDeps without any changes.
 - **Beta branch support.** Verified on Bannerlord e1.4.5. The public branch (e1.3.x) is also supported by the same build.
 
+## Where this is going
+
+BetaDeps right now is a drop-in replacement for the BUTR dependency stack. That's the starting point, not the destination. The end goal is a single thing: an **always-compatible modding kit** that keeps your modded Bannerlord running through every TaleWorlds update, every beta branch, every patch that normally breaks half your mod list overnight.
+
+When TaleWorlds pushes a game update, BetaDeps gets updated to match — before the modlist starts dying. Mods that would crash the game on the new version get **auto-disabled** with a clear note telling you why, so the launcher boots even when individual mods are temporarily broken upstream. You hit Play, the game starts. Every time. The worst case becomes "I'm playing without DismembermentPlus this week" instead of "I can't launch my save."
+
+That's the goal: **you keep playing, no matter what.**
+
 ## Build from source
 
 Requirements:
@@ -35,6 +43,7 @@ Requirements:
 - PowerShell 5+ on Windows
 
 ```powershell
+cd C:\dev
 git clone https://github.com/Trashpanda62/Betadeps.git
 cd Betadeps
 .\scripts\Build-Phase1.ps1
@@ -61,7 +70,7 @@ The underlying [Lib.Harmony](https://github.com/pardeike/Harmony) by Andreas Par
 
 ## Support the work / commission a mod
 
-BetaDeps is free, and that won't change regardless of how this page does. If you'd like to support development, or commission custom mod work, that lives on Patreon: [patreon.com/trashpanda62](https://patreon.com/trashpanda62).
+BetaDeps is free, and that won't change regardless of how this page does. If you'd like to support development, or commission custom mod work, that lives on Patreon: [patreon.com/Trashpanda62](https://patreon.com/Trashpanda62).
 
 ## Contributing
 
