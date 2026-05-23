@@ -1949,6 +1949,82 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
     }
 
+    /// <summary>
+    /// "Toggle Auto-Disable" button.
+    /// Default behavior in v0.7.1+ is auto-disable OFF -- users opt IN by
+    /// clicking this button, which creates the marker file
+    /// `Modules\BetaDeps\auto-disable-enabled.flag`. When the flag exists,
+    /// IncompatibleModDetector.RunEarlyPhase and SubModuleConstructionGuard
+    /// install their full recovery pipeline. When it doesn't exist, BetaDeps
+    /// stays out of the way -- crashes happen naturally, mod authors can
+    /// debug their own work without interference.
+    ///
+    /// Why default OFF: Bhelogan (Nexus mod author) flagged v0.6's
+    /// auto-disable-by-default as a major roadblock for mod developers, and
+    /// the v0.7 single-launch Harmony patch made the problem more aggressive.
+    /// Opt-in semantics keep us conservative for the population that doesn't
+    /// need recovery, while one click upgrades anyone who does need it.
+    /// </summary>
+    [DataSourceMethod]
+    public void ExecuteToggleAutoDisable()
+    {
+        DiagLog.Log(Tag, "ExecuteToggleAutoDisable: click received");
+        try
+        {
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rtPath);
+            if (string.IsNullOrEmpty(dir))
+            {
+                DiagLog.Log(Tag, "ExecuteToggleAutoDisable: could not resolve BetaDeps directory; abort.");
+                return;
+            }
+            var flagPath = System.IO.Path.Combine(dir!, "auto-disable-enabled.flag");
+
+            bool nowEnabled;
+            if (System.IO.File.Exists(flagPath))
+            {
+                System.IO.File.Delete(flagPath);
+                nowEnabled = false;
+                DiagLog.Log(Tag, $"ExecuteToggleAutoDisable: flag deleted ({RedactUserPath(flagPath)}); auto-disable now OFF.");
+            }
+            else
+            {
+                System.IO.File.WriteAllText(flagPath,
+                    $"Created via Mod Config 'Toggle Auto-Disable' on {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}.{System.Environment.NewLine}" +
+                    "Delete this file (or click Toggle Auto-Disable in Mod Config again) to return BetaDeps to its default passive mode.");
+                nowEnabled = true;
+                DiagLog.Log(Tag, $"ExecuteToggleAutoDisable: flag written ({RedactUserPath(flagPath)}); auto-disable now ON.");
+            }
+
+            var title = nowEnabled ? "Auto-disable ENABLED" : "Auto-disable DISABLED";
+            var body = nowEnabled
+                ? "Crash recovery is now ENABLED.\n\n" +
+                  "On the NEXT launch, BetaDeps will record which mods load cleanly to the main menu. " +
+                  "If a future launch crashes before reaching the main menu, BetaDeps will diff your enabled mods against that baseline " +
+                  "and block the newly-broken mod from loading. The game boots, you keep playing.\n\n" +
+                  "Restart Bannerlord for the change to take effect."
+                : "Crash recovery is now DISABLED.\n\n" +
+                  "BetaDeps will no longer touch your mod list. Crashes will happen naturally and no mod will be quarantined. " +
+                  "Mod authors who are debugging their own work should keep this off.\n\n" +
+                  "Click this button again any time to re-enable recovery. Restart Bannerlord for the change to take effect.";
+
+            var prompt = new TaleWorlds.Library.InquiryData(
+                titleText: title,
+                text: body,
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: false,
+                affirmativeText: "OK",
+                negativeText: null,
+                affirmativeAction: () => { },
+                negativeAction: () => { });
+            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "ExecuteToggleAutoDisable", ex);
+        }
+    }
+
     private void OpenGitHubIssueUrl()
     {
         try

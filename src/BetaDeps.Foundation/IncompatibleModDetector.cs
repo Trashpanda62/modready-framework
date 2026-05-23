@@ -157,29 +157,38 @@ public static class IncompatibleModDetector
         }
         catch { /* never throw out of the marker write */ }
 
-        // Developer-mode opt-out (Bhelogan request, v0.7).
-        // If a "developer-mode.flag" file is present next to BetaDeps' DLLs,
-        // skip the entire auto-disable pipeline -- mod authors need to see
-        // real crashes while debugging, not have their own broken mod silently
-        // quarantined. The launch marker above still gets written so crash
-        // recovery works for the user once they turn dev mode off again.
+        // Opt-in gate (v0.7.1+): auto-disable is OFF by default. A file named
+        // "auto-disable-enabled.flag" in Modules\BetaDeps\ is the signal to
+        // run the full recovery pipeline. The Mod Config "Toggle Auto-Disable"
+        // button writes/deletes this flag. Default-off keeps BetaDeps passive
+        // for mod authors and users who don't want their list mutated, and
+        // requires one explicit opt-in click for anyone who does want
+        // crash recovery.
+        // The launch marker above is still written regardless, so the moment
+        // a user enables recovery, the next session has a baseline to work
+        // from.
         try
         {
             var modulesRoot = ResolveModulesRoot();
-            if (!string.IsNullOrEmpty(modulesRoot))
+            if (string.IsNullOrEmpty(modulesRoot))
             {
-                var devModeFlag = Path.Combine(modulesRoot!, "BetaDeps", "developer-mode.flag");
-                if (File.Exists(devModeFlag))
-                {
-                    DiagLog.Log(Tag, "RunEarlyPhase: developer-mode.flag present -- skipping auto-disable scan.");
-                    return;
-                }
+                DiagLog.Log(Tag, "RunEarlyPhase: modules root unknown; skipping auto-disable scan.");
+                return;
             }
+            var enabledFlag = Path.Combine(modulesRoot!, "BetaDeps", "auto-disable-enabled.flag");
+            if (!File.Exists(enabledFlag))
+            {
+                DiagLog.Log(Tag, "RunEarlyPhase: auto-disable-enabled.flag NOT present (default) -- skipping scan. Click 'Toggle Auto-Disable' in Mod Config to enable.");
+                return;
+            }
+            DiagLog.Log(Tag, "RunEarlyPhase: auto-disable-enabled.flag present -- running full scan.");
         }
         catch (Exception ex)
         {
-            try { DiagLog.LogCaught(Tag, "  dev-mode flag check", ex); } catch { }
-            // Don't bail -- if we can't check the flag, fall through and run normally.
+            try { DiagLog.LogCaught(Tag, "  enabled-flag check", ex); } catch { }
+            // On error, be conservative: do NOT run the auto-disable. The
+            // user can always re-toggle from Mod Config.
+            return;
         }
 
         try

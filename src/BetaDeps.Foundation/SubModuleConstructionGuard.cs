@@ -65,23 +65,30 @@ public static class SubModuleConstructionGuard
 
         try
         {
-            // Honour the dev opt-out flag -- same file as IncompatibleModDetector.
+            // Opt-in gate (v0.7.1+): same flag as IncompatibleModDetector.
+            // Auto-disable + pre-construction guard both off by default; user
+            // toggles via Mod Config "Toggle Auto-Disable" button which writes
+            // Modules\BetaDeps\auto-disable-enabled.flag.
             try
             {
                 var modulesRoot = ResolveModulesRoot();
-                if (!string.IsNullOrEmpty(modulesRoot))
+                if (string.IsNullOrEmpty(modulesRoot))
                 {
-                    var devModeFlag = Path.Combine(modulesRoot!, "BetaDeps", "developer-mode.flag");
-                    if (File.Exists(devModeFlag))
-                    {
-                        DiagLog.Log(Tag, "developer-mode.flag present -- skipping pre-construction patch install.");
-                        return;
-                    }
+                    DiagLog.Log(Tag, "modules root unknown; skipping pre-construction patch install.");
+                    return;
                 }
+                var enabledFlag = Path.Combine(modulesRoot!, "BetaDeps", "auto-disable-enabled.flag");
+                if (!File.Exists(enabledFlag))
+                {
+                    DiagLog.Log(Tag, "auto-disable-enabled.flag NOT present (default) -- skipping pre-construction patch install. Click 'Toggle Auto-Disable' in Mod Config to enable.");
+                    return;
+                }
+                DiagLog.Log(Tag, "auto-disable-enabled.flag present -- installing pre-construction patch.");
             }
             catch (Exception ex)
             {
-                try { DiagLog.LogCaught(Tag, "  dev-mode flag check", ex); } catch { }
+                try { DiagLog.LogCaught(Tag, "  enabled-flag check", ex); } catch { }
+                return;  // be conservative on error
             }
 
             LoadDisabledList();
