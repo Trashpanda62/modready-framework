@@ -56,6 +56,23 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             {
                 try { DiagLog.LogCaught(Tag, "ctor/IncompatEarly", ex); } catch { }
             }
+
+            // v0.7: install the Harmony pre-construction guard. Must happen
+            // from BetaDeps's constructor (not OnSubModuleLoad) because by the
+            // time OnSubModuleLoad fires, other mods' constructors have
+            // already run -- and a broken constructor is exactly what we're
+            // trying to block. BetaDeps loads before every consumer mod by
+            // virtue of its ModulesToLoadAfterThis list, so this is the first
+            // moment Lib.Harmony is reachable AND no consumer mod has been
+            // constructed yet.
+            try
+            {
+                SubModuleConstructionGuard.Install();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/SubModuleGuard", ex); } catch { }
+            }
         }
     }
 

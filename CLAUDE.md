@@ -1,5 +1,96 @@
 # BetaDeps project — persistent instructions
 
+## 🗣️ SHORT TRIGGER WORDS
+
+The user prefers single-word replies for common check-ins:
+- **"go"** = test cycle finished, read the logs and continue
+- **"pause"** / **"call it for tonight"** = stop here, run the nightly protocol
+- (Used to be "done"; user switched to "go" on 2026-05-24.)
+
+## 🤖 OPERATING RULE — pick the easiest unblocked task and just work
+
+Every project day on the calendar has a numbered task list in its
+description, ordered easiest-unblocked first with hour estimates.
+**Never ask "what's next?"** — pick the lowest-numbered TODO item
+whose dependencies are met and start working on it. After completing
+each item, update the calendar event description to strike it through
+(prefix with `✓` and wrap in `~~...~~`), then immediately move to the
+next one. Only stop and ask the user when:
+
+- A task requires a decision only the user can make (taste, naming,
+  scope cut)
+- A task is blocked on something only the user can do (install
+  software, post on social media, accept a TOS)
+- The user explicitly says "pause" / "wait" / "call it for tonight"
+
+If a task takes longer than its hour estimate, push the overrun into
+the next day's plan rather than rushing — don't ship broken code to
+stay on schedule.
+
+## 🌅 MORNING CHECK-IN — do this at the start of every session
+
+When the user opens a new session in the morning (greeting like "good
+morning", "let's start", "what's up today", etc.), immediately:
+
+1. Call `mcp__2fb8a39b-...__list_events` with today's date range
+   (00:00 → 23:59 America/New_York, primary calendar) to see what's
+   on the schedule.
+2. Read the latest `C:\dev\bannerlord\MASTER-PLAN.md` to see where
+   we left off last night.
+3. Open with a short briefing in chat (5–8 lines): today's calendar
+   items, what last night's session shipped, and a "first task" the
+   user can start on. End with a single concrete action.
+
+This is a standing morning ritual — never skip it.
+
+## 📋 NIGHTLY MASTER PLAN UPDATE — do this at the end of every session
+
+At the end of each working session (when the user says "call it for tonight",
+"goodnight", "pause", or otherwise signals they're stopping), update
+`C:\dev\bannerlord\MASTER-PLAN.md`. The update should include:
+
+1. **Phase progress** — move items from 🔄 to ✅ where work landed; add new
+   🔄 items for work the user asked to be queued
+2. **Current status** section — refresh shipped/active/limitations
+3. **Work hours** table — add a row for today's date with estimated hours
+   (use `runtime.log` timestamps, git commit times, or session activity as
+   the basis). Bump the running total
+4. **Active tasks** — sync against the Cowork task list
+5. **Rolling daily-breakdown calendar events** — every Sunday night (or
+   the last working session of a calendar week), look ahead to the
+   following Monday and create 7 Google Calendar events (one per day)
+   covering the next week's project work, split into per-day tasks
+   (9am–5pm America/New_York). Use the `mcp__2fb8a39b-...__create_event`
+   tool. Color code by project: BetaDeps=tangerine(7),
+   auto-fix=blueberry(9), v1.0=basil(10), HERALD=banana(5),
+   archive=graphite(8), Total Bannerwar=peacock(7),
+   Battle Tactics=grape(3), WeatherSystem=sage(2),
+   RV app=lavender(1), AppCreate=flamingo(4), Junkball=tomato(11).
+   Daily breakdown is currently scheduled through 2026-06-14.
+6. **Master-plan .ics auto-sync** — `C:\dev\bannerlord\master-plan-calendar.ics`
+   is the source of truth for project milestones. It is hosted as a
+   public GitHub Gist (`https://gist.github.com/Trashpanda62/069f5e4fe73e19e19e69b1700231b50a`)
+   that the user's Google Calendar subscribes to. The gist is cloned
+   locally at `C:\dev\bannerlord\gist-master-plan\`. **Every nightly
+   update, after you finish editing master-plan-calendar.ics, tell
+   the user to run:**
+
+   ```
+   cd C:\dev\beta-deps
+   .\scripts\Update-Gist.ps1
+   ```
+
+   That script copies the .ics into the gist clone, commits, and
+   pushes. Google polls the gist roughly every 12–24 hours and the
+   subscribed calendar updates. The script is idempotent — if the
+   .ics didn't change, it exits cleanly without a push.
+
+Then deliver a short summary in chat (5–10 lines) showing the diff from
+last night: what was completed, what's queued, total hours, what's next.
+
+The user explicitly requested nightly master-plan updates including current
+progress and work hours. This is a standing instruction, not a one-off.
+
 ## ⚠️ CANONICAL TEST COMMAND — memorize this exactly
 
 The ONLY way to ask the user to test a code change is:

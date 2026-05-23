@@ -4,8 +4,15 @@
   that consumer mods which declare <DependedModule Id="Bannerlord.Harmony" />
   in their own SubModule.xml find a module with that Id in the launcher.
   All Harmony functionality is provided by Modules\BetaDeps\.
-  Version v2.4.0.99 - 4-part form satisfies CargoHolds's v2.4.0.* wildcard,
-  XorberaxLegacy's v2.4.* wildcard, and the BLSE v2.2.2 minimum.
+  Version v2.4.99.0 satisfies any reasonable v2.4.x minimum (Bannerlord
+  launcher compares 4-part versions left-to-right). Known dependents that
+  declare minimum versions in v2.4.x range:
+    Character Development Editor v1.0.10 requires Harmony v2.4.2 (v0.7 fix)
+    XorberaxLegacy declares v2.4.* wildcard
+    BLSE v2.2.2 minimum
+  WARNING: legacy mods declaring strict v2.4.0.* wildcards (e.g. CargoHolds
+  if still maintained) will NOT match v2.4.99.0. If reports come in we may
+  need to revisit; modern modlist support takes precedence for now.
 -->
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">

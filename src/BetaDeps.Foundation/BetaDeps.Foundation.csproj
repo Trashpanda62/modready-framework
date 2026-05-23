@@ -25,9 +25,9 @@
          UIExtenderEx) always reference a known-stable version. Without this,
          the SDK defaults to 1.0.0.0 but incremental builds can keep stale
          v0.3.0.0 references, causing CLR binding failures at game launch. -->
-    <AssemblyVersion>0.6.0.0</AssemblyVersion>
-    <FileVersion>0.6.0.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.6.0</InformationalVersion>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <FileVersion>0.7.0.0</FileVersion>
+    <InformationalVersion>BetaDeps 0.7.0</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +35,12 @@
          Pinned to a recent stable release; floating version lets CI pull whatever
          matches the target game version at build time. -->
     <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
+
+    <!-- v0.7: SubModuleConstructionGuard uses HarmonyLib to patch the engine's
+         SubModule loader. Lib.Harmony is also referenced by BetaDeps.Harmony.
+         This duplicate ref is harmless because at runtime there's only one
+         0Harmony.dll on disk (shipped from BetaDeps.Harmony). MIT terms. -->
+    <PackageReference Include="Lib.Harmony" Version="2.4.*" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

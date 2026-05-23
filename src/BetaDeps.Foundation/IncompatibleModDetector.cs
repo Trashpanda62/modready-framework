@@ -157,6 +157,31 @@ public static class IncompatibleModDetector
         }
         catch { /* never throw out of the marker write */ }
 
+        // Developer-mode opt-out (Bhelogan request, v0.7).
+        // If a "developer-mode.flag" file is present next to BetaDeps' DLLs,
+        // skip the entire auto-disable pipeline -- mod authors need to see
+        // real crashes while debugging, not have their own broken mod silently
+        // quarantined. The launch marker above still gets written so crash
+        // recovery works for the user once they turn dev mode off again.
+        try
+        {
+            var modulesRoot = ResolveModulesRoot();
+            if (!string.IsNullOrEmpty(modulesRoot))
+            {
+                var devModeFlag = Path.Combine(modulesRoot!, "BetaDeps", "developer-mode.flag");
+                if (File.Exists(devModeFlag))
+                {
+                    DiagLog.Log(Tag, "RunEarlyPhase: developer-mode.flag present -- skipping auto-disable scan.");
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "  dev-mode flag check", ex); } catch { }
+            // Don't bail -- if we can't check the flag, fall through and run normally.
+        }
+
         try
         {
             DiagLog.Log(Tag, "RunEarlyPhase: scanning LauncherData.xml for known-incompatible mods");
