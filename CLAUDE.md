@@ -11,6 +11,23 @@ cd C:\dev\beta-deps
 
 Do NOT invent variants like `powershell -ExecutionPolicy Bypass -File ...`, `pwsh ./scripts/...`, or anything else. The user has called this out as a recurring annoyance after every context compression. If you find yourself typing anything other than the two lines above, stop and use them. After it finishes, read `C:\dev\bannerlord\runtime.log` and `C:\dev\bannerlord\selftest.log` (Quick-Test copies them there automatically).
 
+## ⚠️ ALWAYS include the `cd` step in PowerShell instructions
+
+The user is non-technical and runs whatever PowerShell prompt they happen to have open — which is often `C:\WINDOWS\system32`. **Every PowerShell command block you give them must start with the `cd` line to the correct folder.** No exceptions. This applies to git commands, dotnet commands, scripts, anything.
+
+Wrong:
+```
+git push
+```
+
+Right:
+```
+cd C:\dev\beta-deps
+git push
+```
+
+If a command set spans multiple repos or folders, give a separate `cd` for each. If the user already ran `cd` earlier in the same response, repeat it in the next block anyway — they may copy/paste blocks individually or come back later from a fresh window. The user lost time on a "fatal: not a git repository" error from running `git remote set-url` in `C:\WINDOWS\system32` and called this out explicitly.
+
 ## Nexus file-description format (per-version upload blurb)
 
 The per-file description field on Nexus has a **255-character limit** and shows in the Files tab. It is NOT a changelog — it's a short user-facing summary.
