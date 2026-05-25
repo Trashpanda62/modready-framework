@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$Version = '0.7.0',
+    [string]$Version = '0.7.3',
     [switch]$SkipVerify,
     [switch]$SkipZip,
     # When the live Bannerlord install is found at the standard Steam path
@@ -39,6 +39,11 @@ $UIExtAlias       = Join-Path $DistRoot ('Modules\Bannerlord.UIExtenderEx')
 $ButterLibAlias   = Join-Path $DistRoot ('Modules\Bannerlord.ButterLib')
 $MCMAlias         = Join-Path $DistRoot ('Modules\Bannerlord.MBOptionScreen')
 $BinRoot          = Join-Path $ModuleRoot 'bin\Win64_Shipping_Client'
+# Tactics editor ships as its own opt-in module folder (Modules\BetaDeps.TacticsEditor)
+# rather than bloating the main BetaDeps load surface. Users who don't want the
+# editor leave that folder disabled; users who do, get the editor + apply logic.
+$TacticsEditorRoot = Join-Path $DistRoot ('Modules\BetaDeps.TacticsEditor')
+$TacticsEditorBin  = Join-Path $TacticsEditorRoot 'bin\Win64_Shipping_Client'
 
 # Back-compat alias var so later sections of the script (and any external
 # tooling that imported the old name) keep working.
@@ -54,19 +59,21 @@ if (Test-Path $DistRoot) {
     Write-Host "Cleaning previous dist..." -ForegroundColor Yellow
     Remove-Item -Recurse -Force $DistRoot
 }
-New-Item -ItemType Directory -Force -Path $BinRoot         | Out-Null
-New-Item -ItemType Directory -Force -Path $HarmonyAlias    | Out-Null
-New-Item -ItemType Directory -Force -Path $UIExtAlias      | Out-Null
-New-Item -ItemType Directory -Force -Path $ButterLibAlias  | Out-Null
-New-Item -ItemType Directory -Force -Path $MCMAlias        | Out-Null
+New-Item -ItemType Directory -Force -Path $BinRoot           | Out-Null
+New-Item -ItemType Directory -Force -Path $HarmonyAlias      | Out-Null
+New-Item -ItemType Directory -Force -Path $UIExtAlias        | Out-Null
+New-Item -ItemType Directory -Force -Path $ButterLibAlias    | Out-Null
+New-Item -ItemType Directory -Force -Path $MCMAlias          | Out-Null
+New-Item -ItemType Directory -Force -Path $TacticsEditorBin  | Out-Null
 
 # -------- 2. Build all five projects --------
 $Projects = @(
-    @{ Name = 'BetaDeps.Foundation';   Path = (Join-Path $SrcRoot 'BetaDeps.Foundation\BetaDeps.Foundation.csproj')     },
-    @{ Name = 'BetaDeps.Harmony';      Path = (Join-Path $SrcRoot 'BetaDeps.Harmony\BetaDeps.Harmony.csproj')           },
-    @{ Name = 'BetaDeps.UIExtenderEx'; Path = (Join-Path $SrcRoot 'BetaDeps.UIExtenderEx\BetaDeps.UIExtenderEx.csproj') },
-    @{ Name = 'BetaDeps.ButterLib';    Path = (Join-Path $SrcRoot 'BetaDeps.ButterLib\BetaDeps.ButterLib.csproj')       },
-    @{ Name = 'BetaDeps.MCM';          Path = (Join-Path $SrcRoot 'BetaDeps.MCM\BetaDeps.MCM.csproj')                   }
+    @{ Name = 'BetaDeps.Foundation';     Path = (Join-Path $SrcRoot 'BetaDeps.Foundation\BetaDeps.Foundation.csproj')         },
+    @{ Name = 'BetaDeps.Harmony';        Path = (Join-Path $SrcRoot 'BetaDeps.Harmony\BetaDeps.Harmony.csproj')               },
+    @{ Name = 'BetaDeps.UIExtenderEx';   Path = (Join-Path $SrcRoot 'BetaDeps.UIExtenderEx\BetaDeps.UIExtenderEx.csproj')     },
+    @{ Name = 'BetaDeps.ButterLib';      Path = (Join-Path $SrcRoot 'BetaDeps.ButterLib\BetaDeps.ButterLib.csproj')           },
+    @{ Name = 'BetaDeps.MCM';            Path = (Join-Path $SrcRoot 'BetaDeps.MCM\BetaDeps.MCM.csproj')                       },
+    @{ Name = 'BetaDeps.TacticsEditor';  Path = (Join-Path $SrcRoot 'BetaDeps.TacticsEditor\BetaDeps.TacticsEditor.csproj')   }
 )
 
 foreach ($p in $Projects) {
@@ -175,6 +182,20 @@ foreach ($name in $MCMRequired) {
     Copy-Item $src (Join-Path $BinRoot $name) -Force
     Write-Host "  staged $name"
 }
+
+# BetaDeps.TacticsEditor ships into its own Modules\BetaDeps.TacticsEditor\ folder
+# rather than mixing into BetaDeps's bin. It depends at runtime on
+# BetaDeps.Foundation + Newtonsoft.Json, both of which are already loaded via
+# the main BetaDeps module -- so the only DLL the tactics editor folder needs
+# is its own.
+$TacticsEditorOutDir = Join-Path $RepoRoot "src\BetaDeps.TacticsEditor\bin\$Configuration\net472"
+if (-not (Test-Path $TacticsEditorOutDir)) { throw "Missing build output dir: $TacticsEditorOutDir" }
+$TacticsEditorDll = Join-Path $TacticsEditorOutDir 'BetaDeps.TacticsEditor.dll'
+if (-not (Test-Path $TacticsEditorDll)) { throw "Missing build output: $TacticsEditorDll" }
+Copy-Item $TacticsEditorDll (Join-Path $TacticsEditorBin 'BetaDeps.TacticsEditor.dll') -Force
+Write-Host "  staged Modules\BetaDeps.TacticsEditor\bin\..\BetaDeps.TacticsEditor.dll"
+Copy-Item (Join-Path $SrcRoot 'BetaDeps.Module\submodules\BetaDeps.TacticsEditor\SubModule.xml') (Join-Path $TacticsEditorRoot 'SubModule.xml') -Force
+Write-Host "  staged Modules\BetaDeps.TacticsEditor\SubModule.xml"
 
 # -------- 4. Copy SubModule.xml for the real module + the aliases --------
 Copy-Item (Join-Path $SrcRoot 'BetaDeps.Module\SubModule.xml')                                          (Join-Path $ModuleRoot     'SubModule.xml') -Force
@@ -430,10 +451,25 @@ if (-not $SkipZip) {
         }
     }
 
+    # v0.7.2: Vortex FOMOD installer profile. Lives at the zip ROOT (not
+    # inside Modules\BetaDeps\) so Vortex's FOMOD Installer extension can
+    # discover it. Users without the extension don't see the wizard; they
+    # get the normal Modules\ deploy which still works.
+    $FomodSrc = Join-Path $RepoRoot 'fomod'
+    if (Test-Path $FomodSrc) {
+        Copy-Item -Recurse -Force $FomodSrc (Join-Path $ZipStaging 'fomod')
+        Write-Host "  staged fomod\ at zip root (Vortex installer profile)"
+    }
+
     $ZipPath = Join-Path $DistRoot ("BetaDeps-v$Version.zip")
     if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }
-    Compress-Archive -Path (Join-Path $ZipStaging 'Modules') -DestinationPath $ZipPath -CompressionLevel Optimal
-    Write-Host "  $ZipPath  (single Modules\BetaDeps folder, aliases nested under aliases\)" -ForegroundColor Green
+    # Include BOTH Modules\ and (if present) fomod\ in the zip root.
+    $ZipPathsToInclude = @( (Join-Path $ZipStaging 'Modules') )
+    if (Test-Path (Join-Path $ZipStaging 'fomod')) {
+        $ZipPathsToInclude += (Join-Path $ZipStaging 'fomod')
+    }
+    Compress-Archive -Path $ZipPathsToInclude -DestinationPath $ZipPath -CompressionLevel Optimal
+    Write-Host "  $ZipPath  (single Modules\BetaDeps folder + fomod\ at zip root)" -ForegroundColor Green
     Remove-Item -Recurse -Force $ZipStaging
 }
 
@@ -463,7 +499,7 @@ if (-not $SkipDeploy) {
         $liveModules = Join-Path $liveRoot 'Modules'
         Write-Host "  target: $liveModules" -ForegroundColor Cyan
         $sourceModules = Join-Path $DistRoot 'Modules'
-        $folders = 'BetaDeps','Bannerlord.Harmony','Bannerlord.UIExtenderEx','Bannerlord.ButterLib','Bannerlord.MBOptionScreen'
+        $folders = 'BetaDeps','Bannerlord.Harmony','Bannerlord.UIExtenderEx','Bannerlord.ButterLib','Bannerlord.MBOptionScreen','BetaDeps.TacticsEditor'
         foreach ($f in $folders) {
             $srcDir = Join-Path $sourceModules $f
             $dstDir = Join-Path $liveModules   $f

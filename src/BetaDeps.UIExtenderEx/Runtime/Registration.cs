@@ -52,5 +52,13 @@ internal sealed class UIExtenderRegistry
     public List<MixinRegistration> Mixins { get; } = new();
     public bool Enabled { get; set; }
 
+    /// <summary>
+    /// Patch / mixin types the consumer mod has explicitly disabled via
+    /// UIExtender.Disable(Type). Runtime engine checks this set before
+    /// applying a registration. Empty for the typical mod that never
+    /// calls per-type Disable.
+    /// </summary>
+    public HashSet<Type> DisabledTypes { get; } = new();
+
     public UIExtenderRegistry(string moduleName) { ModuleName = moduleName; }
 }

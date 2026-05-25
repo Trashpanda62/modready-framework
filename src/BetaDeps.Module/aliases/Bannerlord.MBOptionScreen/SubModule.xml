@@ -25,12 +25,7 @@
 
   <DependedModuleMetadatas />
 
-  <SubModules>
-    <SubModule>
-      <Name value="Bannerlord.MBOptionScreen alias stub" />
-      <DLLName value="BetaDeps.Foundation.dll" />
-      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
-      <Tags />
-    </SubModule>
-  </SubModules>
+  <!-- v0.7.2: empty SubModules so BLSE LauncherEx doesn't construct anything
+       from this alias DLL. All code runs from Modules\BetaDeps\. -->
+  <SubModules />
 </Module>

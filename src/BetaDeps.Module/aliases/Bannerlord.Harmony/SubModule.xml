@@ -33,12 +33,14 @@
 
   <DependedModuleMetadatas />
 
-  <SubModules>
-    <SubModule>
-      <Name value="Bannerlord.Harmony alias stub" />
-      <DLLName value="BetaDeps.Foundation.dll" />
-      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
-      <Tags />
-    </SubModule>
-  </SubModules>
+  <!--
+    v0.7.2: empty SubModules so BLSE LauncherEx (and any other reflective
+    mod-list builder) never constructs an instance from this alias DLL.
+    The alias's only job is to advertise the Bannerlord.Harmony module ID
+    so consumer-mod DependedModule checks pass. All actual code runs from
+    Modules\BetaDeps\ via BetaDepsHarmonySubModule's ctor. Previous shape
+    declared BetaDeps.Foundation.AliasStubSubModule whose ctor crashed
+    LauncherEx because it touched game-side types not yet loaded.
+  -->
+  <SubModules />
 </Module>

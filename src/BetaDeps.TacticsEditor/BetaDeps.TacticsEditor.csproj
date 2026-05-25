@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+
+    <AssemblyName>BetaDeps.TacticsEditor</AssemblyName>
+    <RootNamespace>BetaDeps.TacticsEditor</RootNamespace>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <Company>Maxfield Management Group</Company>
+    <Authors>Steve / Maxfield Management Group</Authors>
+    <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
+    <Description>Tactics editor for BetaDeps. In-battle planner where a non-coder click-drags formation positions, sets behaviors, and exports the plan as a standalone Bannerlord mod that other players can install.</Description>
+    <Product>BetaDeps.TacticsEditor</Product>
+
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>BetaDeps.TacticsEditor 1.0.0</InformationalVersion>
+
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.*" PrivateAssets="all" />
+    <!-- Core brings TaleWorlds.Core/Library/MountAndBlade/Engine/InputSystem/
+         ScreenSystem. We intentionally do NOT reference
+         TaleWorlds.MountAndBlade.View.dll: the editor reaches MissionScreen
+         via ScreenManager.TopScreen as object + reflection, so no separate
+         View reference is needed. -->
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BetaDeps.Foundation">
+      <HintPath>..\BetaDeps.Foundation\bin\Release\net472\BetaDeps.Foundation.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -1,10 +1,10 @@
 # BetaDeps
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Latest release](https://img.shields.io/badge/release-v0.5.8-green.svg)](https://github.com/Trashpanda62/Betadeps/releases)
+[![Latest release](https://img.shields.io/badge/release-v0.7.0-green.svg)](https://github.com/Trashpanda62/Betadeps/releases)
 [![Game version](https://img.shields.io/badge/Bannerlord-e1.4.5-orange.svg)](https://store.steampowered.com/app/261550/Mount__Blade_II_Bannerlord/)
 
-A single drop-in dependency module for **Mount & Blade II: Bannerlord** that replaces the entire BUTR dependency stack (Harmony + UIExtenderEx + ButterLib + MCM) with one folder, one load entry, and one settings UI.
+A single drop-in dependency module for **Mount & Blade II: Bannerlord** that replaces the entire BUTR dependency stack (Harmony + UIExtenderEx + ButterLib + MCM) with one folder, one load entry, and one settings UI — and now catches the entire class of "consumer mod built against a stale TaleWorlds API" crashes so your modlist keeps booting through TaleWorlds updates.
 
 ## What it does
 
@@ -30,10 +30,12 @@ If a fresh install doesn't show all four aliases in the launcher yet, BetaDeps m
 
 ## Features
 
+- **PatchShield (v0.7).** Generic Harmony finalizer installed on every patched method during every lifecycle hook. When a consumer mod's prefix throws `MissingMethodException`, `MissingFieldException`, or `TypeLoadException` because TaleWorlds renamed/removed something it was patching, BetaDeps logs it, synthesizes a sensible default return value, and auto-unpatches the offending prefix so it stops firing. The class of crash that used to take out your campaign load every time TaleWorlds shipped a patch.
 - **One module, four libraries.** Harmony, ButterLib, UIExtenderEx, and MCM all live inside `Modules\BetaDeps\` so there's exactly one thing to enable and one thing to update.
 - **Mod Config UI.** In-game settings menu with draggable sliders on every numeric setting, dropdowns, toggles, and right-side hover hints that explain what each setting does as you mouse over it.
 - **In-game Self-Test.** A one-click test that round-trips every setting across every installed mod and reports any mismatches before they corrupt your save.
 - **Compatibility shims.** Type-forwarding DLLs (`Bannerlord.Harmony.dll`, `Bannerlord.ButterLib.dll`, `Bannerlord.UIExtenderEx.dll`, `MCMv5.dll`) so existing mods that were compiled against the upstream BUTR names resolve against BetaDeps without any changes.
+- **Opt-in single-launch recovery.** Click `Toggle Auto-Disable` in Mod Config to enable a Harmony pre-construction guard that blocks known-broken mods from instantiating. All recovery features that modify `LauncherData.xml` ship OFF by default — your modlist is not touched unless you ask.
 - **Beta branch support.** Verified on Bannerlord e1.4.5. The public branch (e1.3.x) is also supported by the same build.
 
 ## Where this is going

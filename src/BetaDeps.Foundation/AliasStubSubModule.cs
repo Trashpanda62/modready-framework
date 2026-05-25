@@ -39,6 +39,33 @@ public class AliasStubSubModule : MBSubModuleBase
     {
         if (System.Threading.Interlocked.Exchange(ref _earlyDetectionRan, 1) == 0)
         {
+            // v0.7 hotfix: install the AssemblyResolve shim + LoadFrom
+            // dependency-conflict override FIRST in the ctor so consumer-mod
+            // load attempts that touch our impersonated assemblies
+            // (ButterLib / UIExtenderEx / Harmony) get our handlers in place
+            // before LoadFrom is called for them. Idempotent --
+            // BetaDepsHarmonySubModule's ctor also installs both, whichever
+            // runs first wins.
+            try
+            {
+                AssemblyVersionShim.Install();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/AssemblyShim", ex); } catch { }
+            }
+
+            // AssemblyLoaderDependencyShim disabled -- see BetaDepsHarmonySubModule for rationale.
+
+            try
+            {
+                CollectAssemblyTypesShim.Install();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/CollectAssemblyTypesShim", ex); } catch { }
+            }
+
             try
             {
                 IncompatibleModDetector.RunEarlyPhase();

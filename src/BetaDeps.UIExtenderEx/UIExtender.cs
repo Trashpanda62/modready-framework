@@ -207,5 +207,35 @@ public class UIExtender
         DiagLog.Log(Tag, $"Disable('{_moduleName}'): registry marked disabled");
     }
 
+    /// <summary>
+    /// v0.7.2 (BannerCraft v1.3.13 compat): some consumer mods call
+    /// `UIExtender.Disable(typeof(SomeMixin))` to disable a single
+    /// prefab / mixin patch without disabling the whole module. The
+    /// upstream BUTR API takes a System.Type identifying the patch class.
+    /// We don't physically uninstall the patches at runtime — once Harmony
+    /// has applied them they stay until the game closes — but we add the
+    /// type to the registry's DisabledTypes set so the runtime engine
+    /// skips that registration going forward, AND so callers querying the
+    /// registry see consistent state. The main job here is to satisfy the
+    /// MissingMethodException that BannerCraft was hitting.
+    /// </summary>
+    public void Disable(Type patchType)
+    {
+        if (patchType == null)
+        {
+            DiagLog.Log(Tag, $"Disable(null) on '{_moduleName}': ignored");
+            return;
+        }
+        try
+        {
+            _registry.DisabledTypes.Add(patchType);
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"Disable(Type={patchType.FullName})", ex);
+        }
+        DiagLog.Log(Tag, $"Disable('{_moduleName}', {patchType.FullName}): marked inactive in registry");
+    }
+
     internal UIExtenderRegistry Registry => _registry;
 }

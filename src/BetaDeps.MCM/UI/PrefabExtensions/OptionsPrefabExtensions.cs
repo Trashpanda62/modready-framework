@@ -230,6 +230,12 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "        <ButtonWidget Command.Click=\"ExecuteToggleAutoDisable\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
         + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Toggle Auto-Disable\" /></Children>\n"
         + "        </ButtonWidget>\n"
+        + "        <ButtonWidget Command.Click=\"ExecuteTogglePatchShield\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Toggle PatchShield\" /></Children>\n"
+        + "        </ButtonWidget>\n"
+        + "        <ButtonWidget Command.Click=\"ExecuteToggleSaveShieldSwallow\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Toggle SaveShield Swallow\" /></Children>\n"
+        + "        </ButtonWidget>\n"
         + "      </Children>\n"
         + "    </ListPanel>\n"
         // v1.0: dead space after the action button row so the Cancel/Done bar

@@ -1,5 +1,19 @@
 # BetaDeps project — persistent instructions
 
+## 🛑 NEVER PROPOSE STOPPING OR PARKING WORK
+
+Do NOT suggest "park this for tomorrow", "let's stop here", "call it for the
+night", "ship without this", or any variant of bailing out of an in-flight
+investigation. The user decides when work stops, not Claude. Do not
+guess the local time; do not invoke fatigue, lateness, or complexity as
+reasons to halt. Caught doing this on 2026-05-24 (CDE investigation, ~5pm
+local) — Claude repeatedly tried to defer the fix even though the user
+had explicitly said "we aren't stopping until it's done". Keep iterating
+on the actual technical problem until the user explicitly says stop,
+pause, ship, or call it a night.
+
+
+
 ## 🗣️ SHORT TRIGGER WORDS
 
 The user prefers single-word replies for common check-ins:
@@ -141,6 +155,9 @@ Write this to `C:\dev\bannerlord\nexus-file-description-v<X.Y.Z>.md` so the user
 ## Shipping authority
 
 **The user — not Claude — decides what ships and when.** Both directions of this matter:
+
+**Don't jump to upload steps until the user signals ship time.** When the user says "ship tonight" or "release at end of day", treat that as a hard fence — code work, builds, local changelogs, git tags can all keep going during the day, but anything that touches a public surface (GitHub Release page edits, Nexus upload, Steam Workshop, Patreon post, social posts) waits until the user explicitly says "go" / "ship it" / "do it now" in the context of the ship sequence. Caught doing this on the v0.7.0 day (2026-05-24) — I pushed the user to update the GitHub Release page mid-afternoon when they'd said tonight. Don't repeat.
+
 
 - Do NOT proactively suggest shipping a release that lacks features the user has previously called out as required (e.g., working sliders). Earlier today: "no we do not ship 1.0 yet, you don't get to decide that" and "get the sliders working again, you don't get to decide that".
 - When the user says "ship it", do not push back even if a previous directive said don't ship. The user is overriding their own earlier criteria; respect that and execute.

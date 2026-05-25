@@ -376,7 +376,7 @@ internal static class McmSelfTest
             try
             {
                 var original = prop.GetValue(instance);
-                var isDropdown = prop.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null;
+                var isDropdown = IsDropdownProperty(prop);
                 // For Dropdown<T>, capture original SelectedValue as a string
                 // so we can restore by SelectedValue assignment after the
                 // round-trip — re-assigning the same Dropdown reference would
@@ -491,7 +491,7 @@ internal static class McmSelfTest
             try
             {
                 var current = p.GetValue(instance);
-                bool isDropdown = p.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null;
+                bool isDropdown = IsDropdownProperty(p);
                 var mutated = MutateValue(p, current);
                 bool changed = isDropdown
                     ? (mutated != null)  // dropdowns mutate in place; assume change attempted
@@ -514,7 +514,7 @@ internal static class McmSelfTest
                         try
                         {
                             var v = q.GetValue(instance);
-                            string repr = q.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null
+                            string repr = IsDropdownProperty(q)
                                 ? ToSelectedValueRepr(v)
                                 : (v?.ToString() ?? "<null>");
                             if (!watchedTrails.TryGetValue(q.Name, out var trail))
@@ -531,6 +531,21 @@ internal static class McmSelfTest
             catch { /* property won't accept mutation; skip */ }
         }
         if (mutations.Count == 0) return true;
+
+        // Re-snapshot expected values AFTER all mutations are complete. Some
+        // consumer mods (e.g. IDontCare) expose computed/aggregate properties
+        // whose getter recomputes from other properties' state. When we
+        // mutate property A early and later mutate property B that triggers
+        // A's recompute, the value we captured at A's mutation step is stale.
+        // The Done test asserts "save+load preserves what's currently in
+        // memory after Done", so the in-memory value at this point is the
+        // correct expectation.
+        foreach (var p in props)
+        {
+            if (!mutations.ContainsKey(p.Name)) continue;
+            try { mutations[p.Name] = p.GetValue(instance); }
+            catch { /* leave the earlier-captured value as expectation */ }
+        }
 
         try { SettingsStorage.Save(instance, entry.Id); }
         catch (Exception ex) { DiagLog.LogCaught(Tag, $"DoneSave({entry.Id})", ex); return false; }
@@ -633,6 +648,13 @@ internal static class McmSelfTest
 
     private static string ClassifyProperty(PropertyInfo p)
     {
+        // Type-first: trust the declared property type over the attribute,
+        // because some mods (e.g. IDontCare — I Don't Care) decorate a
+        // Dropdown<string> property with [SettingPropertyBool] (mod-author
+        // bug). The mutation/save path WILL fail if we trust the attribute,
+        // because writing a bool into a Dropdown<string> setter throws.
+        if (IsDropdownProperty(p)) return "dropdown";
+
         var attr = p.GetCustomAttributes(inherit: true).OfType<SettingPropertyAttribute>().FirstOrDefault();
         if (attr is SettingPropertyBoolAttribute) return "bool";
         if (attr is SettingPropertyIntegerAttribute) return "int";
@@ -642,12 +664,46 @@ internal static class McmSelfTest
         return "unknown";
     }
 
+    /// <summary>
+    /// True if the property is a dropdown — either marked with
+    /// [SettingPropertyDropdown] OR whose declared type is MCM.Common.Dropdown&lt;T&gt;.
+    /// </summary>
+    private static bool IsDropdownProperty(PropertyInfo p)
+    {
+        if (p.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null)
+            return true;
+        var t = p.PropertyType;
+        while (t != null)
+        {
+            if (t.IsGenericType)
+            {
+                var gd = t.GetGenericTypeDefinition();
+                if (gd.FullName == "MCM.Common.Dropdown`1") return true;
+            }
+            t = t.BaseType;
+        }
+        return false;
+    }
+
     // --------------------------------------------------------------------
     // Value mutation
     // --------------------------------------------------------------------
 
     private static object? MutateValue(PropertyInfo p, object? current)
     {
+        // Type-first: if the property is Dropdown<T>, treat it as a dropdown
+        // regardless of any (possibly mis-applied) bool/int attribute. Same
+        // rationale as ClassifyProperty — IDontCare decorates a Dropdown<string>
+        // property with [SettingPropertyBool], so trusting the attribute would
+        // flip a bool and crash on save.
+        if (IsDropdownProperty(p))
+        {
+            // Fall through to the existing dropdown-handling block below.
+            // (The attribute-based branches all return early; this guard
+            // ensures we skip them for type-confirmed dropdowns.)
+            return MutateDropdown(p, current);
+        }
+
         var attr = p.GetCustomAttributes(inherit: true).OfType<SettingPropertyAttribute>().FirstOrDefault();
         if (attr is SettingPropertyBoolAttribute)
         {
@@ -691,23 +747,31 @@ internal static class McmSelfTest
         }
         if (attr is SettingPropertyDropdownAttribute)
         {
-            // Cycle the dropdown's SelectedIndex by 1 if possible.
-            if (current == null) return null;
-            var t = current.GetType();
-            var idxProp = t.GetProperty("SelectedIndex", BindingFlags.Public | BindingFlags.Instance);
-            if (idxProp == null) return null;
-            var items = ReadDropdownItemCount(current);
-            if (items <= 1) return current; // can't mutate
-            int cur = idxProp.GetValue(current) is int ci ? ci : 0;
-            int next = (cur + 1) % items;
-            try
-            {
-                if (idxProp.CanWrite) idxProp.SetValue(current, next);
-                return current; // mutate-in-place
-            }
-            catch { return null; }
+            return MutateDropdown(p, current);
         }
         return null;
+    }
+
+    /// <summary>
+    /// Cycle a Dropdown<T>'s SelectedIndex by 1. Mutates in-place; returns
+    /// the same reference (or null if the property/value can't be mutated).
+    /// </summary>
+    private static object? MutateDropdown(PropertyInfo p, object? current)
+    {
+        if (current == null) return null;
+        var t = current.GetType();
+        var idxProp = t.GetProperty("SelectedIndex", BindingFlags.Public | BindingFlags.Instance);
+        if (idxProp == null) return null;
+        var items = ReadDropdownItemCount(current);
+        if (items <= 1) return current;
+        int cur = idxProp.GetValue(current) is int ci ? ci : 0;
+        int next = (cur + 1) % items;
+        try
+        {
+            if (idxProp.CanWrite) idxProp.SetValue(current, next);
+            return current;
+        }
+        catch { return null; }
     }
 
     private static int ReadDropdownItemCount(object dropdown)
@@ -732,8 +796,9 @@ internal static class McmSelfTest
 
     private static bool ValuesEqual(PropertyInfo p, object? a, object? b)
     {
-        var attr = p.GetCustomAttributes(inherit: true).OfType<SettingPropertyAttribute>().FirstOrDefault();
-        if (attr is SettingPropertyDropdownAttribute)
+        // Type-first dropdown check (same rationale as ClassifyProperty:
+        // IDontCare uses [SettingPropertyBool] on Dropdown<string> properties).
+        if (IsDropdownProperty(p))
         {
             // The on-disk wire format is the dropdown's SelectedValue (see
             // DropdownConverter.WriteJson). SelectedIndex is only stable when
@@ -863,7 +928,7 @@ internal static class McmSelfTest
             try
             {
                 var val = p.GetValue(instance);
-                if (p.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null)
+                if (IsDropdownProperty(p))
                 {
                     snap[p.Name] = new DropdownSnap
                     {
@@ -889,7 +954,7 @@ internal static class McmSelfTest
             if (p == null) continue;
             try
             {
-                if (p.GetCustomAttributes(inherit: true).OfType<SettingPropertyDropdownAttribute>().FirstOrDefault() != null)
+                if (IsDropdownProperty(p))
                 {
                     var dd = p.GetValue(instance);
                     if (dd != null && kv.Value is DropdownSnap ds)
@@ -1020,6 +1085,22 @@ internal static class McmSelfTest
                 var selftestPath = System.IO.Path.Combine(dir, "selftest.log");
                 System.IO.File.WriteAllText(selftestPath, fullText);
                 DiagLog.Log(Tag, $"wrote selftest.log ({fullText.Length} chars)");
+
+                // v4 #5: machine-readable sidecar. selftest.json carries the
+                // same SaveShield + PatchShield + environment data in a form
+                // that AI assistants and CI tooling can parse without
+                // needing to interpret the human-readable text layout.
+                try
+                {
+                    var jsonPath = System.IO.Path.Combine(dir, "selftest.json");
+                    var jsonText = BuildSelftestJson(report);
+                    System.IO.File.WriteAllText(jsonPath, jsonText);
+                    DiagLog.Log(Tag, $"wrote selftest.json ({jsonText.Length} chars)");
+                }
+                catch (Exception jsonEx)
+                {
+                    DiagLog.LogCaught(Tag, "WriteSelftestJson", jsonEx);
+                }
             }
 
             // Echo errors-only summary into runtime.log for quick triage.
@@ -1046,6 +1127,13 @@ internal static class McmSelfTest
         sb.AppendLine($"Cancel:   {report.PassedCancel}/{report.TestedMods} mods passed Cancel semantics");
         sb.AppendLine($"Visibility: {report.VisibilityMissing} enabled-with-code mod folder(s) NOT in registry");
         sb.AppendLine($"Duplicate DLLs: {report.DuplicateGroups} watched library(ies) shipped in 2+ mods");
+        sb.AppendLine();
+
+        AppendEnvironment(sb);
+        AppendPatchShieldStatus(sb);
+        AppendSaveShieldStatus(sb);
+        AppendInstalledVsEnabled(sb);
+        AppendRuntimeLogTriage(sb);
         sb.AppendLine();
 
         // v0.5.0+: list of registered mods so users can paste this into a
@@ -1282,6 +1370,591 @@ internal static class McmSelfTest
         catch (Exception ex)
         {
             sb.AppendLine($"--- Auto-disable diagnostics: skipped, threw {ex.GetType().Name}: {ex.Message} ---");
+        }
+    }
+
+    // --------------------------------------------------------------------
+    // v0.7.2 selftest enhancements: environment, patchshield status,
+    // installed-vs-enabled mod list. Triggered from BuildReportText so
+    // every selftest.log uploaded to github carries this context.
+    // --------------------------------------------------------------------
+
+    private static void AppendEnvironment(StringBuilder sb)
+    {
+        sb.AppendLine("--- Environment ---");
+        try
+        {
+            // BetaDeps version: pull from the Foundation assembly we know
+            // was loaded (cleaner than reflecting on this MCM assembly).
+            var betaDepsVersion = "(unknown)";
+            try
+            {
+                var fdn = typeof(BetaDeps.Foundation.DiagLog).Assembly.GetName();
+                betaDepsVersion = $"v{fdn.Version} ({fdn.Name})";
+            }
+            catch { }
+            sb.AppendLine($"  BetaDeps:     {betaDepsVersion}");
+
+            // Bannerlord game version + branch. VersionProbe is cached.
+            try
+            {
+                sb.AppendLine($"  Bannerlord:   v{BetaDeps.Foundation.VersionProbe.Major}.{BetaDeps.Foundation.VersionProbe.Minor} (branch: {BetaDeps.Foundation.VersionProbe.Branch})");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"  Bannerlord:   (probe failed: {ex.GetType().Name})");
+            }
+
+            // Install path (where the runtime.log lives is next to BetaDeps).
+            try
+            {
+                sb.AppendLine($"  Install dir:  {System.IO.Path.GetDirectoryName(BetaDeps.Foundation.RuntimeLog.Path)}");
+            }
+            catch { }
+
+            sb.AppendLine($"  Date/time:    {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (environment probe threw: {ex.GetType().Name}: {ex.Message})");
+        }
+        sb.AppendLine();
+    }
+
+    private static void AppendPatchShieldStatus(StringBuilder sb)
+    {
+        sb.AppendLine("--- PatchShield status ---");
+        try
+        {
+            bool disabled = BetaDeps.Foundation.PatchShield.IsDisabled();
+            sb.AppendLine($"  Enabled:                {(disabled ? "NO (opt-out flag present)" : "yes")}");
+            sb.AppendLine($"  Methods shielded:       {BetaDeps.Foundation.PatchShield.ShieldedCount}");
+            sb.AppendLine($"  Prefixes auto-unpatched: {BetaDeps.Foundation.PatchShield.UnpatchedCount}");
+            sb.AppendLine($"  Swallowed exceptions:");
+            sb.AppendLine($"    MissingMethodException: {BetaDeps.Foundation.PatchShield.SwallowedMissingMethod}");
+            sb.AppendLine($"    MissingFieldException:  {BetaDeps.Foundation.PatchShield.SwallowedMissingField}");
+            sb.AppendLine($"    TypeLoadException:      {BetaDeps.Foundation.PatchShield.SwallowedTypeLoad}");
+            sb.AppendLine($"    Total swallowed:        {BetaDeps.Foundation.PatchShield.SwallowedTotal}");
+            if (BetaDeps.Foundation.PatchShield.SwallowedTotal > 0)
+            {
+                sb.AppendLine($"  NOTE: every swallow = a consumer-mod patch that would have crashed your game.");
+                sb.AppendLine($"        See runtime.log [BetaDeps.PatchShield] lines for the specific methods.");
+            }
+
+            // v4 #6: owners (Harmony IDs) whose patches got unpatched. Mod
+            // authors typically use their mod's namespace as the Harmony ID,
+            // so this is usually mod-identifiable on its own.
+            var ownerMap = BetaDeps.Foundation.PatchShield.UnpatchedOwnerCounts;
+            if (ownerMap.Count > 0)
+            {
+                sb.AppendLine($"  Unpatched owners ({ownerMap.Count}):");
+                foreach (var kv in ownerMap.OrderByDescending(k => k.Value))
+                {
+                    sb.AppendLine($"    {kv.Value,4}  {kv.Key}");
+                }
+                sb.AppendLine($"        (each line = one Harmony owner ID and how many of its patches PatchShield unpatched this session.");
+                sb.AppendLine($"         The owner ID is typically the mod's namespace, so each row points at a mod needing an update.)");
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (PatchShield probe threw: {ex.GetType().Name}: {ex.Message})");
+        }
+        sb.AppendLine();
+    }
+
+    /// <summary>
+    /// Embed SaveShield activity in selftest.log so mod authors can read the
+    /// full diagnostic blocks (SAVE-LOAD / MISSION-INIT FAILURE) without
+    /// asking the user to also share runtime.log. Header carries counters;
+    /// body extracts every SaveShield === block written this session, with
+    /// the most-recent N blocks rendered inline (older blocks are
+    /// summarised by CULPRIT line only to keep the report compact).
+    /// </summary>
+    private static void AppendSaveShieldStatus(StringBuilder sb)
+    {
+        sb.AppendLine("--- SaveShield status ---");
+        try
+        {
+            sb.AppendLine($"  Methods shielded:        {BetaDeps.Foundation.SaveShield.ShieldedCount}");
+            sb.AppendLine($"  Duplicate-key hits:      {BetaDeps.Foundation.SaveShield.DuplicateKeyHits}");
+            sb.AppendLine($"  Other load failures:     {BetaDeps.Foundation.SaveShield.OtherFailureHits}");
+            sb.AppendLine($"  Total caught:            {BetaDeps.Foundation.SaveShield.DuplicateKeyHits + BetaDeps.Foundation.SaveShield.OtherFailureHits}");
+            sb.AppendLine($"  Swallow-mode:            {(BetaDeps.Foundation.SaveShield.IsSwallowEnabled() ? "ENABLED (default in v0.7.3+)" : "disabled (saveshield-swallow-disabled.flag present)")}");
+            sb.AppendLine($"  Exceptions swallowed:    {BetaDeps.Foundation.SaveShield.SwallowedCount}");
+            if (BetaDeps.Foundation.SaveShield.SwallowedCount > 0)
+            {
+                sb.AppendLine($"  NOTE: each swallow = a mod's save-load or mission-init handler that would have crashed");
+                sb.AppendLine($"        the game but was instead logged + dropped. The mod's specific feature did not");
+                sb.AppendLine($"        fire at that call site. See FAILURE records below for the affected mods.");
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (SaveShield probe threw: {ex.GetType().Name}: {ex.Message})");
+        }
+        sb.AppendLine();
+
+        // v4: prefer the structured ring buffer; fall back to scanning
+        // runtime.log if it's empty (e.g. failure fired before MCM loaded).
+        try
+        {
+            var records = BetaDeps.Foundation.SaveShield.RecentFailures;
+            if (records.Count > 0)
+            {
+                sb.AppendLine($"--- SaveShield FAILURE records ({records.Count} this session, newest first) ---");
+                sb.AppendLine();
+                sb.AppendLine("Mod authors: each record below names the CULPRIT assembly + current API surface +");
+                sb.AppendLine("the culprit mod's manifest. That's almost always the mod that needs an update.");
+                sb.AppendLine();
+
+                const int RenderInFullN = 5;
+                int renderUpTo = System.Math.Min(RenderInFullN, records.Count);
+                for (int i = 0; i < renderUpTo; i++)
+                {
+                    sb.AppendLine($"--- record {i + 1} of {records.Count} (full) ---");
+                    sb.AppendLine(records[i].ToLogBlock());
+                    sb.AppendLine();
+                }
+                if (records.Count > RenderInFullN)
+                {
+                    sb.AppendLine($"  Older records (CULPRIT summary only, {records.Count - RenderInFullN} more):");
+                    for (int i = RenderInFullN; i < records.Count; i++)
+                    {
+                        var r = records[i];
+                        sb.AppendLine($"    [{i + 1}] {r.Category}: {r.CulpritAssembly} -- {r.ExceptionType} in {r.OwnerType}.{r.OwnerMethod}");
+                    }
+                    sb.AppendLine();
+                }
+
+                // Also drop a GitHub-ready markdown snippet of the most recent
+                // failure inside selftest.log so the user can copy/paste it
+                // straight into a mod's issue tracker without using the
+                // Send-to-GitHub button.
+                sb.AppendLine("--- GitHub issue snippet (most recent failure) ---");
+                sb.AppendLine("(copy-paste the block below into the mod's bug tracker)");
+                sb.AppendLine();
+                sb.AppendLine("```markdown");
+                sb.AppendLine(records[0].ToMarkdownSnippet());
+                sb.AppendLine("```");
+                sb.AppendLine();
+
+                sb.AppendLine();
+                return;
+            }
+
+            // Fallback: pull blocks from runtime.log (legacy path).
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            if (string.IsNullOrEmpty(rtPath) || !System.IO.File.Exists(rtPath))
+            {
+                sb.AppendLine("  (no SaveShield records this session -- nothing crashed save-load or mission-init)");
+                sb.AppendLine();
+                return;
+            }
+            var blocks = ExtractSaveShieldBlocks(rtPath);
+            if (blocks.Count == 0)
+            {
+                sb.AppendLine("  (no SaveShield records this session -- nothing crashed save-load or mission-init)");
+                sb.AppendLine();
+                return;
+            }
+            sb.AppendLine($"--- SaveShield FAILURE blocks ({blocks.Count} from runtime.log) ---");
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                sb.AppendLine($"--- block {i + 1} ---");
+                foreach (var line in blocks[i]) sb.AppendLine(line);
+                sb.AppendLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (SaveShield record extraction threw: {ex.GetType().Name}: {ex.Message})");
+        }
+        sb.AppendLine();
+    }
+
+    /// <summary>
+    /// Stream runtime.log and pull out each [BetaDeps.SaveShield] FAILURE
+    /// block (delimited by the "===" lines SaveShield emits). Returns each
+    /// block as a list of cleaned-up lines (timestamp/tag prefix stripped so
+    /// the embedded output reads naturally inside selftest.log).
+    /// </summary>
+    private static System.Collections.Generic.List<System.Collections.Generic.List<string>> ExtractSaveShieldBlocks(string runtimeLogPath)
+    {
+        var blocks = new System.Collections.Generic.List<System.Collections.Generic.List<string>>();
+        const string Tag = "[BetaDeps.SaveShield]";
+        const string Delim = "========================================================";
+        try
+        {
+            using var fs = new System.IO.FileStream(runtimeLogPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+            using var sr = new System.IO.StreamReader(fs);
+
+            System.Collections.Generic.List<string>? current = null;
+            string? line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                int tagPos = line.IndexOf(Tag, System.StringComparison.Ordinal);
+                if (tagPos < 0) continue;
+
+                // Strip "[timestamp] [Tnn] [BetaDeps.SaveShield] " prefix.
+                var content = line.Substring(tagPos + Tag.Length).TrimStart();
+
+                if (content.StartsWith(Delim, System.StringComparison.Ordinal))
+                {
+                    if (current == null)
+                    {
+                        // Open marker.
+                        current = new System.Collections.Generic.List<string>();
+                    }
+                    else
+                    {
+                        // Close marker -- block complete.
+                        blocks.Add(current);
+                        current = null;
+                    }
+                    continue;
+                }
+
+                if (current != null)
+                {
+                    current.Add("  " + content);
+                }
+            }
+
+            // If runtime.log ended mid-block (crash before close marker),
+            // capture it anyway.
+            if (current != null && current.Count > 0)
+            {
+                blocks.Add(current);
+            }
+        }
+        catch
+        {
+            // Swallow -- partial extraction is fine; we just won't show all blocks.
+        }
+        return blocks;
+    }
+
+    /// <summary>
+    /// v4 #5: build a single JSON document with the SaveShield ring buffer +
+    /// PatchShield counters + environment + brief test summary. Hand-built
+    /// (no Newtonsoft dependency from McmSelfTest) so the document stays
+    /// reproducible without extra package refs.
+    /// </summary>
+    private static string BuildSelftestJson(Report report)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append('{');
+        sb.Append($"\"schema\":\"betadeps.selftest\",\"version\":1,");
+        sb.Append($"\"generated_at\":\"{System.DateTime.UtcNow:o}\",");
+
+        // Environment
+        try
+        {
+            sb.Append("\"environment\":{");
+            // Pull from Foundation's assembly so this matches the BetaDeps
+            // version line in selftest.log (which uses Foundation, not MCM).
+            sb.Append($"\"betadeps_version\":\"{JsonEsc(typeof(BetaDeps.Foundation.DiagLog).Assembly.GetName().Version?.ToString())}\",");
+            sb.Append($"\"bannerlord_branch\":\"{JsonEsc(BetaDeps.Foundation.VersionProbe.Branch.ToString())}\",");
+            sb.Append($"\"bannerlord_version\":\"{BetaDeps.Foundation.VersionProbe.Major}.{BetaDeps.Foundation.VersionProbe.Minor}\"");
+            sb.Append("},");
+        }
+        catch { sb.Append("\"environment\":null,"); }
+
+        // PatchShield counters
+        try
+        {
+            sb.Append("\"patchshield\":{");
+            sb.Append($"\"enabled\":{(BetaDeps.Foundation.PatchShield.IsDisabled() ? "false" : "true")},");
+            sb.Append($"\"shielded_count\":{BetaDeps.Foundation.PatchShield.ShieldedCount},");
+            sb.Append($"\"unpatched_count\":{BetaDeps.Foundation.PatchShield.UnpatchedCount},");
+            sb.Append($"\"swallowed_missing_method\":{BetaDeps.Foundation.PatchShield.SwallowedMissingMethod},");
+            sb.Append($"\"swallowed_missing_field\":{BetaDeps.Foundation.PatchShield.SwallowedMissingField},");
+            sb.Append($"\"swallowed_type_load\":{BetaDeps.Foundation.PatchShield.SwallowedTypeLoad},");
+            sb.Append($"\"swallowed_total\":{BetaDeps.Foundation.PatchShield.SwallowedTotal}");
+            sb.Append("},");
+        }
+        catch { sb.Append("\"patchshield\":null,"); }
+
+        // SaveShield: counters + every recent FailureRecord
+        try
+        {
+            sb.Append("\"saveshield\":{");
+            sb.Append($"\"shielded_count\":{BetaDeps.Foundation.SaveShield.ShieldedCount},");
+            sb.Append($"\"duplicate_key_hits\":{BetaDeps.Foundation.SaveShield.DuplicateKeyHits},");
+            sb.Append($"\"other_failure_hits\":{BetaDeps.Foundation.SaveShield.OtherFailureHits},");
+            sb.Append($"\"swallow_enabled\":{(BetaDeps.Foundation.SaveShield.IsSwallowEnabled() ? "true" : "false")},");
+            sb.Append($"\"swallowed_count\":{BetaDeps.Foundation.SaveShield.SwallowedCount},");
+            sb.Append("\"recent_failures\":[");
+            var records = BetaDeps.Foundation.SaveShield.RecentFailures;
+            for (int i = 0; i < records.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append(records[i].ToJsonObject());
+            }
+            sb.Append("]");
+            sb.Append("},");
+        }
+        catch { sb.Append("\"saveshield\":null,"); }
+
+        // Test headline
+        try
+        {
+            sb.Append("\"test_summary\":{");
+            sb.Append($"\"mods_count\":{report.Mods.Count},");
+            sb.Append($"\"tested_mods\":{report.TestedMods},");
+            sb.Append($"\"properties_passed\":{report.PassedProperties},");
+            sb.Append($"\"properties_total\":{report.TotalProperties},");
+            sb.Append($"\"done_passed\":{report.PassedDone},");
+            sb.Append($"\"cancel_passed\":{report.PassedCancel},");
+            sb.Append($"\"duplicate_dll_groups\":{report.DuplicateGroups}");
+            sb.Append('}');
+        }
+        catch { sb.Append("\"test_summary\":null"); }
+
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    private static string JsonEsc(string? s)
+    {
+        if (string.IsNullOrEmpty(s)) return string.Empty;
+        var sb = new System.Text.StringBuilder(s!.Length);
+        foreach (var c in s)
+        {
+            switch (c)
+            {
+                case '\\': sb.Append("\\\\"); break;
+                case '"':  sb.Append("\\\""); break;
+                case '\n': sb.Append("\\n"); break;
+                case '\r': sb.Append("\\r"); break;
+                case '\t': sb.Append("\\t"); break;
+                default:
+                    if (c < 0x20) sb.Append($"\\u{(int)c:x4}");
+                    else sb.Append(c);
+                    break;
+            }
+        }
+        return sb.ToString();
+    }
+
+    private static string FindCulpritInBlock(System.Collections.Generic.List<string> block)
+    {
+        foreach (var l in block)
+        {
+            var t = l.TrimStart();
+            if (t.StartsWith("CULPRIT:", System.StringComparison.Ordinal))
+            {
+                return t.Substring("CULPRIT:".Length).Trim();
+            }
+        }
+        return "(no CULPRIT line in block)";
+    }
+
+    private static string FindCategoryInBlock(System.Collections.Generic.List<string> block)
+    {
+        foreach (var l in block)
+        {
+            var t = l.TrimStart();
+            // First line of every block is "<CATEGORY> FAILURE in <method>".
+            int idx = t.IndexOf(" FAILURE in ", System.StringComparison.Ordinal);
+            if (idx > 0) return t.Substring(0, idx);
+        }
+        return "FAILURE";
+    }
+
+    /// <summary>
+    /// Scan runtime.log and emit a "Runtime log triage" section listing the
+    /// counts and unique signatures of FirstChanceException entries plus
+    /// any WARNING lines BetaDeps logged. This means the user only has to
+    /// upload selftest.log -- everything that's actionable from runtime.log
+    /// is already summarised here.
+    /// </summary>
+    private static void AppendRuntimeLogTriage(StringBuilder sb)
+    {
+        sb.AppendLine("--- Runtime log triage (auto-extracted) ---");
+        try
+        {
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            if (string.IsNullOrEmpty(rtPath) || !System.IO.File.Exists(rtPath))
+            {
+                sb.AppendLine("  (runtime.log not found at expected path)");
+                return;
+            }
+            var fi = new System.IO.FileInfo(rtPath);
+            sb.AppendLine($"  runtime.log: {rtPath}");
+            sb.AppendLine($"  size: {fi.Length:N0} bytes");
+
+            // Scan the file line-by-line. On heavy modlists we've seen 18k+
+            // lines, but each is short. Use ReadLines (streaming) not
+            // ReadAllLines so peak memory stays bounded.
+            int missingMethodCount = 0;
+            int missingFieldCount  = 0;
+            int typeLoadCount      = 0;
+            int warningCount       = 0;
+            int caughtCount        = 0;
+            var missingMethodSigs = new Dictionary<string, int>(StringComparer.Ordinal);
+            var missingFieldSigs  = new Dictionary<string, int>(StringComparer.Ordinal);
+            var typeLoadSigs      = new Dictionary<string, int>(StringComparer.Ordinal);
+            var warningLines      = new List<string>();
+            const int MaxWarnings = 25;
+
+            using (var s = new System.IO.FileStream(rtPath, System.IO.FileMode.Open,
+                                                    System.IO.FileAccess.Read,
+                                                    System.IO.FileShare.ReadWrite))
+            using (var r = new System.IO.StreamReader(s))
+            {
+                string? line;
+                while ((line = r.ReadLine()) != null)
+                {
+                    // FirstChanceException dispatcher logs these in a
+                    // consistent format. Lift the "Method not found: '..'" /
+                    // "Field not found: '..'" / "Could not load type '..'"
+                    // sub-string for the signature.
+                    if (line.IndexOf("MissingMethodException", StringComparison.Ordinal) >= 0)
+                    {
+                        missingMethodCount++;
+                        var sig = ExtractBetween(line, "Method not found: '", "'");
+                        if (sig != null) missingMethodSigs[sig] = missingMethodSigs.TryGetValue(sig, out var c) ? c + 1 : 1;
+                    }
+                    else if (line.IndexOf("MissingFieldException", StringComparison.Ordinal) >= 0)
+                    {
+                        missingFieldCount++;
+                        var sig = ExtractBetween(line, "Field not found: '", "'");
+                        if (sig != null) missingFieldSigs[sig] = missingFieldSigs.TryGetValue(sig, out var c) ? c + 1 : 1;
+                    }
+                    else if (line.IndexOf("TypeLoadException", StringComparison.Ordinal) >= 0)
+                    {
+                        typeLoadCount++;
+                        var sig = ExtractBetween(line, "Could not load type '", "'");
+                        if (sig != null) typeLoadSigs[sig] = typeLoadSigs.TryGetValue(sig, out var c) ? c + 1 : 1;
+                    }
+
+                    if (line.IndexOf("WARNING:", StringComparison.Ordinal) >= 0)
+                    {
+                        warningCount++;
+                        if (warningLines.Count < MaxWarnings) warningLines.Add(line.Trim());
+                    }
+                    if (line.IndexOf("LogCaught", StringComparison.Ordinal) >= 0
+                        || line.IndexOf("caught: ", StringComparison.Ordinal) >= 0)
+                    {
+                        caughtCount++;
+                    }
+                }
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($"  Exception event totals:");
+            sb.AppendLine($"    MissingMethodException: {missingMethodCount}");
+            sb.AppendLine($"    MissingFieldException:  {missingFieldCount}");
+            sb.AppendLine($"    TypeLoadException:      {typeLoadCount}");
+            sb.AppendLine($"    WARNING lines:          {warningCount}");
+            sb.AppendLine($"    LogCaught entries:      {caughtCount}");
+
+            DumpSigDict(sb, "Missing methods (top by hit count)", missingMethodSigs, 20);
+            DumpSigDict(sb, "Missing fields (top by hit count)",  missingFieldSigs,  10);
+            DumpSigDict(sb, "Unloadable types (top by hit count)", typeLoadSigs,    20);
+
+            if (warningLines.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"  WARNING samples (first {warningLines.Count} of {warningCount}):");
+                foreach (var w in warningLines) sb.AppendLine($"    {w}");
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (runtime-log triage threw: {ex.GetType().Name}: {ex.Message})");
+        }
+        sb.AppendLine();
+    }
+
+    private static string? ExtractBetween(string s, string start, string end)
+    {
+        int i = s.IndexOf(start, StringComparison.Ordinal);
+        if (i < 0) return null;
+        i += start.Length;
+        int j = s.IndexOf(end, i, StringComparison.Ordinal);
+        if (j < 0) return null;
+        return s.Substring(i, j - i);
+    }
+
+    private static void DumpSigDict(StringBuilder sb, string heading, Dictionary<string, int> dict, int maxRows)
+    {
+        if (dict.Count == 0) return;
+        sb.AppendLine();
+        sb.AppendLine($"  {heading} ({dict.Count} unique):");
+        int shown = 0;
+        foreach (var kv in dict.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.Ordinal))
+        {
+            if (shown >= maxRows) { sb.AppendLine($"    ... +{dict.Count - shown} more"); break; }
+            sb.AppendLine($"    [{kv.Value,5}x] {kv.Key}");
+            shown++;
+        }
+    }
+
+    private static void AppendInstalledVsEnabled(StringBuilder sb)
+    {
+        sb.AppendLine("--- Installed vs enabled mods ---");
+        try
+        {
+            // Modules root = parent of the BetaDeps folder where runtime.log lives.
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            var betaDepsDir = System.IO.Path.GetDirectoryName(rtPath);
+            var modulesRoot = System.IO.Path.GetDirectoryName(betaDepsDir);
+            if (string.IsNullOrEmpty(modulesRoot) || !System.IO.Directory.Exists(modulesRoot))
+            {
+                sb.AppendLine($"  (modules root not found)");
+                return;
+            }
+
+            var installed = System.IO.Directory.EnumerateDirectories(modulesRoot)
+                .Select(System.IO.Path.GetFileName)
+                .Where(n => !string.IsNullOrEmpty(n))
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            // Activated mods from LauncherData.xml -- IncompatibleModDetector
+            // already knows how to read this.
+            HashSet<string>? enabled = null;
+            try
+            {
+                enabled = BetaDeps.Foundation.IncompatibleModDetector.GetEnabledModsFromLauncherData();
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"  (LauncherData.xml read failed: {ex.GetType().Name}: {ex.Message})");
+            }
+
+            sb.AppendLine($"  Installed on disk: {installed.Count}");
+            if (enabled != null) sb.AppendLine($"  Enabled in launcher: {enabled.Count}");
+            sb.AppendLine();
+            sb.AppendLine($"  Per-mod state: [E]=enabled in launcher, [D]=installed but disabled, [?]=launcher state unknown");
+            foreach (var name in installed)
+            {
+                var marker = enabled == null ? "?"
+                           : (enabled.Contains(name!) ? "E" : "D");
+                sb.AppendLine($"    [{marker}] {name}");
+            }
+
+            // Highlight any mods enabled in the launcher but missing on disk
+            // (a frequent confusion source -- "I disabled this but Vortex
+            // still has it in the LauncherData").
+            if (enabled != null)
+            {
+                var phantoms = enabled.Where(e => !installed.Contains(e!)).ToList();
+                if (phantoms.Count > 0)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"  Phantom entries (enabled in launcher but folder missing on disk):");
+                    foreach (var p in phantoms.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+                        sb.AppendLine($"    {p}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            sb.AppendLine($"  (installed-vs-enabled probe threw: {ex.GetType().Name}: {ex.Message})");
         }
     }
 }

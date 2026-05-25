@@ -56,6 +56,25 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
     /// <summary>No-op SetSubGroupDelimiter for API compatibility.</summary>
     public ISettingsBuilder SetSubGroupDelimiter(string delimiter) => this;
 
+    // Presets declared on this builder. Stored so a future UI pass can wire
+    // a "Presets" dropdown into the fluent panel. For now this is enough to
+    // unblock Retinues and any other consumer mod that fluent-declares
+    // presets — the call no longer throws MissingMethodException and the
+    // preset definitions are captured for later use.
+    internal readonly List<SettingsPresetBuilderImpl> _presets = new();
+
+    public ISettingsBuilder CreatePreset(string id, string name, Action<ISettingsPresetBuilder> presetBuilder)
+    {
+        var p = new SettingsPresetBuilderImpl();
+        p.SetId(id ?? string.Empty);
+        p.SetName(name ?? id ?? string.Empty);
+        try { presetBuilder?.Invoke(p); }
+        catch (Exception ex) { DiagLog.LogCaught("FluentBuilder", $"CreatePreset({id}) configure", ex); }
+        _presets.Add(p);
+        DiagLog.Log("FluentBuilder", $"preset '{p.Id}' declared on settings '{Id}' with {p.Values.Count} value(s)");
+        return this;
+    }
+
     public MCM.Abstractions.Base.Global.FluentGlobalSettings BuildAsGlobal()
     {
         MCM.Abstractions.Base.Global.FluentGlobalSettings? settings = null;
@@ -71,14 +90,43 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
         }
         return settings!;
     }
+
+    public MCM.Abstractions.Base.PerSave.FluentPerSaveSettings BuildAsPerSave()
+    {
+        // ButterEquipped v1.3.13+ binds to this. Behaviour matches
+        // BuildAsGlobal but produces the per-save-scope class so consumer
+        // mods that branch on settings scope get the right type back.
+        MCM.Abstractions.Base.PerSave.FluentPerSaveSettings? settings = null;
+        try
+        {
+            settings = new MCM.Abstractions.Base.PerSave.FluentPerSaveSettings(this);
+            DiagLog.Log("FluentBuilder", $"BuildAsPerSave: built per-save settings '{Id}' with {_groups.Count} group(s)");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught("FluentBuilder", $"BuildAsPerSave({Id})", ex);
+        }
+        return settings!;
+    }
 }
 
 internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
 {
     public string Name { get; }
+    public int GroupOrder { get; private set; }
     internal readonly List<FluentProperty> _properties = new();
 
     public PropertyGroupBuilderImpl(string name) { Name = name ?? string.Empty; }
+
+    /// <summary>
+    /// No-op for now (UI doesn't surface group ordering yet), but we capture
+    /// the order so a future UI pass can sort groups before rendering.
+    /// </summary>
+    public ISettingsPropertyGroupBuilder SetGroupOrder(int order)
+    {
+        GroupOrder = order;
+        return this;
+    }
 
     public ISettingsPropertyGroupBuilder AddBool(string id, string displayName, bool defaultValue, Action<ISettingsPropertyBoolBuilder>? configure = null)
     {
@@ -202,6 +250,12 @@ internal sealed class FluentProperty
     public string HintText { get; set; } = "";
     public double Min { get; set; }
     public double Max { get; set; }
+    // printf-style value-format string for int/float sliders. Adjustable
+    // Leveling and friends set this via ISettingsPropertyIntegerBuilder.
+    // AddValueFormat / ISettingsPropertyFloatingIntegerBuilder.AddValueFormat;
+    // we stash it here so future renderers can honour it, but the current
+    // UI ignores it (sliders render the raw number).
+    public string ValueFormat { get; set; } = "";
 
     /// <summary>
     /// Optional binding ref. Set by the IRef-based AddX(...) overloads on
@@ -237,7 +291,9 @@ internal sealed class FluentProperty
 // Anchoring this to the non-generic Models.ISettingsPropertyBuilder triggers
 // EntryPointNotFoundException at consumer-mod JIT time.
 
-internal abstract class PropBuilderBase<TSelf> : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<TSelf>
+internal abstract class PropBuilderBase<TSelf> :
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<TSelf>,
+    MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
     where TSelf : class
 {
     protected readonly FluentProperty _prop = new();
@@ -251,6 +307,21 @@ internal abstract class PropBuilderBase<TSelf> : MCM.Abstractions.FluentBuilder.
     public TSelf SetOrder(int order)              { _prop.Order = order; return (TSelf)(object)this; }
     public TSelf SetRequireRestart(bool require)  { _prop.RequireRestart = require; return (TSelf)(object)this; }
     public TSelf SetHintText(string hintText)     { _prop.HintText = hintText ?? string.Empty; return (TSelf)(object)this; }
+
+    // Explicit non-generic ISettingsPropertyBuilder impls so v0.7.2's
+    // AddValueFormat overload can `return this` and satisfy the upstream
+    // BUTR IL signature (which returns the non-generic interface). These
+    // delegate to the generic versions and just re-cast to the non-generic
+    // interface for chaining.
+    MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder.SetOrder(int order)
+        { SetOrder(order); return this; }
+    MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder.SetRequireRestart(bool require)
+        { SetRequireRestart(require); return this; }
+    MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder.SetHintText(string hintText)
+        { SetHintText(hintText); return this; }
 
     public FluentProperty Build() => _prop;
 }
@@ -273,6 +344,16 @@ internal sealed class IntPropBuilder : PropBuilderBase<ISettingsPropertyIntegerB
         _prop.Max = max;
         _prop.Value = defaultValue;
     }
+
+    // Adjustable Leveling calls this with format strings like "{0}" or
+    // "Tier {0}". We don't apply the format in our current renderer, so
+    // this stashes the format on the property and returns the non-generic
+    // builder for fluent chaining (matches upstream BUTR's return type).
+    public MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
+    {
+        _prop.ValueFormat = valueFormat;
+        return this;
+    }
 }
 
 internal sealed class FloatPropBuilder : PropBuilderBase<ISettingsPropertyFloatingIntegerBuilder>, ISettingsPropertyFloatingIntegerBuilder
@@ -283,6 +364,12 @@ internal sealed class FloatPropBuilder : PropBuilderBase<ISettingsPropertyFloati
         _prop.Min = min;
         _prop.Max = max;
         _prop.Value = defaultValue;
+    }
+
+    public MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
+    {
+        _prop.ValueFormat = valueFormat;
+        return this;
     }
 }
 

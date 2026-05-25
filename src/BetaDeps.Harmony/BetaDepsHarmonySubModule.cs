@@ -22,6 +22,7 @@ using System.Reflection;
 
 using BetaDeps.Foundation;
 
+using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
 namespace BetaDeps.Harmony;
@@ -48,6 +49,44 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     {
         if (System.Threading.Interlocked.Exchange(ref _ctorEarlyDetectionRan, 1) == 0)
         {
+            // v0.7 hotfix: install the AssemblyResolve shim FIRST -- before
+            // RunEarlyPhase or anything else. The engine constructs every
+            // SubModule class during the same phase (before any OnSubModuleLoad
+            // fires), so consumer-mod constructors that touch ButterLib /
+            // UIExtenderEx / Harmony assemblies need our redirect handler in
+            // place during their own ctor.
+            try
+            {
+                AssemblyVersionShim.Install();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/AssemblyShim", ex); } catch { }
+            }
+
+            // NOTE: AssemblyLoaderDependencyShim was an earlier approach that
+            // proved unnecessary -- LoadFrom returns Success for affected
+            // consumer mods; the CriticalError verdict actually comes from
+            // CollectModuleAssemblyTypes (see CollectAssemblyTypesShim).
+            // Disabled here to avoid spurious Postfix work on every LoadFrom
+            // call. Source file kept in repo as documentation of the
+            // investigation path.
+
+            // v0.7 hotfix #3: install lenient-types shim on
+            // Module.CollectModuleAssemblyTypes. The real CDE-class failure
+            // is here, not in LoadFrom: assembly.GetTypes() throws because
+            // some types in the consumer assembly reference our impersonated
+            // ButterLib/UIExt/etc members that may not exist on our build.
+            // The lenient version pulls partial types from the exception.
+            try
+            {
+                CollectAssemblyTypesShim.Install();
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "ctor/CollectAssemblyTypesShim", ex); } catch { }
+            }
+
             try
             {
                 IncompatibleModDetector.RunEarlyPhase();
@@ -217,9 +256,69 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     protected override void OnBeforeInitialModuleScreenSetAsRoot()
     {
         base.OnBeforeInitialModuleScreenSetAsRoot();
-        // Hook for future load-order validation. Intentionally empty
-        // in Phase 1 -- the validation logic isn't worth porting before
-        // we have a self-test suite to drive it.
+        TryInstallPatchShield("OnBeforeInitialModuleScreenSetAsRoot");
+    }
+
+    // Re-install the shield at every lifecycle point a consumer mod could
+    // plausibly call Harmony.PatchAll. AIInfluence (and similar mods) defer
+    // their patches past OnSubModuleLoad — they apply them during game
+    // initialization, so a single install at OnBeforeInitialModuleScreenSetAsRoot
+    // misses those patches. PatchShield.Install is idempotent and tracks
+    // already-shielded methods, so re-running it just adds the new ones.
+
+    public override void OnGameInitializationFinished(Game game)
+    {
+        base.OnGameInitializationFinished(game);
+        TryInstallPatchShield("OnGameInitializationFinished");
+    }
+
+    protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
+    {
+        base.OnGameStart(game, gameStarterObject);
+        TryInstallPatchShield("OnGameStart");
+    }
+
+    public override void OnAfterGameInitializationFinished(Game game, object starterObject)
+    {
+        base.OnAfterGameInitializationFinished(game, starterObject);
+        TryInstallPatchShield("OnAfterGameInitializationFinished");
+    }
+
+    public override void OnNewGameCreated(Game game, object initializerObject)
+    {
+        base.OnNewGameCreated(game, initializerObject);
+        TryInstallPatchShield("OnNewGameCreated");
+    }
+
+    private static void TryInstallPatchShield(string from)
+    {
+        // v0.7: install PatchShield (idempotent — only shields newly-patched
+        // methods on each pass). Catches MissingMethodException /
+        // MissingFieldException / TypeLoadException from consumer-mod
+        // prefixes built against older TaleWorlds APIs (AIInfluence +
+        // NavalDLC is the canonical case).
+        try
+        {
+            PatchShield.Install();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"{from}/PatchShield", ex);
+        }
+
+        // v0.7.3: install SaveShield (also idempotent). Wraps the save-load
+        // entry points so duplicate-key Dictionary.Add crashes during save
+        // deserialization get logged with the full stack + SaveGameFileInfo
+        // metadata before being rethrown. Lets users (and us) identify the
+        // colliding mod from runtime.log instead of bisecting by hand.
+        try
+        {
+            SaveShield.Install();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"{from}/SaveShield", ex);
+        }
     }
 
     /// <summary>

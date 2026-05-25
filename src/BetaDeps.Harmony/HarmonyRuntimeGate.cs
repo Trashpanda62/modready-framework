@@ -51,11 +51,19 @@ internal static class HarmonyRuntimeGate
             DiagLog.Log(Tag, $"0Harmony.dll loaded: version {ver}, from {loc}");
 
             // Cross-check: is this the copy we shipped? We shipped it next
-            // to BetaDeps.Harmony.dll, so the directory should match.
+            // to BetaDeps.Harmony.dll, AND mirror it into the four impersonation
+            // alias folders (Bannerlord.Harmony / .UIExtenderEx / .ButterLib /
+            // .MBOptionScreen) so BLSE LauncherEx's per-alias-folder checks
+            // pass. Loading from any of THOSE locations is fine. The warning
+            // should only fire when 0Harmony.dll resolves from a folder OUTSIDE
+            // the BetaDeps-managed tree, i.e. a different mod shipping its own
+            // copy. v0.7.1 emitted false positives on every user with the
+            // Bannerlord.Harmony alias active (which is everyone).
             var selfDir = SafeDir(typeof(HarmonyRuntimeGate).Assembly);
             var harmonyDir = string.IsNullOrEmpty(loc) ? null : Path.GetDirectoryName(loc);
             if (!string.IsNullOrEmpty(selfDir) && !string.IsNullOrEmpty(harmonyDir)
-                && !string.Equals(selfDir, harmonyDir, StringComparison.OrdinalIgnoreCase))
+                && !string.Equals(selfDir, harmonyDir, StringComparison.OrdinalIgnoreCase)
+                && !IsBetaDepsManagedDir(harmonyDir!))
             {
                 DiagLog.Log(Tag, $"WARNING: 0Harmony.dll resolved from a different folder ({harmonyDir}) than BetaDeps.Harmony.dll ({selfDir}). Some other module is shipping its own copy and won the load race. Expect issues if the version differs.");
             }
@@ -93,6 +101,34 @@ internal static class HarmonyRuntimeGate
     private static string SafeLocation(Assembly a)
     {
         try { return a.Location ?? string.Empty; } catch { return string.Empty; }
+    }
+
+    /// <summary>
+    /// True when the directory belongs to the BetaDeps-managed module
+    /// tree: Modules\BetaDeps\bin\... or Modules\Bannerlord.{Harmony,
+    /// UIExtenderEx, ButterLib, MBOptionScreen}\bin\... (the four alias
+    /// folders BetaDeps creates as drop-in replacements). 0Harmony.dll
+    /// loading from any of these is expected, not a conflict.
+    /// </summary>
+    private static bool IsBetaDepsManagedDir(string dir)
+    {
+        if (string.IsNullOrEmpty(dir)) return false;
+        var norm = dir.Replace('/', '\\');
+        // We don't need an exact-prefix check -- we just need to confirm
+        // the path contains a "Modules\<name>\bin" segment whose name is
+        // either BetaDeps or one of the four alias module IDs.
+        string[] managed = {
+            "\\Modules\\BetaDeps\\",
+            "\\Modules\\Bannerlord.Harmony\\",
+            "\\Modules\\Bannerlord.UIExtenderEx\\",
+            "\\Modules\\Bannerlord.ButterLib\\",
+            "\\Modules\\Bannerlord.MBOptionScreen\\"
+        };
+        foreach (var seg in managed)
+        {
+            if (norm.IndexOf(seg, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+        }
+        return false;
     }
 
     private static string SafeDir(Assembly a)

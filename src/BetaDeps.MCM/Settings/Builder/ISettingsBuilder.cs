@@ -49,16 +49,43 @@ public interface ISettingsBuilder
     ISettingsBuilder SetSubGroupDelimiter(string delimiter);
 
     /// <summary>
+    /// Declare a named preset (saved bundle of property values the user can
+    /// apply with one click from the MCM panel). Mirrors upstream BUTR MCM's
+    /// CreatePreset(...) so consumer mods that build presets fluently (e.g.
+    /// Retinues) bind by name. The presetBuilder action gets a fresh
+    /// ISettingsPresetBuilder to declare Id/Name/property values on; the
+    /// returned ISettingsBuilder allows chaining further .CreatePreset or
+    /// .CreateGroup calls.
+    /// </summary>
+    ISettingsBuilder CreatePreset(string id, string name, Action<ISettingsPresetBuilder> presetBuilder);
+
+    /// <summary>
     /// Construct + register the underlying BaseSettings instance as a global
     /// setting and return it. Upstream BUTR returns the constructed
     /// FluentGlobalSettings so callers can chain .Register() after.
     /// </summary>
     FluentGlobalSettings BuildAsGlobal();
+
+    /// <summary>
+    /// Per-save scope counterpart to BuildAsGlobal. ButterEquipped v1.3.13+
+    /// uses this to bind a fluently-built settings group to the save-file
+    /// scope (settings travel with the save instead of with the user
+    /// profile). Returns a FluentPerSaveSettings — semantically equivalent
+    /// to FluentGlobalSettings but registered against the per-save tree.
+    /// </summary>
+    MCM.Abstractions.Base.PerSave.FluentPerSaveSettings BuildAsPerSave();
 }
 
 public interface ISettingsPropertyGroupBuilder
 {
     string Name { get; }
+
+    // Set the group's render order (lower numbers appear first in the panel).
+    // Upstream BUTR MCM exposes this on the group builder so consumer mods
+    // can control the section ordering inside their fluent settings. We don't
+    // currently surface group ordering in the UI, so this is a no-op stub —
+    // present so consumer mods (Retinues, etc.) don't hit MissingMethodException.
+    ISettingsPropertyGroupBuilder SetGroupOrder(int order);
 
     // Default-value overloads: the property starts at the given default and
     // mutates the FluentGlobalSettings's internal dictionary on write.
@@ -124,8 +151,21 @@ public interface ISettingsPropertyBuilder
 // FluentBuilder namespace so SetHintText("...") resolved at the call site
 // returns the typed builder (BUTR's F-bounded polymorphism pattern).
 public interface ISettingsPropertyBoolBuilder            : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyBoolBuilder> { }
-public interface ISettingsPropertyIntegerBuilder         : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyIntegerBuilder> { }
-public interface ISettingsPropertyFloatingIntegerBuilder : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyFloatingIntegerBuilder> { }
+public interface ISettingsPropertyIntegerBuilder         : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyIntegerBuilder>
+{
+    // Adjustable Leveling v1.x calls this to attach a printf-style format
+    // string to integer slider values. Upstream BUTR MCM returns the
+    // NON-generic ISettingsPropertyBuilder (verified from consumer-mod IL).
+    // We don't render the format yet, so the impl is a no-op stub returning
+    // the builder for fluent chaining.
+    ISettingsPropertyBuilder AddValueFormat(string valueFormat);
+}
+public interface ISettingsPropertyFloatingIntegerBuilder : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyFloatingIntegerBuilder>
+{
+    // Same shape on the floating-point builder for symmetry; some consumer
+    // mods declare a format string on float settings too.
+    ISettingsPropertyBuilder AddValueFormat(string valueFormat);
+}
 public interface ISettingsPropertyTextBuilder            : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyTextBuilder> { }
 
 }  // namespace MCM.Abstractions.FluentBuilder.Models

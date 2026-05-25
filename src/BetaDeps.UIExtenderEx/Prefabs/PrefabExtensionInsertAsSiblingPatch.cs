@@ -23,5 +23,8 @@ public abstract class PrefabExtensionInsertAsSiblingPatch : IPrefabPatch
 
     public abstract InsertType Type { get; }
 
-    public abstract XmlNode GetPrefabExtension();
+    // Return type must be XmlDocument (not XmlNode) to match upstream
+    // Bannerlord.UIExtenderEx ABI; see PrefabExtensionReplacePatch for
+    // the same fix rationale.
+    public abstract XmlDocument GetPrefabExtension();
 }

@@ -99,6 +99,30 @@ public static class IncompatibleModDetector
     // File names under Modules\BetaDeps\ used by the runtime-detection scheme.
     private const string LastGoodFile         = "last-good-modlist.txt";   // mods that reached main-menu last clean boot
     private const string LaunchMarkerFile     = "session-launching.marker"; // present = previous launch never finished
+
+    /// <summary>
+    /// Where the launch-marker is written. Moved OUT of the deployed
+    /// Modules\BetaDeps\ tree in v0.7.2 because Vortex's deploy cycle
+    /// snapshots the deployed tree and panics with ENOENT when the
+    /// marker isn't there (it's a runtime breadcrumb that doesn't exist
+    /// at deploy-time). The new location is %LocalAppData%\BetaDeps\,
+    /// completely outside any mod-manager's view.
+    /// </summary>
+    private static string ResolveLaunchMarkerPath()
+    {
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrEmpty(localAppData)) return string.Empty;
+            var dir = Path.Combine(localAppData, "BetaDeps");
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, LaunchMarkerFile);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
     private const string AutoDisabledLogFile  = "betadeps-auto-disabled.log"; // append-only audit of what BetaDeps disabled and when
 
     // Removed: cascade-family table.
@@ -139,15 +163,30 @@ public static class IncompatibleModDetector
             if (!string.IsNullOrEmpty(modulesRoot))
             {
                 var betaDepsDir = Path.Combine(modulesRoot!, "BetaDeps");
-                var markerPath  = Path.Combine(betaDepsDir, LaunchMarkerFile);
-                // Snapshot whether marker already existed BEFORE we overwrite,
-                // because that's the signal for "previous session crashed".
-                previousCrashedBeforeMarkerWrite = File.Exists(markerPath);
+                // Marker now lives under %LocalAppData%\BetaDeps\ (v0.7.2) to
+                // keep it out of Vortex's deploy snapshot. Old marker path
+                // (Modules\BetaDeps\) is migrated below if found.
+                var markerPath  = ResolveLaunchMarkerPath();
+                var oldMarkerPath = Path.Combine(betaDepsDir, LaunchMarkerFile);
+                // One-time migration: if a stale marker is sitting in the
+                // old deployed location, treat it as "previous crashed" AND
+                // delete it so Vortex stops seeing it on subsequent boots.
+                if (File.Exists(oldMarkerPath))
+                {
+                    previousCrashedBeforeMarkerWrite = true;
+                    try { File.Delete(oldMarkerPath); } catch { }
+                }
+                else if (!string.IsNullOrEmpty(markerPath))
+                {
+                    previousCrashedBeforeMarkerWrite = File.Exists(markerPath);
+                }
                 try
                 {
-                    Directory.CreateDirectory(betaDepsDir);
-                    File.WriteAllText(markerPath,
-                        $"launch started {DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}");
+                    if (!string.IsNullOrEmpty(markerPath))
+                    {
+                        File.WriteAllText(markerPath,
+                            $"launch started {DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -397,8 +436,16 @@ public static class IncompatibleModDetector
             }
 
             // Delete the launch marker -- we reached interactive state, no crash.
-            var marker = Path.Combine(betaDepsDir, LaunchMarkerFile);
-            try { if (File.Exists(marker)) File.Delete(marker); } catch { }
+            // New location (v0.7.2): %LocalAppData%\BetaDeps\. Old deployed
+            // location is also cleared in case a pre-0.7.2 marker is lying
+            // around from a previous install.
+            var newMarker = ResolveLaunchMarkerPath();
+            if (!string.IsNullOrEmpty(newMarker))
+            {
+                try { if (File.Exists(newMarker)) File.Delete(newMarker); } catch { }
+            }
+            var oldMarker = Path.Combine(betaDepsDir, LaunchMarkerFile);
+            try { if (File.Exists(oldMarker)) File.Delete(oldMarker); } catch { }
         }
         catch (Exception ex)
         {

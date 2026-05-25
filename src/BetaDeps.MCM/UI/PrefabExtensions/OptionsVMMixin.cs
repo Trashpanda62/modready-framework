@@ -2025,6 +2025,125 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
     }
 
+    /// <summary>
+    /// "Toggle PatchShield" button.
+    /// Default behavior is PatchShield ON (catches MissingMethod/MissingField/
+    /// TypeLoad exceptions from consumer-mod prefixes, unpatches the offending
+    /// prefix). Mod authors debugging their own work, or users who suspect
+    /// PatchShield is interfering with another shim, can click this to write
+    /// `Modules\BetaDeps\patchshield-disabled.flag`. When the flag exists,
+    /// PatchShield.Install() bails on every lifecycle pass and consumer-mod
+    /// exceptions propagate unmodified.
+    ///
+    /// Asymmetry with Toggle Auto-Disable on purpose: auto-disable is opt-IN
+    /// (file presence ENABLES the recovery pipeline because it modifies
+    /// LauncherData.xml), PatchShield is opt-OUT (file presence DISABLES it
+    /// because the conservative default for an in-memory exception catcher
+    /// is "on, catching things" rather than "off, let it crash").
+    /// </summary>
+    [DataSourceMethod]
+    public void ExecuteTogglePatchShield()
+    {
+        DiagLog.Log(Tag, "ExecuteTogglePatchShield: click received");
+        try
+        {
+            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
+            var dir = System.IO.Path.GetDirectoryName(rtPath);
+            if (string.IsNullOrEmpty(dir))
+            {
+                DiagLog.Log(Tag, "ExecuteTogglePatchShield: could not resolve BetaDeps directory; abort.");
+                return;
+            }
+            var flagPath = System.IO.Path.Combine(dir!, "patchshield-disabled.flag");
+
+            bool nowEnabled;
+            if (System.IO.File.Exists(flagPath))
+            {
+                System.IO.File.Delete(flagPath);
+                nowEnabled = true;
+                DiagLog.Log(Tag, $"ExecuteTogglePatchShield: flag deleted ({RedactUserPath(flagPath)}); PatchShield now ON.");
+            }
+            else
+            {
+                System.IO.File.WriteAllText(flagPath,
+                    $"Created via Mod Config 'Toggle PatchShield' on {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}.{System.Environment.NewLine}" +
+                    "Delete this file (or click Toggle PatchShield in Mod Config again) to re-enable the shield.");
+                nowEnabled = false;
+                DiagLog.Log(Tag, $"ExecuteTogglePatchShield: flag written ({RedactUserPath(flagPath)}); PatchShield now OFF.");
+            }
+
+            var title = nowEnabled ? "PatchShield ENABLED" : "PatchShield DISABLED";
+            var body = nowEnabled
+                ? "PatchShield is now ENABLED (default).\n\n" +
+                  "On the NEXT launch, BetaDeps will wrap every Harmony-patched method with a finalizer that catches MissingMethodException, MissingFieldException, and TypeLoadException thrown by consumer-mod prefixes built against older TaleWorlds APIs. Caught exceptions are logged and the offending prefix is unpatched so subsequent calls run the unmodified original.\n\n" +
+                  "Restart Bannerlord for the change to take effect."
+                : "PatchShield is now DISABLED.\n\n" +
+                  "BetaDeps will no longer catch or unpatch consumer-mod prefixes that throw MissingMethod/MissingField/TypeLoad exceptions. Crashes that PatchShield would have caught will now propagate to the game and likely CTD.\n\n" +
+                  "Useful if you're a mod author debugging your own work and want exceptions to surface unmodified. Click this button again any time to re-enable. Restart Bannerlord for the change to take effect.";
+
+            var prompt = new TaleWorlds.Library.InquiryData(
+                titleText: title,
+                text: body,
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: false,
+                affirmativeText: "OK",
+                negativeText: null,
+                affirmativeAction: () => { },
+                negativeAction: () => { });
+            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "ExecuteTogglePatchShield", ex);
+        }
+    }
+
+    /// <summary>
+    /// v0.7.3+ Mod Config button: toggle SaveShield swallow-mode by creating
+    /// or deleting saveshield-swallow.flag next to runtime.log. When enabled,
+    /// SaveShield logs save-load / mission-init failures from consumer mods
+    /// but DOES NOT re-throw -- the mod's broken handler is dropped at the
+    /// failing call site and the game continues. Off by default; turning it
+    /// on lets users play battles even with API-broken mods like
+    /// ReinforcementSystem still enabled, at the cost of that mod's
+    /// specific in-battle feature not actually firing.
+    /// </summary>
+    [DataSourceMethod]
+    public void ExecuteToggleSaveShieldSwallow()
+    {
+        DiagLog.Log(Tag, "ExecuteToggleSaveShieldSwallow: click received");
+        try
+        {
+            bool nowEnabled = BetaDeps.Foundation.SaveShield.ToggleSwallow();
+
+            var title = nowEnabled ? "SaveShield Swallow-Mode ENABLED" : "SaveShield Swallow-Mode DISABLED";
+            var body = nowEnabled
+                ? "SaveShield swallow-mode is now ENABLED (default in v0.7.3+).\n\n" +
+                  "On the NEXT launch, SaveShield will continue to LOG every save-load and mission-init failure from consumer-mod frames -- but it will NOT re-throw the exception. The mod's broken handler is dropped at the failing call site so the game keeps running.\n\n" +
+                  "What you get: battles still load even when a mod was compiled against an older Bannerlord API. The mod's specific in-battle feature won't fire, but the rest of the game runs.\n\n" +
+                  "What you lose: any feature the broken handler was supposed to add (extra spawns, custom logic, etc.) is missing. Some mods are tightly coupled to engine state and may still cause a downstream crash inside TaleWorlds code -- if that happens, disable the named CULPRIT mod from the SaveShield FAILURE block in runtime.log.\n\n" +
+                  "Restart Bannerlord for the change to take effect."
+                : "SaveShield swallow-mode is now DISABLED.\n\n" +
+                  "Save-load and mission-init failures from consumer-mod code will re-throw and crash the game. Diagnostic blocks still get written to runtime.log so you can find which mod to disable. Useful if you're a mod author debugging your own work and want exceptions to surface unmodified.\n\n" +
+                  "Click this button again any time to re-enable swallow-mode (the default). Restart Bannerlord for the change to take effect.";
+
+            var prompt = new TaleWorlds.Library.InquiryData(
+                titleText: title,
+                text: body,
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: false,
+                affirmativeText: "OK",
+                negativeText: null,
+                affirmativeAction: () => { },
+                negativeAction: () => { });
+            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "ExecuteToggleSaveShieldSwallow", ex);
+        }
+    }
+
     private void OpenGitHubIssueUrl()
     {
         try
@@ -2148,6 +2267,24 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
         catch (System.Exception ex) { sb.AppendLine($"(error gathering diagnostics: {ex.Message})"); }
         sb.AppendLine();
+
+        // v0.7.3+: if SaveShield caught any save-load or mission-init failures
+        // this session, emit a copy-paste-ready markdown block for the most
+        // recent one (CULPRIT table + current API signatures + manifest +
+        // stack). Mod authors who get this issue body see the headline answer
+        // before scrolling.
+        try
+        {
+            var last = BetaDeps.Foundation.SaveShield.LastFailure;
+            if (last != null)
+            {
+                sb.AppendLine("### SaveShield diagnostic (most recent failure this session)");
+                sb.AppendLine();
+                sb.AppendLine(last.ToMarkdownSnippet());
+                sb.AppendLine();
+            }
+        }
+        catch { }
 
         // Top of selftest.log so reviewer sees the headline pass/fail
         // numbers without having to download the attachment.
