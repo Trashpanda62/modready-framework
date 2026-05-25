@@ -15,9 +15,13 @@ instead of through the bundled BUTR-impersonation aliases
   hooks, `SafeBind`, `DiagLog`) that the alias surface intentionally
   doesn't expose.
 
-**Status as of v0.7.1:** the BUTR-impersonation surface and the
+**Status as of v0.7.3:** the BUTR-impersonation surface and the
 BetaDeps-native surface co-exist. v1.0 keeps both. v2.0 deprecates the
-aliases for new mods (existing mods keep working forever).
+aliases for new mods (existing mods keep working forever). v0.7.3 added
+SaveShield as the second defensive layer alongside PatchShield, with
+public APIs for mod authors who want to query diagnostic state from
+their own code (see [SaveShield](#saveshield-engine-entry-defensive-layer)
+below).
 
 ---
 
@@ -118,6 +122,157 @@ if (PatchShield.IsDisabled()) {
 `PatchShield.Install()` is callable but already runs at multiple lifecycle
 points. You only need to call it if you're installing Harmony patches at
 an unusual time (e.g. from a coroutine after the game is mid-mission).
+
+#### PatchShield: per-mod owner counts (v0.7.3+)
+
+When PatchShield auto-unpatches a prefix, it records the Harmony owner ID
+of the patch (which by convention is the mod's namespace). You can query
+the aggregate counts:
+
+```csharp
+foreach (var kv in PatchShield.UnpatchedOwnerCounts) {
+    DiagLog.Log("MyMod", $"{kv.Key}: {kv.Value} patches unpatched this session");
+}
+```
+
+Useful if your mod wants to surface a UI panel like "these mods are
+currently bleeding patches" or "X mod has been unstable for the last N
+sessions."
+
+### SaveShield (engine-entry defensive layer)
+
+SaveShield is PatchShield's sibling: it wraps engine-level entry points
+where consumer-mod handlers run during save deserialization and battle
+init, rather than inside Harmony prefixes. Currently shielded:
+
+- `TaleWorlds.Core.MBSaveLoad.LoadSaveGameData`
+- `TaleWorlds.SaveSystem.SaveManager.Load` (all overloads)
+- `SandBox.SandBoxSaveHelper.LoadGameAction`
+- `TaleWorlds.MountAndBlade.MissionState.FinishMissionLoading`
+- `TaleWorlds.MountAndBlade.Mission.SetMissionMode`
+- `TaleWorlds.MountAndBlade.Mission.OnInitialize`
+- `TaleWorlds.MountAndBlade.Mission.SpawnTroop`
+
+When a non-engine frame throws `MissingMethodException`,
+`MissingFieldException`, `TypeLoadException`, or a duplicate-key
+`ArgumentException` from one of those, SaveShield writes a full
+diagnostic to `runtime.log` and (by default) drops the throw so the load
+continues.
+
+#### Counters
+
+```csharp
+using BetaDeps.Foundation;
+
+DiagLog.Log("MyMod", $"Methods shielded:       {SaveShield.ShieldedCount}");
+DiagLog.Log("MyMod", $"Duplicate-key hits:     {SaveShield.DuplicateKeyHits}");
+DiagLog.Log("MyMod", $"Other load failures:    {SaveShield.OtherFailureHits}");
+DiagLog.Log("MyMod", $"Exceptions swallowed:   {SaveShield.SwallowedCount}");
+DiagLog.Log("MyMod", $"Swallow-mode enabled:   {SaveShield.IsSwallowEnabled()}");
+```
+
+#### Reading the ring buffer
+
+The most recent failures are in `SaveShield.RecentFailures`
+(`IReadOnlyList<FailureRecord>`, newest first, capped at 20):
+
+```csharp
+var last = SaveShield.LastFailure;
+if (last != null && last.CulpritAssembly != "MyMod") {
+    // Surface a UI dialog naming the other mod
+    InformationManager.DisplayMessage(new InformationMessage(
+        $"Another mod is failing: {last.CulpritAssembly} threw {last.ExceptionType}"));
+}
+```
+
+#### FailureRecord structure
+
+Each `FailureRecord` carries:
+
+| Field                 | Type            | What it is                                        |
+|-----------------------|-----------------|---------------------------------------------------|
+| `When`                | `DateTime`      | UTC timestamp                                     |
+| `Category`            | `string`        | `SAVE-LOAD` / `MISSION-INIT` / `FAILURE`          |
+| `OwnerType`           | `string`        | TaleWorlds type that was shielded                 |
+| `OwnerMethod`         | `string`        | TaleWorlds method that caught the throw           |
+| `ExceptionType`       | `string`        | e.g. `System.MissingMethodException`              |
+| `Message`             | `string`        | exception message                                 |
+| `ThrowSiteType`       | `string`        | `ex.TargetSite.DeclaringType.FullName`            |
+| `ThrowSiteMethod`     | `string`        | `ex.TargetSite.Name`                              |
+| `CulpritAssembly`     | `string`        | deepest non-engine assembly in stack              |
+| `CulpritFrame`        | `string`        | full frame description for that assembly          |
+| `CulpritAssemblyPath` | `string`        | DLL path on disk                                  |
+| `IsDuplicateKey`      | `bool`          | true if the exception is the "same key" pattern   |
+| `StackTraceRaw`       | `string`        | `ex.StackTrace`                                   |
+| `ParsedFrames`        | `List<string>`  | walked via `System.Diagnostics.StackTrace`        |
+| `FinalizerCallChain`  | `List<string>`  | call chain that led TO the patched method         |
+| `CurrentSignatures`   | `List<string>`  | current API overloads (if any matched)            |
+| `ImportMatches`       | `List<string>`  | TaleWorlds.\* member refs in CULPRIT DLL          |
+| `CulpritManifest`     | `ModManifest?`  | culprit mod's SubModule.xml + DLL refs            |
+| `FirstArgSummary`     | `string`        | first arg (e.g. save name or MissionMode value)   |
+
+And three render methods:
+
+```csharp
+last.ToLogBlock();         // the human-readable runtime.log block format
+last.ToMarkdownSnippet();  // GitHub-issue-ready markdown table + stack
+last.ToJsonObject();       // compact JSON (no Newtonsoft dependency)
+```
+
+#### Swallow-mode toggle
+
+By default SaveShield drops the throw so the game keeps running. Users
+can opt out via `Toggle SaveShield Swallow` in Mod Config (creates
+`saveshield-swallow-disabled.flag` in `Modules\BetaDeps\`). Programmatic
+read/write:
+
+```csharp
+bool nowEnabled = SaveShield.ToggleSwallow();
+if (!SaveShield.IsSwallowEnabled()) {
+    DiagLog.Log("MyMod", "swallow-mode is off -- exceptions will crash unmodified");
+}
+```
+
+If your mod author build wants exceptions to surface raw for debugging,
+ship a script that writes the disable flag on first launch and your
+testers don't have to click anything.
+
+#### ModManifest
+
+When SaveShield identifies a CULPRIT mod, it probes the mod's manifest:
+
+```csharp
+public sealed class ModManifest {
+    public string ModFolder { get; set; }
+    public string ModId { get; set; }
+    public string ModName { get; set; }
+    public string ModVersion { get; set; }       // from SubModule.xml <Version>
+    public string ModAuthor { get; set; }
+    public string AssemblyName { get; set; }
+    public string AssemblyVersion { get; set; }  // from DLL metadata
+    public string AssemblyLocation { get; set; }
+    public List<string> DependedModules { get; }
+    public List<string> TaleWorldsReferences { get; } // "TaleWorlds.Core v1.0.0.0" etc.
+
+    public IEnumerable<string> ToLines();
+    public string ToJsonObject();
+}
+```
+
+#### Failed-mods catalog
+
+Append-only ledger at `Modules\BetaDeps\failed-mods-catalog.txt`. Each
+session, the first time a `(CulpritAssembly, ExceptionType, OwnerMethod)`
+triple is seen, a one-line entry is appended:
+
+```csharp
+FailedModsCatalog.Append(failureRecord);   // idempotent within session
+string catalogPath = FailedModsCatalog.ResolvePath();
+```
+
+You generally don't call `Append` directly — SaveShield's finalizer
+already does. But if you have your own catch-and-classify code path and
+want to feed the same catalog, the API is public.
 
 ### Type lookup
 

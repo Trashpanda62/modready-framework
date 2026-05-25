@@ -84,6 +84,39 @@ public static class PatchShield
     public static long SwallowedTotal =>
         SwallowedMissingMethod + SwallowedMissingField + SwallowedTypeLoad + SwallowedOther;
 
+    /// <summary>
+    /// One-liner session-summary, written to runtime.log at AppDomain.ProcessExit
+    /// so users grepping runtime.log get a single tidy summary line instead
+    /// of needing to scan the whole file. Idempotent + cheap; safe to call
+    /// from a process-exit handler even if PatchShield never installed.
+    /// </summary>
+    public static void WriteSessionSummary()
+    {
+        try
+        {
+            string topOwner = "(none)";
+            lock (_ownerLock)
+            {
+                if (_ownerCounts.Count > 0)
+                {
+                    var top = _ownerCounts.OrderByDescending(k => k.Value).First();
+                    topOwner = $"{top.Key} ({top.Value})";
+                }
+            }
+            DiagLog.Log(Tag,
+                $"SESSION SUMMARY: shielded {ShieldedCount} method(s), " +
+                $"unpatched {UnpatchedCount} prefix(es), " +
+                $"swallowed {SwallowedTotal} exception(s) " +
+                $"(MissingMethod {SwallowedMissingMethod}, MissingField {SwallowedMissingField}, " +
+                $"TypeLoad {SwallowedTypeLoad}, other {SwallowedOther}). " +
+                $"Top unpatched owner: {topOwner}.");
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "WriteSessionSummary", ex); } catch { }
+        }
+    }
+
     // Opt-out marker file. Default behavior is PatchShield ON. If a user
     // wants to disable it (mod author debugging, suspected interference
     // with another shim, etc.) they click "Toggle PatchShield" in Mod

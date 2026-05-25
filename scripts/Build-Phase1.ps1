@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$Version = '0.7.3',
+    [string]$Version = '0.7.4',
     [switch]$SkipVerify,
     [switch]$SkipZip,
     # When the live Bannerlord install is found at the standard Steam path
@@ -422,6 +422,21 @@ if (-not $SkipVerify) {
         throw 'Aragas/BUTR copyright string found in output DLLs. Investigate before shipping.'
     }
     Write-Host "  PASS: no Aragas/BUTR strings in our authored DLLs (Foundation, Harmony, UIExtenderEx, ButterLib, MCM)" -ForegroundColor Green
+}
+
+# -------- 6b. XML lint (v0.7.4+) --------
+# Catches the kind of bug that broke Vortex install on v0.7.2/v0.7.3:
+# `--` inside an XML comment body, illegal per the XML 1.0 spec, which
+# Vortex's FOMOD parser correctly rejected. Run AFTER the dist tree is
+# staged so we lint every XML the user will actually receive.
+Write-Host ""
+Write-Host "Linting XML files in dist..." -ForegroundColor Yellow
+& "$RepoRoot\scripts\Validate-Xml.ps1" -Root $DistRoot
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ""
+    Write-Host "XML lint failed -- aborting build. Fix the errors above and re-run." -ForegroundColor Red
+    Write-Host "Set `$env:BETADEPS_SKIP_XML_LINT='1' to bypass (not recommended)." -ForegroundColor DarkGray
+    throw "XML lint failure"
 }
 
 # -------- 7. Zip --------

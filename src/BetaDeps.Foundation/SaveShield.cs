@@ -204,6 +204,43 @@ public static class SaveShield
         }
     }
 
+    /// <summary>
+    /// One-liner session-summary mirroring PatchShield.WriteSessionSummary.
+    /// Fires at AppDomain.ProcessExit. Quotes the top CULPRIT mod (most
+    /// common offender across all FailureRecords this session) so users
+    /// have a single line in runtime.log that names the worst-behaved mod.
+    /// </summary>
+    public static void WriteSessionSummary()
+    {
+        try
+        {
+            string topCulprit = "(none)";
+            lock (_recentLock)
+            {
+                if (_recent.Count > 0)
+                {
+                    var grouped = _recent
+                        .Where(r => !string.IsNullOrEmpty(r.CulpritAssembly))
+                        .GroupBy(r => r.CulpritAssembly)
+                        .OrderByDescending(g => g.Count())
+                        .FirstOrDefault();
+                    if (grouped != null)
+                        topCulprit = $"{grouped.Key} ({grouped.Count()})";
+                }
+            }
+            DiagLog.Log(Tag,
+                $"SESSION SUMMARY: shielded {ShieldedCount} entry-point(s), " +
+                $"caught {DuplicateKeyHits + OtherFailureHits} failure(s) " +
+                $"(duplicate-key {DuplicateKeyHits}, other {OtherFailureHits}), " +
+                $"swallowed {SwallowedCount}, swallow-mode {(IsSwallowEnabled() ? "ON" : "OFF")}. " +
+                $"Top CULPRIT: {topCulprit}.");
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "WriteSessionSummary", ex); } catch { }
+        }
+    }
+
     // Methods we want to wrap. We resolve by reflection so SaveShield doesn't
     // compile-bind to TaleWorlds.SaveSystem.dll or SandBox.dll. The probe
     // is idempotent -- a method already in _shielded skips silently.

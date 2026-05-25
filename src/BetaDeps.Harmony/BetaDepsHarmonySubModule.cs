@@ -139,6 +139,23 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             try { DiagLog.LogCaught(Tag, "AssemblyVersionShim.Install", ex); } catch { }
         }
 
+        // v0.7.4: hook AppDomain.ProcessExit so PatchShield + SaveShield each
+        // write a one-line session-summary to runtime.log on game shutdown.
+        // Users grepping runtime.log for the diagnostic gist get a single
+        // tidy line per shield instead of scanning the full file.
+        try
+        {
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
+            {
+                try { PatchShield.WriteSessionSummary(); } catch { }
+                try { SaveShield.WriteSessionSummary(); } catch { }
+            };
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "ProcessExit-summary-hook", ex); } catch { }
+        }
+
         // Install AppDomain unhandled-exception logger. BEW finalizers only
         // catch crashes that occur during Tick; consumer-mod SubModule
         // constructors run BEFORE the first Tick, so when one of them throws
