@@ -108,6 +108,26 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
         }
         return settings!;
     }
+
+    public MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings BuildAsPerCampaign()
+    {
+        // v0.7.5 ship-blocker: XorberaxLegacy calls this during new-campaign
+        // init. Without the method existing, the JIT throws MissingMethodException,
+        // which our MCM reset-on-failure flow turns into a save/load feedback
+        // loop and CTDs the game. Implementation mirrors BuildAsPerSave with
+        // a per-campaign scope type.
+        MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings? settings = null;
+        try
+        {
+            settings = new MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings(this);
+            DiagLog.Log("FluentBuilder", $"BuildAsPerCampaign: built per-campaign settings '{Id}' with {_groups.Count} group(s)");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught("FluentBuilder", $"BuildAsPerCampaign({Id})", ex);
+        }
+        return settings!;
+    }
 }
 
 internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
@@ -293,6 +313,7 @@ internal sealed class FluentProperty
 
 internal abstract class PropBuilderBase<TSelf> :
     MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<TSelf>,
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder,                  // v0.7.5: parent-namespace non-generic
     MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
     where TSelf : class
 {
@@ -308,11 +329,23 @@ internal abstract class PropBuilderBase<TSelf> :
     public TSelf SetRequireRestart(bool require)  { _prop.RequireRestart = require; return (TSelf)(object)this; }
     public TSelf SetHintText(string hintText)     { _prop.HintText = hintText ?? string.Empty; return (TSelf)(object)this; }
 
-    // Explicit non-generic ISettingsPropertyBuilder impls so v0.7.2's
-    // AddValueFormat overload can `return this` and satisfy the upstream
-    // BUTR IL signature (which returns the non-generic interface). These
-    // delegate to the generic versions and just re-cast to the non-generic
-    // interface for chaining.
+    // v0.7.5 SHIP-BLOCKER fix: explicit parent-namespace non-generic
+    // ISettingsPropertyBuilder impls. XorberaxLegacy + AdjustableLeveling's
+    // IL routes Set* / AddValueFormat through this interface, and the v0.7.4
+    // shim returned the Models nested variant -- triggered MissingMethodException
+    // -> SettingsStorage reset cycle -> CTD on new-campaign init.
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder.SetOrder(int order)
+        { SetOrder(order); return this; }
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder.SetRequireRestart(bool require)
+        { SetRequireRestart(require); return this; }
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder
+        MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder.SetHintText(string hintText)
+        { SetHintText(hintText); return this; }
+
+    // Explicit Models.ISettingsPropertyBuilder impls (kept for back-compat
+    // with internal call sites that take that nested-namespace reference).
     MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder
         MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder.SetOrder(int order)
         { SetOrder(order); return this; }
@@ -345,11 +378,12 @@ internal sealed class IntPropBuilder : PropBuilderBase<ISettingsPropertyIntegerB
         _prop.Value = defaultValue;
     }
 
-    // Adjustable Leveling calls this with format strings like "{0}" or
-    // "Tier {0}". We don't apply the format in our current renderer, so
-    // this stashes the format on the property and returns the non-generic
-    // builder for fluent chaining (matches upstream BUTR's return type).
-    public MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
+    // Adjustable Leveling + XorberaxLegacy v1.x call this with format strings
+    // like "{0}" or "Tier {0}". v0.7.5: returns the PARENT-namespace
+    // ISettingsPropertyBuilder to match the consumer mod's IL signature
+    // (returning Models.ISettingsPropertyBuilder threw MissingMethodException
+    // -> SettingsStorage save/reload cycle -> CTD).
+    public MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
     {
         _prop.ValueFormat = valueFormat;
         return this;
@@ -366,7 +400,7 @@ internal sealed class FloatPropBuilder : PropBuilderBase<ISettingsPropertyFloati
         _prop.Value = defaultValue;
     }
 
-    public MCM.Abstractions.FluentBuilder.Models.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
+    public MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder AddValueFormat(string valueFormat)
     {
         _prop.ValueFormat = valueFormat;
         return this;

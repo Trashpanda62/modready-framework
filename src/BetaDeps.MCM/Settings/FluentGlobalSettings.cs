@@ -70,6 +70,18 @@ public sealed class FluentGlobalSettings : BaseSettings
     {
         MCM.Internal.FluentSettingsRegistry.Register(this);
     }
+
+    /// <summary>
+    /// v0.7.5 ship-blocker: counterpart to Register(). XorberaxLegacy (and
+    /// other mods built against newer BUTR MCM revisions) call this during
+    /// teardown / settings reset. Without the method, MissingMethodException
+    /// at the call site fed the save/load feedback loop. Safe to call
+    /// multiple times; no-ops if we weren't registered.
+    /// </summary>
+    public void Unregister()
+    {
+        MCM.Internal.FluentSettingsRegistry.Unregister(this);
+    }
 }
 
 } // namespace MCM.Abstractions.Base.Global
@@ -103,6 +115,16 @@ internal static class FluentSettingsRegistry
         // Attribute-based settings get this for free via their singleton
         // Instance accessor; fluent settings have no such hook.
         try { SettingsStorage.Load(settings, settings.Id); } catch { }
+    }
+
+    /// <summary>
+    /// v0.7.5: counterpart to Register(). Safe to call with a settings
+    /// instance that was never registered (no-op in that case).
+    /// </summary>
+    public static void Unregister(FluentGlobalSettings settings)
+    {
+        if (settings == null) return;
+        lock (_gate) { _all.Remove(settings); }
     }
 
     public static IReadOnlyList<FluentGlobalSettings> All

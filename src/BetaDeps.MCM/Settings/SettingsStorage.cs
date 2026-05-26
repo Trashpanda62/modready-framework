@@ -30,6 +30,67 @@ internal static class SettingsStorage
     private static readonly DropdownConverter _dropdownConverter = new DropdownConverter();
     private static readonly JsonSerializer _serializer = MakeSerializer();
 
+    // v0.7.5 ship-blocker: re-entrance / feedback-loop guard. XorberaxLegacy
+    // hit a MissingMethodException that propagated into MCM's settings reset
+    // flow; the reset triggered a Save, which triggered a PropertyChanged,
+    // which triggered another Load, which triggered another Save, looping
+    // indefinitely until the campaign-load step CTD'd.
+    //
+    // Defense: every Save and Load remembers when it last ran for a given
+    // settingsId; if a follow-up call arrives within RecursionWindow of the
+    // last call (same id, same operation), we skip it and log once.
+    //
+    // 100ms is well above the cost of a normal save (~1ms) but far below
+    // the cadence of user-initiated changes (humans don't change a setting
+    // 10 times/second), so legitimate work isn't throttled.
+    private static readonly object _recurseLock = new object();
+    private static readonly Dictionary<string, DateTime> _lastSaveAt = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, DateTime> _lastLoadAt = new(StringComparer.Ordinal);
+    private static readonly HashSet<string> _loopWarned = new(StringComparer.Ordinal);
+    private static readonly TimeSpan RecursionWindow = TimeSpan.FromMilliseconds(100);
+
+    /// <summary>
+    /// Returns true if the (op, settingsId) just fired within RecursionWindow
+    /// of its previous fire. Caller should skip and (the first time per id)
+    /// log a warning. Always updates the timestamp on entry so the throttle
+    /// window slides forward.
+    /// </summary>
+    private static bool IsRecursingSave(string settingsId)
+    {
+        lock (_recurseLock)
+        {
+            var now = DateTime.UtcNow;
+            if (_lastSaveAt.TryGetValue(settingsId, out var last) && (now - last) < RecursionWindow)
+            {
+                if (_loopWarned.Add("save:" + settingsId))
+                {
+                    try { DiagLog.Log(Tag, $"GUARD: Save('{settingsId}') called {((int)(now - last).TotalMilliseconds)}ms after previous Save -- skipping to break feedback loop. (warning logged once per id)"); } catch { }
+                }
+                return true;
+            }
+            _lastSaveAt[settingsId] = now;
+            return false;
+        }
+    }
+
+    private static bool IsRecursingLoad(string settingsId)
+    {
+        lock (_recurseLock)
+        {
+            var now = DateTime.UtcNow;
+            if (_lastLoadAt.TryGetValue(settingsId, out var last) && (now - last) < RecursionWindow)
+            {
+                if (_loopWarned.Add("load:" + settingsId))
+                {
+                    try { DiagLog.Log(Tag, $"GUARD: Load('{settingsId}') called {((int)(now - last).TotalMilliseconds)}ms after previous Load -- skipping to break feedback loop. (warning logged once per id)"); } catch { }
+                }
+                return true;
+            }
+            _lastLoadAt[settingsId] = now;
+            return false;
+        }
+    }
+
     private static JsonSerializer MakeSerializer()
     {
         var s = new JsonSerializer
@@ -54,6 +115,8 @@ internal static class SettingsStorage
 
     public static void Load(object instance, string settingsId)
     {
+        // v0.7.5: feedback-loop guard. See IsRecursingLoad doc.
+        if (IsRecursingLoad(settingsId ?? string.Empty)) return;
         try
         {
             var path = ResolvePath(settingsId);
@@ -153,6 +216,8 @@ internal static class SettingsStorage
 
     public static void Save(object instance, string settingsId)
     {
+        // v0.7.5: feedback-loop guard. See IsRecursingSave doc.
+        if (IsRecursingSave(settingsId ?? string.Empty)) return;
         try
         {
             var path = ResolvePath(settingsId);

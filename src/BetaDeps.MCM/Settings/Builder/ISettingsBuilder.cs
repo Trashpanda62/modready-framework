@@ -74,6 +74,17 @@ public interface ISettingsBuilder
     /// to FluentGlobalSettings but registered against the per-save tree.
     /// </summary>
     MCM.Abstractions.Base.PerSave.FluentPerSaveSettings BuildAsPerSave();
+
+    /// <summary>
+    /// Per-campaign scope counterpart. v0.7.5 ship-blocker: XorberaxLegacy
+    /// (and other mods built against newer BUTR MCM revisions) call this
+    /// during new-campaign init. Without the method, MissingMethodException
+    /// at JIT-bind time triggered an infinite save/load reset loop that
+    /// CTD'd the game during campaign creation. Per-campaign vs per-save:
+    /// per-campaign survives saves within the same campaign; per-save dies
+    /// with the save file.
+    /// </summary>
+    MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings BuildAsPerCampaign();
 }
 
 public interface ISettingsPropertyGroupBuilder
@@ -125,6 +136,27 @@ public interface ISettingsPropertyBuilder<TPropertyBuilder>
     TPropertyBuilder SetHintText(string hintText);
 }
 
+// v0.7.5 ship-blocker fix: XorberaxLegacy's IL emits an AddValueFormat call
+// site whose return type is `MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder`
+// (parent namespace, NON-generic) -- NOT the Models.ISettingsPropertyBuilder
+// our typed builder interfaces previously returned. CLR signature matching
+// is exact on return type, so the mismatched return type threw
+// MissingMethodException at every property access -- which fed an infinite
+// save->event->reload->save cycle inside MCM.SettingsStorage during new-
+// campaign init, CTDing the game.
+//
+// Fix: add the non-generic interface in this parent namespace too. C#
+// permits ISettingsPropertyBuilder and ISettingsPropertyBuilder<T> to
+// coexist (different arity = different CLR types). Models's non-generic
+// interface stays for back-compat with internal call sites that already
+// reference it by full name.
+public interface ISettingsPropertyBuilder
+{
+    ISettingsPropertyBuilder SetOrder(int order);
+    ISettingsPropertyBuilder SetRequireRestart(bool requireRestart);
+    ISettingsPropertyBuilder SetHintText(string hintText);
+}
+
 }  // namespace MCM.Abstractions.FluentBuilder
 
 
@@ -153,18 +185,19 @@ public interface ISettingsPropertyBuilder
 public interface ISettingsPropertyBoolBuilder            : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyBoolBuilder> { }
 public interface ISettingsPropertyIntegerBuilder         : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyIntegerBuilder>
 {
-    // Adjustable Leveling v1.x calls this to attach a printf-style format
-    // string to integer slider values. Upstream BUTR MCM returns the
-    // NON-generic ISettingsPropertyBuilder (verified from consumer-mod IL).
-    // We don't render the format yet, so the impl is a no-op stub returning
-    // the builder for fluent chaining.
-    ISettingsPropertyBuilder AddValueFormat(string valueFormat);
+    // Adjustable Leveling + XorberaxLegacy v1.x both call this to attach a
+    // printf-style format string to integer slider values. Upstream BUTR MCM
+    // returns the PARENT-namespace non-generic ISettingsPropertyBuilder
+    // (verified from XorberaxLegacy IL; v0.7.4 incorrectly anchored to
+    // Models.ISettingsPropertyBuilder, which caused MissingMethodException
+    // -> infinite save/reload cycle during new-campaign init).
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder AddValueFormat(string valueFormat);
 }
 public interface ISettingsPropertyFloatingIntegerBuilder : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyFloatingIntegerBuilder>
 {
     // Same shape on the floating-point builder for symmetry; some consumer
     // mods declare a format string on float settings too.
-    ISettingsPropertyBuilder AddValueFormat(string valueFormat);
+    MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder AddValueFormat(string valueFormat);
 }
 public interface ISettingsPropertyTextBuilder            : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyTextBuilder> { }
 

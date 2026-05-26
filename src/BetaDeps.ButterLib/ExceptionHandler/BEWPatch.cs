@@ -94,14 +94,66 @@ public static class BEWPatch
     /// Harmony finalizer body. Receives the in-flight exception via
     /// __exception, logs it, and returns null to swallow.
     /// </summary>
+    // v0.7.5 (post-ship-prep): once-per-(method,exception) log dedup so a
+    // tight engine-tick swallow doesn't fill the log with the same line
+    // 60 times/second. Key is "{Method}|{ExceptionTypeName}|{first 200 chars
+    // of message}" so distinct LoaderExceptions still surface independently.
+    private static readonly System.Collections.Generic.HashSet<string> _loggedSwallowKeys
+        = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+    private static readonly object _swallowLogLock = new object();
+
+    /// <summary>
+    /// Harmony finalizer body. Receives the in-flight exception via
+    /// __exception, logs it, and returns null to swallow.
+    ///
+    /// v0.7.5 (post-ship-prep): when the exception is a
+    /// ReflectionTypeLoadException, unwrap LoaderExceptions and log the
+    /// FIRST few inner exceptions so the actual missing-type / missing-
+    /// method culprit is visible. Without this, "swallowed
+    /// ReflectionTypeLoadException -- retrieve LoaderExceptions for more
+    /// information" was completely opaque and hid Eagle Rising's per-tick
+    /// type-load failure during new-campaign init.
+    /// </summary>
     public static Exception? Finalizer(MethodBase __originalMethod, Exception? __exception)
     {
         if (__exception == null) return null;
         try
         {
+            var methodSig = $"{__originalMethod?.DeclaringType?.FullName}.{__originalMethod?.Name}";
+            var msgHead = __exception.Message ?? string.Empty;
+            if (msgHead.Length > 200) msgHead = msgHead.Substring(0, 200);
+            var key = $"{methodSig}|{__exception.GetType().Name}|{msgHead}";
+            bool isFirstSeen;
+            lock (_swallowLogLock) { isFirstSeen = _loggedSwallowKeys.Add(key); }
+            if (!isFirstSeen) return null;  // already logged this exact failure; don't spam
+
             DiagLog.Log(Tag,
-                $"swallowed engine exception in {__originalMethod?.DeclaringType?.FullName}.{__originalMethod?.Name}: " +
+                $"swallowed engine exception in {methodSig}: " +
                 $"{__exception.GetType().Name} -- {__exception.Message}");
+
+            // Unwrap ReflectionTypeLoadException: its LoaderExceptions
+            // property carries the actual culprit exceptions. Log up to
+            // the first 5 with full type+message so we can see what mod
+            // assembly's type-load is failing.
+            if (__exception is System.Reflection.ReflectionTypeLoadException rtle && rtle.LoaderExceptions != null)
+            {
+                int shown = 0;
+                int total = rtle.LoaderExceptions.Length;
+                foreach (var le in rtle.LoaderExceptions)
+                {
+                    if (le == null) continue;
+                    if (shown >= 5) break;
+                    DiagLog.Log(Tag, $"  LoaderException[{shown}/{total}]: {le.GetType().Name} -- {le.Message}");
+                    shown++;
+                }
+                if (total > 5)
+                    DiagLog.Log(Tag, $"  (+ {total - 5} more LoaderException(s) suppressed)");
+            }
+            // Also unwrap a single InnerException for non-RTLE wrapping.
+            else if (__exception.InnerException != null)
+            {
+                DiagLog.Log(Tag, $"  InnerException: {__exception.InnerException.GetType().Name} -- {__exception.InnerException.Message}");
+            }
         }
         catch { }
         return null;

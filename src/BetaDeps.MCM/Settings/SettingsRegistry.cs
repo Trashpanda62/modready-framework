@@ -471,10 +471,19 @@ public static class SettingsRegistry
             // Determine which modules are enabled. Best-effort cascade:
             //   1. Command-line _MODULES_*Name1*...*_MODULES_ marker (TaleWorlds launcher)
             //   2. TaleWorlds.Module.CurrentModule.ModuleList (canonical)
-            //   3. Heuristic: any folder whose bin DLLs already appear in the AppDomain
+            //   3. LauncherData.xml IsSelected="true" entries (authoritative — what
+            //      the user actually toggled in BLSE/vanilla launcher UI)
+            //   4. Heuristic: any folder whose bin DLLs already appear in the AppDomain
             //      is enabled, because BLSE loads enabled mods' DLLs at boot.
-            // The third fallback works even when launched via BLSE LauncherEx (which
-            // doesn't put module names on its own command line).
+            //
+            // v0.7.5 fix: previously the heuristic could OVER-detect (e.g. it
+            // saw 27 module folders as "enabled" when LauncherData said 18),
+            // causing us to eager-load DLLs from disabled mods. Once loaded,
+            // a broken adapter DLL like ArtemsLivelyAnimations's vendored
+            // MCM.UI.Adapter.MCMv5 v5.11.2.0 would poison the AppDomain and
+            // cause per-tick ReflectionTypeLoadException feedback loops at
+            // new-campaign-init. Inserting LauncherData.xml as step 3 fixes
+            // it — that file is the user's literal click-state, no inference.
             var enabledModules = ParseEnabledModulesFromCommandLine();
             if (enabledModules.Count == 0)
             {
@@ -483,8 +492,20 @@ public static class SettingsRegistry
             }
             if (enabledModules.Count == 0)
             {
+                try
+                {
+                    enabledModules = BetaDeps.Foundation.IncompatibleModDetector.GetEnabledModsFromLauncherData();
+                    DiagLog.Log(Tag, $"EagerLoad: LauncherData.xml IsSelected=true: {enabledModules.Count} module(s)");
+                }
+                catch (System.Exception ex)
+                {
+                    try { DiagLog.LogCaught(Tag, "EagerLoad/LauncherData", ex); } catch { }
+                }
+            }
+            if (enabledModules.Count == 0)
+            {
                 enabledModules = DetectEnabledModulesByLoadedAssemblies(modulesRoot, alreadyLoaded);
-                DiagLog.Log(Tag, $"EagerLoad: heuristic AppDomain-scan detected {enabledModules.Count} enabled module folder(s)");
+                DiagLog.Log(Tag, $"EagerLoad: heuristic AppDomain-scan detected {enabledModules.Count} enabled module folder(s) (last-resort fallback)");
             }
             else
             {

@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$Version = '0.7.4',
+    [string]$Version = '0.7.5',
     [switch]$SkipVerify,
     [switch]$SkipZip,
     # When the live Bannerlord install is found at the standard Steam path
@@ -39,9 +39,12 @@ $UIExtAlias       = Join-Path $DistRoot ('Modules\Bannerlord.UIExtenderEx')
 $ButterLibAlias   = Join-Path $DistRoot ('Modules\Bannerlord.ButterLib')
 $MCMAlias         = Join-Path $DistRoot ('Modules\Bannerlord.MBOptionScreen')
 $BinRoot          = Join-Path $ModuleRoot 'bin\Win64_Shipping_Client'
-# Tactics editor ships as its own opt-in module folder (Modules\BetaDeps.TacticsEditor)
-# rather than bloating the main BetaDeps load surface. Users who don't want the
-# editor leave that folder disabled; users who do, get the editor + apply logic.
+# v0.7.5: Tactics editor is held back from shipping until Bannerwar v1.0 lands.
+# We still build the project locally (so the source doesn't bitrot) but don't
+# stage it into dist\, don't deploy to the live install, and don't include it
+# in the public zip. To re-enable shipping in a future build, set
+# $ShipTacticsEditor=$true and the existing logic flows again.
+$ShipTacticsEditor = $false
 $TacticsEditorRoot = Join-Path $DistRoot ('Modules\BetaDeps.TacticsEditor')
 $TacticsEditorBin  = Join-Path $TacticsEditorRoot 'bin\Win64_Shipping_Client'
 
@@ -64,7 +67,9 @@ New-Item -ItemType Directory -Force -Path $HarmonyAlias      | Out-Null
 New-Item -ItemType Directory -Force -Path $UIExtAlias        | Out-Null
 New-Item -ItemType Directory -Force -Path $ButterLibAlias    | Out-Null
 New-Item -ItemType Directory -Force -Path $MCMAlias          | Out-Null
-New-Item -ItemType Directory -Force -Path $TacticsEditorBin  | Out-Null
+if ($ShipTacticsEditor) {
+    New-Item -ItemType Directory -Force -Path $TacticsEditorBin  | Out-Null
+}
 
 # -------- 2. Build all five projects --------
 $Projects = @(
@@ -183,19 +188,21 @@ foreach ($name in $MCMRequired) {
     Write-Host "  staged $name"
 }
 
-# BetaDeps.TacticsEditor ships into its own Modules\BetaDeps.TacticsEditor\ folder
-# rather than mixing into BetaDeps's bin. It depends at runtime on
-# BetaDeps.Foundation + Newtonsoft.Json, both of which are already loaded via
-# the main BetaDeps module -- so the only DLL the tactics editor folder needs
-# is its own.
-$TacticsEditorOutDir = Join-Path $RepoRoot "src\BetaDeps.TacticsEditor\bin\$Configuration\net472"
-if (-not (Test-Path $TacticsEditorOutDir)) { throw "Missing build output dir: $TacticsEditorOutDir" }
-$TacticsEditorDll = Join-Path $TacticsEditorOutDir 'BetaDeps.TacticsEditor.dll'
-if (-not (Test-Path $TacticsEditorDll)) { throw "Missing build output: $TacticsEditorDll" }
-Copy-Item $TacticsEditorDll (Join-Path $TacticsEditorBin 'BetaDeps.TacticsEditor.dll') -Force
-Write-Host "  staged Modules\BetaDeps.TacticsEditor\bin\..\BetaDeps.TacticsEditor.dll"
-Copy-Item (Join-Path $SrcRoot 'BetaDeps.Module\submodules\BetaDeps.TacticsEditor\SubModule.xml') (Join-Path $TacticsEditorRoot 'SubModule.xml') -Force
-Write-Host "  staged Modules\BetaDeps.TacticsEditor\SubModule.xml"
+# BetaDeps.TacticsEditor: built locally to prevent bitrot, but NOT staged into
+# dist\ for v0.7.5 -- holds for Bannerwar v1.0 ship. Flip $ShipTacticsEditor=$true
+# at the top of this script to re-enable staging + deploy + zip inclusion.
+if ($ShipTacticsEditor) {
+    $TacticsEditorOutDir = Join-Path $RepoRoot "src\BetaDeps.TacticsEditor\bin\$Configuration\net472"
+    if (-not (Test-Path $TacticsEditorOutDir)) { throw "Missing build output dir: $TacticsEditorOutDir" }
+    $TacticsEditorDll = Join-Path $TacticsEditorOutDir 'BetaDeps.TacticsEditor.dll'
+    if (-not (Test-Path $TacticsEditorDll)) { throw "Missing build output: $TacticsEditorDll" }
+    Copy-Item $TacticsEditorDll (Join-Path $TacticsEditorBin 'BetaDeps.TacticsEditor.dll') -Force
+    Write-Host "  staged Modules\BetaDeps.TacticsEditor\bin\..\BetaDeps.TacticsEditor.dll"
+    Copy-Item (Join-Path $SrcRoot 'BetaDeps.Module\submodules\BetaDeps.TacticsEditor\SubModule.xml') (Join-Path $TacticsEditorRoot 'SubModule.xml') -Force
+    Write-Host "  staged Modules\BetaDeps.TacticsEditor\SubModule.xml"
+} else {
+    Write-Host "  (TacticsEditor build only -- not staged for ship)" -ForegroundColor DarkGray
+}
 
 # -------- 4. Copy SubModule.xml for the real module + the aliases --------
 Copy-Item (Join-Path $SrcRoot 'BetaDeps.Module\SubModule.xml')                                          (Join-Path $ModuleRoot     'SubModule.xml') -Force
@@ -209,6 +216,16 @@ Write-Host "  staged Modules\Bannerlord.Harmony\SubModule.xml (alias)"
 Write-Host "  staged Modules\Bannerlord.UIExtenderEx\SubModule.xml (alias)"
 Write-Host "  staged Modules\Bannerlord.ButterLib\SubModule.xml (alias)"
 Write-Host "  staged Modules\Bannerlord.MBOptionScreen\SubModule.xml (alias)"
+
+# -------- 4a-pre. Copy user-facing escape hatch (BetaDeps-Reset-State.bat) --------
+# v0.7.5: if BetaDeps' crash-recovery state gets stuck and the in-game
+# recovery toggle isn't reachable (e.g. MCM tab missing), this lets the
+# user reset everything without a full reinstall.
+$ResetBatSrc = Join-Path $SrcRoot 'BetaDeps.Module\BetaDeps-Reset-State.bat'
+if (Test-Path $ResetBatSrc) {
+    Copy-Item $ResetBatSrc (Join-Path $ModuleRoot 'BetaDeps-Reset-State.bat') -Force
+    Write-Host "  staged BetaDeps-Reset-State.bat (user-facing reset script)"
+}
 
 # -------- 4a. Copy MCM GUI/Prefabs/ (custom prefab files) --------
 # Bannerlord auto-discovers any *.xml under Modules\<mod>\GUI\Prefabs\ at
@@ -514,16 +531,90 @@ if (-not $SkipDeploy) {
         $liveModules = Join-Path $liveRoot 'Modules'
         Write-Host "  target: $liveModules" -ForegroundColor Cyan
         $sourceModules = Join-Path $DistRoot 'Modules'
-        $folders = 'BetaDeps','Bannerlord.Harmony','Bannerlord.UIExtenderEx','Bannerlord.ButterLib','Bannerlord.MBOptionScreen','BetaDeps.TacticsEditor'
+        $folders = @('BetaDeps','Bannerlord.Harmony','Bannerlord.UIExtenderEx','Bannerlord.ButterLib','Bannerlord.MBOptionScreen')
+        if ($ShipTacticsEditor) { $folders += 'BetaDeps.TacticsEditor' }
+        # v0.7.5: if we are NOT shipping TacticsEditor this build, remove any
+        # stale TacticsEditor folder from the live install so users who had
+        # v0.7.3/v0.7.4 don't keep loading the now-unsupported module after
+        # an in-place upgrade.
+        if (-not $ShipTacticsEditor) {
+            $staleTE = Join-Path $liveModules 'BetaDeps.TacticsEditor'
+            if (Test-Path $staleTE) {
+                Remove-Item -Recurse -Force $staleTE
+                Write-Host "  removed stale BetaDeps.TacticsEditor from live install" -ForegroundColor Yellow
+            }
+        }
+        # v0.7.5: per-file copy with retry-on-lock. The old single Copy-Item
+        # blew up the whole deploy if ANY file (typically Mono.Cecil.dll)
+        # was held by a leftover Bannerlord process. Now we retry locked
+        # files up to 3x with a 2s backoff, and report what survived.
+        function Copy-FileWithRetry {
+            param([string]$src, [string]$dst, [int]$Retries = 3)
+            # v0.7.5 polish: if the destination already exists and is
+            # byte-identical to the source, skip the copy entirely. This
+            # avoids the "locked file" failure mode for files like
+            # Mono.Cecil.dll that never change between builds but get
+            # held open by long-lived PowerShell sessions (e.g. a session
+            # that ran Compat-Scan earlier). The lock only matters if we
+            # actually need to write a new byte stream.
+            if (Test-Path $dst) {
+                try {
+                    $srcLen = (Get-Item $src).Length
+                    $dstLen = (Get-Item $dst).Length
+                    if ($srcLen -eq $dstLen) {
+                        $srcHash = (Get-FileHash -Path $src -Algorithm SHA256).Hash
+                        $dstHash = (Get-FileHash -Path $dst -Algorithm SHA256).Hash
+                        if ($srcHash -eq $dstHash) {
+                            return $true  # silent skip
+                        }
+                    }
+                } catch {
+                    # Hash check failed (e.g. dst locked for read too); fall through to copy attempt.
+                }
+            }
+            for ($i = 1; $i -le $Retries; $i++) {
+                try {
+                    Copy-Item -Path $src -Destination $dst -Force -ErrorAction Stop
+                    return $true
+                } catch [System.IO.IOException] {
+                    if ($i -lt $Retries) {
+                        Write-Host "    locked: $([IO.Path]::GetFileName($src)) -- retry $i/$Retries in 2s..." -ForegroundColor DarkYellow
+                        Start-Sleep -Seconds 2
+                    } else {
+                        Write-Host "    FAILED after $Retries tries: $([IO.Path]::GetFileName($src))" -ForegroundColor Red
+                        Write-Host "    (a Bannerlord process is still holding this file -- close it and rerun)" -ForegroundColor DarkGray
+                        return $false
+                    }
+                }
+            }
+        }
+
+        $totalFiles = 0
+        $totalFailures = 0
         foreach ($f in $folders) {
             $srcDir = Join-Path $sourceModules $f
             $dstDir = Join-Path $liveModules   $f
             if (-not (Test-Path $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
-            # Copy ALL files recursively, overwriting older versions. Don't
-            # use Remove-Item on dst because the alias folders intentionally
-            # carry runtime.log / other live state we want to preserve.
-            Copy-Item -Path (Join-Path $srcDir '*') -Destination $dstDir -Recurse -Force
-            Write-Host "  deployed -> $f" -ForegroundColor Green
+            $folderFailures = 0
+            foreach ($file in Get-ChildItem -Path $srcDir -Recurse -File) {
+                $totalFiles++
+                $relPath = $file.FullName.Substring($srcDir.Length).TrimStart('\','/')
+                $target  = Join-Path $dstDir $relPath
+                $targetDir = Split-Path -Parent $target
+                if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+                if (-not (Copy-FileWithRetry -src $file.FullName -dst $target)) {
+                    $folderFailures++
+                    $totalFailures++
+                }
+            }
+            $color = if ($folderFailures -eq 0) { 'Green' } else { 'Yellow' }
+            $statusBit = if ($folderFailures -eq 0) { 'all OK' } else { "$folderFailures lock failure(s)" }
+            Write-Host ("  deployed -> {0,-30}  ({1})" -f $f, $statusBit) -ForegroundColor $color
+        }
+        if ($totalFailures -gt 0) {
+            Write-Host ""
+            Write-Host "WARNING: $totalFailures/$totalFiles file(s) failed to deploy because they're locked." -ForegroundColor Red
+            Write-Host "Close Bannerlord/BLSE (Task Manager -> kill anything Bannerlord-related) and rerun." -ForegroundColor Yellow
         }
         # Sanity check: confirm freshly-built MCMv5.dll landed where the game reads from.
         $deployedMCM = Join-Path $liveModules 'BetaDeps\bin\Win64_Shipping_Client\MCMv5.dll'

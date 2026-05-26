@@ -69,6 +69,13 @@ public static class IncompatibleModDetector
     };
 
     // BetaDeps's own modules + its alias stubs. Filter these out too.
+    //
+    // v0.7.5 hardening: the explicit set covers the FIVE folders that actually
+    // ship in the public zip. Any additional submodule folder added in the
+    // future (and any "BetaDeps.*" experimental module that ever slips through
+    // during dev) is caught by the prefix check in IsBetaDepsOwnedId() below.
+    // This prevents the "BetaDeps disables its own submodule after a crash
+    // because it's not in last-good yet" cascade that broke OQrock's MCM tab.
     private static readonly HashSet<string> _betaDepsModuleIds = new(StringComparer.OrdinalIgnoreCase)
     {
         "BetaDeps",
@@ -77,6 +84,21 @@ public static class IncompatibleModDetector
         "Bannerlord.ButterLib",
         "Bannerlord.MBOptionScreen",
     };
+
+    /// <summary>
+    /// v0.7.5: belt-and-suspenders check. Returns true if the module id is
+    /// BetaDeps-owned, EITHER because it's in the explicit set above OR
+    /// because it starts with "BetaDeps." (catches future expansions like
+    /// BetaDeps.TacticsEditor, BetaDeps.AnythingElse without needing to
+    /// remember to add them to the set).
+    /// </summary>
+    public static bool IsBetaDepsOwnedId(string? id)
+    {
+        if (string.IsNullOrEmpty(id)) return false;
+        if (_betaDepsModuleIds.Contains(id!)) return true;
+        if (id!.StartsWith("BetaDeps.", StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    }
 
     // Known-incompatible mods on Bannerlord >= e1.4.x. These were compiled
     // against significantly older TaleWorlds APIs and destabilize the game
@@ -307,7 +329,7 @@ public static class IncompatibleModDetector
                             var suspects = enabled.Where(m =>
                                 !lastGood.Contains(m) &&
                                 !_vanillaModuleIds.Contains(m) &&
-                                !_betaDepsModuleIds.Contains(m)).ToList();
+                                !IsBetaDepsOwnedId(m)).ToList();  // v0.7.5: prefix-aware check
                             DiagLog.Log(Tag, $"  suspects (enabled but not in last-good): {suspects.Count}");
 
                             foreach (var suspect in suspects)

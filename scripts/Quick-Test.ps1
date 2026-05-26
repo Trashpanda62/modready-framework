@@ -37,14 +37,28 @@ $sharedST = "C:\dev\bannerlord\selftest.log"
 function Banner($msg) { Write-Host "`n========== $msg ==========" -ForegroundColor Cyan }
 
 # --- 1. Kill leftovers ---
-$leftovers = Get-Process -Name "Bannerlord","Bannerlord.BLSE.LauncherEx","Bannerlord.BLSE.Standalone","Bannerlord.BLSE.Launcher","TaleWorlds.MountAndBlade.Launcher" -ErrorAction SilentlyContinue
+# v0.7.5 hardening: previously we listed a few exact process names, but
+# orphan processes (and BLSE variants we hadn't listed) could survive and
+# hold file locks on Mono.Cecil.dll, breaking the next deploy. Now we
+# kill ANYTHING with "Bannerlord" or "TaleWorlds" in the process name.
+$leftovers = Get-Process -ErrorAction SilentlyContinue |
+    Where-Object { $_.ProcessName -match '^(Bannerlord|TaleWorlds)' }
 if ($leftovers) {
-    Banner "Killing leftover Bannerlord processes"
+    Banner "Killing leftover Bannerlord/TaleWorlds processes"
     foreach ($p in $leftovers) {
         Write-Host "  killing $($p.ProcessName) (pid $($p.Id))"
         try { $p.Kill() } catch { Write-Host "    -- kill failed: $($_.Exception.Message)" }
     }
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 3
+    # Re-check; if anything survived, warn the user explicitly so a locked-
+    # file copy failure later is at least understandable.
+    $stillThere = Get-Process -ErrorAction SilentlyContinue |
+        Where-Object { $_.ProcessName -match '^(Bannerlord|TaleWorlds)' }
+    if ($stillThere) {
+        Write-Host "  WARNING: $($stillThere.Count) process(es) survived the kill:" -ForegroundColor Yellow
+        $stillThere | ForEach-Object { Write-Host "    - $($_.ProcessName) (pid $($_.Id))" -ForegroundColor Yellow }
+        Write-Host "  Subsequent deploy may fail with 'file in use' errors." -ForegroundColor Yellow
+    }
 }
 
 # --- 2. Build + deploy ---

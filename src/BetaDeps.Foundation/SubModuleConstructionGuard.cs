@@ -223,7 +223,22 @@ public static class SubModuleConstructionGuard
     /// Parse Modules\BetaDeps\betadeps-disabled-mods.log into _disabledModuleIds.
     /// File format (one line per disable, written by IncompatibleModDetector):
     ///   [yyyy-MM-dd HH:mm:ss] {modId}\t{reason}
+    ///
+    /// v0.7.5 hardening:
+    ///   1. Entries older than DisableLogTtl are FORGIVEN -- skipped on load.
+    ///      A crash-suspect that hasn't recurred in 7+ days is more likely a
+    ///      one-off than a chronic problem. The user shouldn't have to know to
+    ///      manually clear the log to give that mod another chance.
+    ///   2. Any BetaDeps-owned ID (per IncompatibleModDetector.IsBetaDepsOwnedId)
+    ///      is NEVER honored as a block target -- protects against a bug
+    ///      elsewhere that mistakenly wrote one of our own ids into the log.
+    ///      Was the root cause OQrock + ehmealeo hit on v0.7.3/v0.7.4: a
+    ///      cascading disable could starve the MCM tab of supporting state,
+    ///      and the recovery toggle lives ON the missing tab. Now: we hard-
+    ///      refuse to disable ourselves under any circumstances.
     /// </summary>
+    private static readonly TimeSpan DisableLogTtl = TimeSpan.FromDays(7);
+
     private static void LoadDisabledList()
     {
         try
@@ -234,13 +249,39 @@ public static class SubModuleConstructionGuard
             var path = Path.Combine(modulesRoot!, "BetaDeps", "betadeps-disabled-mods.log");
             if (!File.Exists(path)) return;
 
+            int forgivenAge = 0;
+            int forgivenOwn = 0;
+            int kept = 0;
+
             foreach (var rawLine in File.ReadAllLines(path))
             {
                 var line = rawLine?.Trim() ?? "";
                 if (string.IsNullOrEmpty(line)) continue;
 
-                // Strip the leading "[timestamp] " prefix if present.
+                // Try to parse a leading "[yyyy-MM-dd HH:mm:ss] " timestamp.
+                DateTime? when = null;
                 var afterBracket = line.IndexOf(']');
+                if (line.StartsWith("[") && afterBracket > 0)
+                {
+                    var tsText = line.Substring(1, afterBracket - 1).Trim();
+                    if (DateTime.TryParse(tsText, System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.AssumeLocal, out var parsed))
+                    {
+                        when = parsed;
+                    }
+                }
+
+                // TTL gate: skip entries older than DisableLogTtl. The line
+                // stays in the file (we don't rewrite the log here -- the
+                // append-only history is useful for triage), we just don't
+                // ACT on it. If the same mod crashes again, a fresh entry
+                // gets written and the new timestamp wins.
+                if (when.HasValue && (DateTime.Now - when.Value) > DisableLogTtl)
+                {
+                    forgivenAge++;
+                    continue;
+                }
+
                 var body = afterBracket >= 0 && afterBracket < line.Length - 1
                     ? line.Substring(afterBracket + 1).TrimStart()
                     : line;
@@ -248,9 +289,22 @@ public static class SubModuleConstructionGuard
                 // Body is "{modId}\t{reason}" — split on tab, take the modId.
                 var tabIdx = body.IndexOf('\t');
                 var modId = tabIdx > 0 ? body.Substring(0, tabIdx).Trim() : body.Trim();
-                if (!string.IsNullOrEmpty(modId))
-                    _disabledModuleIds.Add(modId);
+                if (string.IsNullOrEmpty(modId)) continue;
+
+                // Belt-and-suspenders: NEVER honor a block on a BetaDeps-owned
+                // id. Even if some upstream bug wrote it here, we refuse to
+                // disable ourselves.
+                if (IncompatibleModDetector.IsBetaDepsOwnedId(modId))
+                {
+                    forgivenOwn++;
+                    continue;
+                }
+
+                _disabledModuleIds.Add(modId);
+                kept++;
             }
+
+            DiagLog.Log(Tag, $"LoadDisabledList: {kept} active block(s); forgiven {forgivenAge} aged-out + {forgivenOwn} self-owned.");
         }
         catch (Exception ex)
         {
