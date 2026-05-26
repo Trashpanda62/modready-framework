@@ -29,7 +29,7 @@
          AssemblyVersionShim. -->
     <AssemblyVersion>5.11.99.0</AssemblyVersion>
     <FileVersion>5.11.99.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.7.5</InformationalVersion>
+    <InformationalVersion>BetaDeps 0.7.5.1</InformationalVersion>
 
     <!-- Newtonsoft.Json is a real runtime dep (SettingsStorage uses it) so we
          need the NuGet transitives to land in bin. The PrivateAssets="all" on

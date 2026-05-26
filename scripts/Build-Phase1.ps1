@@ -16,7 +16,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$Version = '0.7.5',
+    [string]$Version = '0.7.5.1',
     [switch]$SkipVerify,
     [switch]$SkipZip,
     # When the live Bannerlord install is found at the standard Steam path
@@ -218,11 +218,18 @@ Write-Host "  staged Modules\Bannerlord.ButterLib\SubModule.xml (alias)"
 Write-Host "  staged Modules\Bannerlord.MBOptionScreen\SubModule.xml (alias)"
 
 # -------- 4a-pre. Copy user-facing escape hatch (BetaDeps-Reset-State.bat) --------
-# v0.7.5: if BetaDeps' crash-recovery state gets stuck and the in-game
-# recovery toggle isn't reachable (e.g. MCM tab missing), this lets the
-# user reset everything without a full reinstall.
-$ResetBatSrc = Join-Path $SrcRoot 'BetaDeps.Module\BetaDeps-Reset-State.bat'
-if (Test-Path $ResetBatSrc) {
+# v0.7.5: shipped a .bat user-facing reset script.
+# v0.7.5.1: PULLED from the public zip after Nexus's malware scanner blocked
+# the v0.7.5 upload as suspicious. The .bat's pattern (self-locating via
+# %~dp0, multiple `del /Q`, wildcard delete, choice prompt) heuristically
+# resembles wiper/ransomware to automated scanners. Reset behaviour is
+# documented in the Nexus description's Troubleshooting section as a manual
+# file-delete list instead. The .bat source remains in the repo for local
+# dev convenience; set $ShipResetBat=$true to put it back in the zip if
+# Nexus's review eventually allows it.
+$ShipResetBat = $false
+$ResetBatSrc  = Join-Path $SrcRoot 'BetaDeps.Module\BetaDeps-Reset-State.bat'
+if ($ShipResetBat -and (Test-Path $ResetBatSrc)) {
     Copy-Item $ResetBatSrc (Join-Path $ModuleRoot 'BetaDeps-Reset-State.bat') -Force
     Write-Host "  staged BetaDeps-Reset-State.bat (user-facing reset script)"
 }
