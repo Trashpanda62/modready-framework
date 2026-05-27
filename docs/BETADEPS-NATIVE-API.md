@@ -590,6 +590,43 @@ Reference implementations using these APIs live in:
 
 ---
 
+## Debugging your mod against BetaDeps
+
+When you're iterating on your own Harmony patches or save-load code,
+BetaDeps's defensive layers will catch exceptions and silently unpatch
+the offending hook — which is exactly what you want in production, but
+exactly what you DON'T want during development. You want the raw stack
+trace, not a silent recovery.
+
+BetaDeps supports flag files for this. Drop an empty (or any-content)
+file into `Modules\BetaDeps\` and the corresponding subsystem disables
+itself on the next game launch. Delete the file to re-enable.
+
+| Flag file (in `Modules\BetaDeps\`)    | Effect when present                                                                                                                                                                |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `patchshield-disabled.flag`            | PatchShield does NOT install its finalizer wrapper around consumer-mod Harmony prefixes. Exceptions in your prefix propagate to the engine and crash the way they normally would. |
+| `saveshield-swallow-disabled.flag`     | SaveShield does NOT swallow exceptions in engine save/load entry points (MBSaveLoad.LoadSaveGameData, Mission.Tick, etc.). Save/load failures abort the way they normally would.   |
+| `auto-disable-enabled.flag`            | OPT-IN. Enables BetaDeps's predictive incompatible-mod scan and runtime crash-recovery auto-disable. Default behavior (no flag) leaves your mod list alone.                       |
+
+**Workflow tip.** Add a build-step to your mod's `build.ps1` (or whatever
+script you use) that drops `patchshield-disabled.flag` before launching
+Bannerlord, so every dev iteration runs with the safety net off and you
+see the unvarnished stack trace. Strip the flag before shipping (or just
+never commit it — your users will never see it).
+
+**Why these aren't UI buttons.** Pre-v0.8 BetaDeps surfaced these as
+buttons on the Mod Config tab. End users had no idea what PatchShield or
+SaveShield were and the labels prompted "is this dangerous if I press
+it?" — so the buttons were removed. Modders work at the filesystem layer
+anyway and the flag-file mechanism fits that workflow better.
+
+If you have a use case where a per-launch toggle button would genuinely
+help (e.g. testing both "with-shield" and "no-shield" passes inside a
+single game session), open an issue — I'll consider a dev-mode flag that
+re-surfaces the buttons.
+
+---
+
 ## Where this guide goes next
 
 v1.0 ships this guide alongside:

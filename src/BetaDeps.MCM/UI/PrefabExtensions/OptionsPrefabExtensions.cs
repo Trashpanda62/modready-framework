@@ -237,45 +237,31 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // Row A: per-mod / diagnostic actions (Reset to Defaults, Run Self-Test,
         // Send to GitHub) -- 3 x 260 = 820 px, easy fit.
         // Row B: global toggle settings (Auto-Disable, PatchShield, SaveShield
-        // Swallow) -- 3 x 260 = 820 px, easy fit.
-        // Previous single-row layout was 1560 px wide and would wrap awkwardly
-        // on narrower aspect ratios.
+        // v0.8 UI cleanup: two button rows (Reset/Self-Test/SendToGitHub plus
+        // AutoDisable/PatchShield/SaveShield toggles) collapsed into ONE row
+        // with two buttons: Reset to Defaults + Report a Bug. The diagnostic
+        // toggles (PatchShield/SaveShield/AutoDisable) were dev-tier surfaces
+        // that just confused end users; they remain accessible via flag files
+        // in Modules\BetaDeps\ for modders who need to debug (see
+        // BETADEPS-NATIVE-API.md "Debugging" section).
         //
-        // v0.7.6 visual change #2: toggle button labels show current state.
-        // @AutoDisableButtonText / @PatchShieldButtonText / @SaveShieldButtonText
-        // are VM properties that produce strings like "Auto-Disable: ON" or
-        // "PatchShield: OFF" based on the current flag file state. The click
-        // handler calls NotifyVisualState() at the end so the label updates
-        // immediately when the user clicks.
-        + "    <ListPanel WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
+        // Run Self-Test is folded INTO Report-a-Bug: clicking the bug button
+        // auto-runs self-test as its first step, then opens a GitHub issue
+        // draft pre-filled with the results. Single click for an end-user
+        // bug report, no need to know "self-test" exists as a concept.
+        + "    <ListPanel WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" MarginBottom=\"15\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "      <Children>\n"
         + "        <ButtonWidget Command.Click=\"ExecuteResetDefaults\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
         + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Reset to Defaults\" /></Children>\n"
         + "        </ButtonWidget>\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteRunSelfTest\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@SelfTestButtonText\" /></Children>\n"
-        + "        </ButtonWidget>\n"
         + "        <ButtonWidget Command.Click=\"ExecuteSendToGitHub\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Send to GitHub\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        + "      </Children>\n"
-        + "    </ListPanel>\n"
-        + "    <ListPanel WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" MarginBottom=\"15\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
-        + "      <Children>\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteToggleAutoDisable\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@AutoDisableButtonText\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteTogglePatchShield\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@PatchShieldButtonText\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteToggleSaveShieldSwallow\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@SaveShieldButtonText\" /></Children>\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Report a Bug\" /></Children>\n"
         + "        </ButtonWidget>\n"
         + "      </Children>\n"
         + "    </ListPanel>\n"
         // v1.0: dead space after the action button row so the Cancel/Done bar
         // at the very bottom of the Options screen doesn't sit on top of
-        // Reset to Defaults / Run Self-Test when the user scrolls to the
+        // Reset to Defaults / Report a Bug when the user scrolls to the
         // bottom of a tall mod. 120 px is roughly the height of the vanilla
         // bottom button bar plus a small margin.
         + "    <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"1\" SuggestedHeight=\"120\" />\n"

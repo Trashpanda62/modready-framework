@@ -2226,29 +2226,68 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         DiagLog.Log(Tag, "ExecuteSendToGitHub: click received");
         try
         {
-            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
-            var dir = System.IO.Path.GetDirectoryName(rtPath) ?? "(unknown)";
-            var selftest = System.IO.Path.Combine(dir, "selftest.log");
-            var runtime  = System.IO.Path.Combine(dir, "runtime.log");
-
             var prompt = new TaleWorlds.Library.InquiryData(
-                titleText: "Send a crash report to BetaDeps",
-                text: "This will open the BetaDeps GitHub issues page in your browser. Before clicking \"New Issue\" there:\n\n" +
-                      "1. Click \"Run Self-Test\" first if you haven't already this session, so the report is fresh.\n" +
-                      $"2. Attach BOTH of these files to the issue (drag-and-drop works):\n   • {RedactUserPath(selftest)}\n   • {RedactUserPath(runtime)}\n" +
-                      "3. Describe what you were doing when the crash happened.\n\n" +
-                      "Open GitHub now?",
+                titleText: "Report a Bug",
+                text: "BetaDeps will run a quick Self-Test (~5 seconds, restores your " +
+                      "settings when done) and then open a GitHub issue draft in your " +
+                      "browser with the results pre-filled.\n\n" +
+                      "After the browser opens, write a short description of what you " +
+                      "were doing when the issue happened, then click Submit on the " +
+                      "GitHub page.\n\n" +
+                      "Continue?",
                 isAffirmativeOptionShown: true,
                 isNegativeOptionShown: true,
-                affirmativeText: "Open GitHub",
+                affirmativeText: "Run + Open GitHub",
                 negativeText: "Cancel",
-                affirmativeAction: () => OpenGitHubIssueUrl(),
+                affirmativeAction: () =>
+                {
+                    // v0.8 UI cleanup: Report-a-Bug auto-runs Self-Test inline so
+                    // the GitHub issue body contains fresh diagnostics. Quiet mode
+                    // (no result popup) — the user already confirmed once; a second
+                    // dialog between "Run + Open GitHub" and the browser opening
+                    // would be a worse UX than one continuous flow.
+                    try { RunSelfTestQuiet(); }
+                    catch (System.Exception ex) { DiagLog.LogCaught(Tag, "ExecuteSendToGitHub/selftest", ex); }
+                    OpenGitHubIssueUrl();
+                },
                 negativeAction: () => { });
             TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
         }
         catch (System.Exception ex)
         {
             DiagLog.LogCaught(Tag, "ExecuteSendToGitHub", ex);
+        }
+    }
+
+    /// <summary>
+    /// Quiet variant of RunSelfTestConfirmed used by Report-a-Bug. Runs the
+    /// McmSelfTest harness synchronously, writes selftest.log + selftest.json
+    /// to disk via the existing harness, but does NOT show a result popup.
+    /// The Report-a-Bug flow proceeds directly to opening the GitHub issue
+    /// draft after this returns. Wrapped in try/catch so a self-test failure
+    /// (e.g. one mod's settings throwing) doesn't abort the bug-report flow.
+    /// </summary>
+    private void RunSelfTestQuiet()
+    {
+        if (_selfTestRunning)
+        {
+            DiagLog.Log(Tag, "RunSelfTestQuiet: already running; skipped");
+            return;
+        }
+        _selfTestRunning = true;
+        try
+        {
+            DiagLog.Log(Tag, "RunSelfTestQuiet: starting McmSelfTest.RunAll() (Report-a-Bug flow)");
+            McmSelfTest.RunAll();
+            DiagLog.Log(Tag, "RunSelfTestQuiet: complete");
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "RunSelfTestQuiet", ex);
+        }
+        finally
+        {
+            _selfTestRunning = false;
         }
     }
 
