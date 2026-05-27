@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  BetaDeps alias stub for Bannerlord.Harmony. This module folder exists so
-  that consumer mods which declare <DependedModule Id="Bannerlord.Harmony" />
-  in their own SubModule.xml find a module with that Id in the launcher.
-  All Harmony functionality is provided by Modules\BetaDeps\.
-  Version v2.4.99.0 satisfies any reasonable v2.4.x minimum (Bannerlord
-  launcher compares 4-part versions left-to-right). Known dependents that
-  declare minimum versions in v2.4.x range:
-    Character Development Editor v1.0.10 requires Harmony v2.4.2 (v0.7 fix)
+  v0.8 step 1: REAL Bannerlord.Harmony module (no longer an alias stub).
+
+  Loads BEFORE BetaDeps because BetaDeps's SubModule.xml now carries
+  <DependedModule Id="Bannerlord.Harmony" />. That ordering puts the
+  Harmony binary fan (0Harmony.dll + Mono.Cecil.dll + the five MonoMod.*.dll
+  files) into the AppDomain before BetaDeps's own SubModule classes JIT,
+  which is the whole point of step 1: consumer mods that DependedModule us
+  via Bannerlord.Harmony share the same Harmony copy as our PatchShield /
+  SaveShield infrastructure, eliminating the "two Harmony copies" failure
+  mode that drove BLSE's preflight quirk and the "Missing Bannerlord.Harmony
+  a0.0.0.0 to a0.0.0.0" load-order popup.
+
+  Version v2.4.99.0 stays — BLSE's preflight compares 4-part versions
+  left-to-right and our v2.4.99 satisfies any reasonable v2.4.x minimum.
+  Known dependents that declare minimum versions in v2.4.x range:
+    Character Development Editor v1.0.10 requires Harmony v2.4.2
     XorberaxLegacy declares v2.4.* wildcard
     BLSE v2.2.2 minimum
   WARNING: legacy mods declaring strict v2.4.0.* wildcards (e.g. CargoHolds
   if still maintained) will NOT match v2.4.99.0. If reports come in we may
   need to revisit; modern modlist support takes precedence for now.
+
+  The DependedModule on BetaDeps is intentionally REMOVED — this module
+  must load first, not second. BetaDeps depends on us, not the other way
+  around.
 -->
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
@@ -27,27 +39,38 @@
   <ModuleType value="Community" />
   <Url value="" />
 
-  <DependedModules>
-    <DependedModule Id="BetaDeps" />
-  </DependedModules>
+  <DependedModules />
 
   <DependedModuleMetadatas />
 
-  <!--
-    v0.7.5: SubModule entry restored. v0.7.2 removed this to avoid a
-    LauncherEx crash, but the resulting empty SubModules block made BLSE
-    treat this alias as metadata-only / not actually loaded, so consumer
-    mods' DependedModule checks failed and BLSE blocked all drag-to-reorder
-    operations with "Missing Bannerlord.Harmony a0.0.0.0 to a0.0.0.0".
-    AliasStubSubModule is a near-no-op MBSubModuleBase derivative; its
-    ctor work is wrapped in try/catch so any LauncherEx-time exception
-    is logged and swallowed without blowing up the launcher.
-  -->
   <SubModules>
     <SubModule>
-      <Name value="Bannerlord.Harmony Alias Stub" />
-      <DLLName value="BetaDeps.Foundation.dll" />
-      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Name value="Bannerlord.Harmony" />
+      <DLLName value="Bannerlord.Harmony.dll" />
+      <SubModuleClassType value="Bannerlord.Harmony.BannerlordHarmonySubModule" />
+      <Assemblies>
+        <!-- BetaDeps.Foundation.dll FIRST so its [ModuleInitializer] is
+             primed before any Harmony reflection runs. The host SubModule
+             logs via DiagLog which lives in Foundation. -->
+        <Assembly value="BetaDeps.Foundation.dll" />
+        <!-- Andreas Pardeike's Harmony, MIT, unmodified NuGet artifact. -->
+        <Assembly value="0Harmony.dll" />
+        <!-- Harmony 2.4.x transitive dependencies. Listed so the launcher
+             preloads them in this module's AppDomain pass before any
+             dependent module (BetaDeps + every consumer mod that DependedModule
+             us) constructs. All MIT-licensed; copyright JB Evain (Cecil)
+             and 0x0ade et al (MonoMod). -->
+        <Assembly value="Mono.Cecil.dll" />
+        <!-- Mono.Cecil.Mdb/Pdb/Rocks intentionally NOT shipped. They're symbol-
+             reader / syntactic-sugar layers that Harmony's hot path doesn't
+             touch. Saves ~160 KB on the public zip; if a future consumer mod
+             needs them, re-add locally. -->
+        <Assembly value="MonoMod.Backports.dll" />
+        <Assembly value="MonoMod.Core.dll" />
+        <Assembly value="MonoMod.Iced.dll" />
+        <Assembly value="MonoMod.ILHelpers.dll" />
+        <Assembly value="MonoMod.Utils.dll" />
+      </Assemblies>
       <Tags />
     </SubModule>
   </SubModules>

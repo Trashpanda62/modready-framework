@@ -9,7 +9,30 @@
   <ModuleType value="Community" />
   <Url value="" />
 
-  <DependedModules />
+  <!-- v0.8 step 1: depend on Bannerlord.Harmony (now a real module, not an
+       alias stub) so the Harmony binary fan loads into the AppDomain BEFORE
+       BetaDeps's SubModule classes JIT. This puts every consumer mod that
+       declares <DependedModule Id="Bannerlord.Harmony" /> on the same Harmony
+       copy as our PatchShield / SaveShield infrastructure.
+
+       v0.8 step 2: same pattern extended to Bannerlord.UIExtenderEx. Its
+       SubModule (BetaDepsUIExtenderExSubModule) now runs from the
+       Bannerlord.UIExtenderEx module's own bin, before BetaDeps. The
+       corresponding <SubModule> entry was removed from this file's
+       <SubModules> block below; that load is owned by the real module now. -->
+  <DependedModules>
+    <DependedModule Id="Bannerlord.Harmony" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" />
+    <!-- v0.8 step 3: ButterLib promoted to a real module too. Its SubModule
+         (ButterLibSubModule) now runs from Modules\Bannerlord.ButterLib\bin\
+         BEFORE BetaDeps's MCM tab construction needs ButterLib's DI container. -->
+    <DependedModule Id="Bannerlord.ButterLib" />
+    <!-- v0.8 step 4 (final): MBOptionScreen / MCM promoted. Both MCMSubModule
+         and MCMUISubModule now run from Modules\Bannerlord.MBOptionScreen\bin\.
+         BetaDeps's OptionsVMMixin runs after MCM has registered, picking up
+         every Settings instance from the same SettingsRegistry. -->
+    <DependedModule Id="Bannerlord.MBOptionScreen" />
+  </DependedModules>
 
   <!-- BetaDeps must load before:
        1. The official TaleWorlds stack (so Mission / Module / ApplicationVersion
@@ -29,11 +52,9 @@
     <Module Id="Sandbox" />
     <Module Id="StoryMode" />
     <Module Id="CustomBattle" />
-    <!-- BUTR alias modules (also DependedModule us, redundant but explicit) -->
-    <Module Id="Bannerlord.Harmony" />
-    <Module Id="Bannerlord.UIExtenderEx" />
-    <Module Id="Bannerlord.ButterLib" />
-    <Module Id="Bannerlord.MBOptionScreen" />
+    <!-- BUTR alias modules: all four were promoted to real DependedModules
+         in v0.8 steps 1-4. None remain in the load-after list (they all
+         load BEFORE BetaDeps now via the <DependedModules> block above). -->
     <!-- Consumer mods known to bundle MCMv5 / 0Harmony copies. Adding here
          pins our load order ahead of theirs regardless of dependency graph. -->
     <Module Id="DismembermentPlus" />
@@ -73,80 +94,35 @@
       <DLLName value="BetaDeps.Harmony.dll" />
       <SubModuleClassType value="BetaDeps.Harmony.BetaDepsHarmonySubModule" />
       <Assemblies>
-        <!-- BetaDeps.Foundation.dll FIRST so its [ModuleInitializer] runs
-             before any of the other assemblies in this block get JIT'd.
-             That [ModuleInitializer] installs the AssemblyResolve hook
-             which redirects all subsequent MCMv5/0Harmony/etc. requests
-             to our copies. -->
-        <Assembly value="BetaDeps.Foundation.dll" />
-        <!-- Andreas Pardeike's Harmony, MIT, unmodified NuGet artifact. -->
-        <Assembly value="0Harmony.dll" />
-        <!-- Harmony 2.3.x transitive dependencies. Listed so the launcher
-             preloads them and consumer mods don't get partial-load surprises.
-             All MIT-licensed; copyright JB Evain (Cecil) and 0x0ade et al (MonoMod). -->
-        <Assembly value="Mono.Cecil.dll" />
-        <!-- Mono.Cecil.Mdb/Pdb/Rocks intentionally NOT shipped. They're symbol-
-             reader / syntactic-sugar layers that Harmony's hot path doesn't
-             touch. Saves ~160 KB on the public zip; if a future consumer mod
-             needs them, re-add locally. -->
+        <!-- BetaDeps.Foundation.dll: its [ModuleInitializer] installs the
+             AssemblyResolve hook that redirects MCMv5/UIExtenderEx/etc.
+             requests to our copies.
 
-        <Assembly value="MonoMod.Backports.dll" />
-        <Assembly value="MonoMod.Core.dll" />
-        <Assembly value="MonoMod.Iced.dll" />
-        <Assembly value="MonoMod.ILHelpers.dll" />
-        <Assembly value="MonoMod.Utils.dll" />
+             v0.8 step 1: the Harmony binary fan (0Harmony.dll, Mono.Cecil.dll,
+             and the five MonoMod.*.dll files) was REMOVED from this Assemblies
+             block. Those DLLs now load via the real Bannerlord.Harmony module
+             (Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\), which
+             constructs BEFORE BetaDeps because of the <DependedModule> entry
+             above. By the time this assembly is JIT'd, Harmony is already
+             resolvable in the AppDomain. -->
+        <Assembly value="BetaDeps.Foundation.dll" />
       </Assemblies>
       <Tags />
     </SubModule>
-    <SubModule>
-      <Name value="BetaDeps UIExtenderEx" />
-      <DLLName value="Bannerlord.UIExtenderEx.dll" />
-      <SubModuleClassType value="Bannerlord.UIExtenderEx.BetaDepsUIExtenderExSubModule" />
-      <Tags />
-    </SubModule>
-    <SubModule>
-      <Name value="BetaDeps ButterLib" />
-      <DLLName value="Bannerlord.ButterLib.dll" />
-      <SubModuleClassType value="Bannerlord.ButterLib.ButterLibSubModule" />
-      <Assemblies>
-        <!-- Microsoft.Extensions.DependencyInjection runtime + transitive deps.
-             All MIT-licensed Microsoft Foundation Libraries. Listed so the
-             launcher preloads them; ButterLibSubModule builds the DI container
-             at OnSubModuleLoad and these must be in the AppDomain by then. -->
-        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
-        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
-        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
-        <Assembly value="Microsoft.Extensions.Logging.dll" />
-        <Assembly value="Microsoft.Extensions.Options.dll" />
-        <Assembly value="Microsoft.Extensions.Primitives.dll" />
-        <!-- System.* facade DLLs (Buffers / DiagnosticSource / Memory / Numerics.Vectors
-             / Runtime.CompilerServices.Unsafe / Threading.Tasks.Extensions) ship in the
-             .NET Framework 4.7.2 BCL by default. Listing them here makes the launcher
-             show "Cannot load <name>.dll" popups on every start; type forwarders in
-             mscorlib / System.dll already resolve them at JIT time. Don't list them. -->
-        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
-        <!-- Serilog: ship our v2.10.0 so consumer mods (FCL etc.) compiled against
-             arbitrary Serilog versions resolve to our copy via AssemblyVersionShim,
-             matching the Action<Serilog.LoggerConfiguration> parameter type in our
-             AddSerilogLoggerProvider overloads. -->
-        <Assembly value="Serilog.dll" />
-      </Assemblies>
-      <Tags />
-    </SubModule>
-    <SubModule>
-      <Name value="BetaDeps MCM" />
-      <DLLName value="MCMv5.dll" />
-      <SubModuleClassType value="MCM.MCMSubModule" />
-      <Assemblies>
-        <Assembly value="Newtonsoft.Json.dll" />
-      </Assemblies>
-      <Tags />
-    </SubModule>
-    <SubModule>
-      <Name value="BetaDeps MCM UI" />
-      <DLLName value="MCMv5.dll" />
-      <SubModuleClassType value="MCM.UI.MCMUISubModule" />
-      <Tags />
-    </SubModule>
+    <!-- v0.8 step 2: BetaDepsUIExtenderExSubModule now loads from the real
+         Bannerlord.UIExtenderEx module (Modules\Bannerlord.UIExtenderEx\) so
+         Bannerlord.UIExtenderEx.dll is in the AppDomain before BetaDeps's
+         own ButterLib/MCM SubModules JIT (they both reference UIExtenderEx
+         types). The DependedModule entry above pins the load order. -->
+    <!-- v0.8 step 3: ButterLibSubModule now loads from the real
+         Bannerlord.ButterLib module (Modules\Bannerlord.ButterLib\) so the
+         DI container is built BEFORE BetaDeps's own MCM tab construction
+         needs ButterLib services. The DependedModule entry above pins the
+         load order; the Assemblies block (DI runtime + Serilog) moved into
+         the real module's SubModule.xml. -->
+    <!-- v0.8 step 4: MCMSubModule + MCMUISubModule both now load from the
+         real Bannerlord.MBOptionScreen module (Modules\Bannerlord.MBOptionScreen\).
+         The DependedModule entry above pins the load order. MCMv5.dll and
+         Newtonsoft.Json.dll live exclusively in the real module's bin. -->
   </SubModules>
 </Module>

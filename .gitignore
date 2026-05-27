@@ -51,3 +51,7 @@ packages/
 .env
 .env.local
 *.local.json
+
+# Local development notes / scripts (not part of the shipped mod) -------------
+CLAUDE.md
+scripts/

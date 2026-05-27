@@ -47,13 +47,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot10_IntValue
     {
         get => (float)(_slots[10]?.IntValue ?? 0);
-        set { if (_slots[10] != null) { _slots[10]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot10_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot10_ValueText));} }
+        set { if (_slots[10] != null) { _slots[10]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot10_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot10_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot10_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot10_FloatValue
     {
         get { var p = _slots[10]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[10]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot10_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot10_ValueText)); }
+        set { var p = _slots[10]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot10_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot10_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot10_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot10_ValueText
@@ -112,13 +112,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot11_IntValue
     {
         get => (float)(_slots[11]?.IntValue ?? 0);
-        set { if (_slots[11] != null) { _slots[11]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot11_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot11_ValueText));} }
+        set { if (_slots[11] != null) { _slots[11]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot11_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot11_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot11_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot11_FloatValue
     {
         get { var p = _slots[11]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[11]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot11_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot11_ValueText)); }
+        set { var p = _slots[11]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot11_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot11_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot11_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot11_ValueText
@@ -177,13 +177,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot12_IntValue
     {
         get => (float)(_slots[12]?.IntValue ?? 0);
-        set { if (_slots[12] != null) { _slots[12]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot12_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot12_ValueText));} }
+        set { if (_slots[12] != null) { _slots[12]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot12_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot12_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot12_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot12_FloatValue
     {
         get { var p = _slots[12]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[12]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot12_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot12_ValueText)); }
+        set { var p = _slots[12]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot12_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot12_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot12_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot12_ValueText
@@ -242,13 +242,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot13_IntValue
     {
         get => (float)(_slots[13]?.IntValue ?? 0);
-        set { if (_slots[13] != null) { _slots[13]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot13_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot13_ValueText));} }
+        set { if (_slots[13] != null) { _slots[13]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot13_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot13_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot13_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot13_FloatValue
     {
         get { var p = _slots[13]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[13]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot13_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot13_ValueText)); }
+        set { var p = _slots[13]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot13_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot13_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot13_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot13_ValueText
@@ -307,13 +307,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot14_IntValue
     {
         get => (float)(_slots[14]?.IntValue ?? 0);
-        set { if (_slots[14] != null) { _slots[14]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot14_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot14_ValueText));} }
+        set { if (_slots[14] != null) { _slots[14]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot14_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot14_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot14_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot14_FloatValue
     {
         get { var p = _slots[14]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[14]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot14_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot14_ValueText)); }
+        set { var p = _slots[14]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot14_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot14_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot14_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot14_ValueText
@@ -372,13 +372,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot15_IntValue
     {
         get => (float)(_slots[15]?.IntValue ?? 0);
-        set { if (_slots[15] != null) { _slots[15]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot15_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot15_ValueText));} }
+        set { if (_slots[15] != null) { _slots[15]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot15_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot15_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot15_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot15_FloatValue
     {
         get { var p = _slots[15]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[15]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot15_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot15_ValueText)); }
+        set { var p = _slots[15]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot15_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot15_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot15_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot15_ValueText
@@ -437,13 +437,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot16_IntValue
     {
         get => (float)(_slots[16]?.IntValue ?? 0);
-        set { if (_slots[16] != null) { _slots[16]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot16_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot16_ValueText));} }
+        set { if (_slots[16] != null) { _slots[16]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot16_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot16_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot16_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot16_FloatValue
     {
         get { var p = _slots[16]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[16]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot16_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot16_ValueText)); }
+        set { var p = _slots[16]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot16_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot16_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot16_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot16_ValueText
@@ -502,13 +502,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot17_IntValue
     {
         get => (float)(_slots[17]?.IntValue ?? 0);
-        set { if (_slots[17] != null) { _slots[17]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot17_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot17_ValueText));} }
+        set { if (_slots[17] != null) { _slots[17]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot17_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot17_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot17_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot17_FloatValue
     {
         get { var p = _slots[17]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[17]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot17_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot17_ValueText)); }
+        set { var p = _slots[17]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot17_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot17_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot17_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot17_ValueText
@@ -567,13 +567,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot18_IntValue
     {
         get => (float)(_slots[18]?.IntValue ?? 0);
-        set { if (_slots[18] != null) { _slots[18]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot18_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot18_ValueText));} }
+        set { if (_slots[18] != null) { _slots[18]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot18_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot18_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot18_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot18_FloatValue
     {
         get { var p = _slots[18]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[18]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot18_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot18_ValueText)); }
+        set { var p = _slots[18]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot18_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot18_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot18_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot18_ValueText
@@ -632,13 +632,13 @@ internal sealed partial class OptionsVMMixin
     public float Slot19_IntValue
     {
         get => (float)(_slots[19]?.IntValue ?? 0);
-        set { if (_slots[19] != null) { _slots[19]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot19_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot19_ValueText));} }
+        set { if (_slots[19] != null) { _slots[19]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot19_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot19_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot19_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot19_FloatValue
     {
         get { var p = _slots[19]; if (p == null) return 0f; return p.IsInteger ? (float)p.IntValue : p.FloatValue; }
-        set { var p = _slots[19]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot19_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot19_ValueText)); }
+        set { var p = _slots[19]; if (p == null) return; if (p.IsInteger) p.IntValue = (int)value; else if (p.IsFloating) p.FloatValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot19_FloatValue)); ViewModel.NotifyPropertyChanged(nameof(Slot19_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot19_EditableValueText)); }
     }
     [DataSourceProperty]
     public string Slot19_ValueText
@@ -667,4 +667,18 @@ internal sealed partial class OptionsVMMixin
     [DataSourceMethod] public void ExecuteSlot19ActionButton() { try { _slots[19]?.InvokeAction(); } catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"ExecuteSlot19ActionButton", ex); } }
     [DataSourceMethod] public void ExecuteSlot19DropdownNext() => CycleSlot(19, +1);
     [DataSourceMethod] public void ExecuteSlot19DropdownPrev() => CycleSlot(19, -1);
+
+    // v0.7.6 click-to-edit: editable numeric value bindings for slots 10-19.
+    // Pairs with the EditableTextWidget in BuildUnifiedSliderBlock. Slots 0-9
+    // live in OptionsVMMixin.cs.
+    [DataSourceProperty] public string Slot10_EditableValueText { get => FormatSlotValueText(10); set { SetSlotFromEditableText(10, value); } }
+    [DataSourceProperty] public string Slot11_EditableValueText { get => FormatSlotValueText(11); set { SetSlotFromEditableText(11, value); } }
+    [DataSourceProperty] public string Slot12_EditableValueText { get => FormatSlotValueText(12); set { SetSlotFromEditableText(12, value); } }
+    [DataSourceProperty] public string Slot13_EditableValueText { get => FormatSlotValueText(13); set { SetSlotFromEditableText(13, value); } }
+    [DataSourceProperty] public string Slot14_EditableValueText { get => FormatSlotValueText(14); set { SetSlotFromEditableText(14, value); } }
+    [DataSourceProperty] public string Slot15_EditableValueText { get => FormatSlotValueText(15); set { SetSlotFromEditableText(15, value); } }
+    [DataSourceProperty] public string Slot16_EditableValueText { get => FormatSlotValueText(16); set { SetSlotFromEditableText(16, value); } }
+    [DataSourceProperty] public string Slot17_EditableValueText { get => FormatSlotValueText(17); set { SetSlotFromEditableText(17, value); } }
+    [DataSourceProperty] public string Slot18_EditableValueText { get => FormatSlotValueText(18); set { SetSlotFromEditableText(18, value); } }
+    [DataSourceProperty] public string Slot19_EditableValueText { get => FormatSlotValueText(19); set { SetSlotFromEditableText(19, value); } }
 }

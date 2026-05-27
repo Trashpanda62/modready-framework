@@ -71,7 +71,7 @@ cd C:\dev\beta-deps
 .\scripts\Quick-Test.ps1
 ```
 
-This rebuilds, launches BLSE LauncherEx, and copies the runtime logs back to a known location for inspection. See [CLAUDE.md](CLAUDE.md) for the full development workflow.
+This rebuilds, launches BLSE LauncherEx, and copies the runtime logs back to a known location for inspection.
 
 ## License
 

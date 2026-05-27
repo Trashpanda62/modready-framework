@@ -1,7 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  BetaDeps alias stub for Bannerlord.UIExtenderEx. The actual UIExtenderEx
-  work is done by Bannerlord.UIExtenderEx.dll inside Modules\BetaDeps\.
+  v0.8 step 2: REAL Bannerlord.UIExtenderEx module (no longer an alias stub).
+
+  Same pattern as v0.8 step 1 promoted Bannerlord.Harmony to a real module:
+  this folder now holds Bannerlord.UIExtenderEx.dll directly and runs its
+  BetaDepsUIExtenderExSubModule class. Loads BEFORE BetaDeps because
+  BetaDeps's SubModule.xml carries <DependedModule Id="Bannerlord.UIExtenderEx" />.
+
+  Why: consumer mods that ship their own bundled copy of
+  Bannerlord.UIExtenderEx.dll inside their own bin folder would otherwise
+  win the AppDomain slot if they JIT'd first. Promoting our copy to a
+  pre-BetaDeps module guarantees ours loads first, and consumer mods that
+  DependedModule us on this Id share that copy.
+
+  Load order in v0.8 step 2:
+    Bannerlord.Harmony            (real module, step 1)
+    Bannerlord.UIExtenderEx       (real module, this step)
+    Bannerlord.ButterLib          (still alias stub — promoted in a later step)
+    Bannerlord.MBOptionScreen     (still alias stub — promoted in a later step)
+    BetaDeps                      (loads after all of the above)
+
+  Version v2.14.99.0 retained from the previous stub. BLSE preflight does
+  4-part left-to-right matching against any reasonable v2.x consumer mod
+  minimum.
+
+  DependedModule on BetaDeps REMOVED — we load before BetaDeps now.
+  DependedModule on Bannerlord.Harmony retained — UIExtenderEx.dll
+  references Harmony internally and the engine pins Harmony first.
 -->
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
@@ -17,18 +42,20 @@
   <Url value="" />
 
   <DependedModules>
-    <DependedModule Id="BetaDeps" />
     <DependedModule Id="Bannerlord.Harmony" />
   </DependedModules>
 
   <DependedModuleMetadatas />
 
-  <!-- v0.7.5: SubModule entry restored (see Harmony alias for rationale). -->
   <SubModules>
     <SubModule>
-      <Name value="Bannerlord.UIExtenderEx Alias Stub" />
-      <DLLName value="BetaDeps.Foundation.dll" />
-      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Name value="Bannerlord.UIExtenderEx" />
+      <DLLName value="Bannerlord.UIExtenderEx.dll" />
+      <SubModuleClassType value="Bannerlord.UIExtenderEx.BetaDepsUIExtenderExSubModule" />
+      <Assemblies>
+        <Assembly value="BetaDeps.Foundation.dll" />
+        <Assembly value="Bannerlord.UIExtenderEx.dll" />
+      </Assemblies>
       <Tags />
     </SubModule>
   </SubModules>

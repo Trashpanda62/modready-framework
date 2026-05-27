@@ -72,6 +72,84 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     [DataSourceProperty] public string BetaDepsModConfigRegisteredModsList   { get => _registeredModsList; set { _registeredModsList = value; } }
     [DataSourceProperty] public string BetaDepsModConfigSummary              { get => _summaryText; set { _summaryText = value; } }
 
+    // v0.7.6 visual polish:
+    //   * empty-state visibility: when no mods registered, show a hint message
+    //     instead of an empty settings panel.
+    //   * toggle-button labels: instead of "Toggle X", show "X: ON" or "X: OFF"
+    //     so users can read current state without clicking. Backed by flag files.
+    [DataSourceProperty] public bool BetaDepsModConfigHasMods   => _registered != null && _registered.Length > 0;
+    [DataSourceProperty] public bool BetaDepsModConfigIsEmpty   => !BetaDepsModConfigHasMods;
+    [DataSourceProperty] public string AutoDisableButtonText    => "Auto-Disable: "       + (IsAutoDisableEnabled()    ? "ON" : "OFF");
+    [DataSourceProperty] public string PatchShieldButtonText    => "PatchShield: "        + (IsPatchShieldEnabled()    ? "ON" : "OFF");
+    [DataSourceProperty] public string SaveShieldButtonText     => "SaveShield Swallow: " + (IsSaveShieldSwallowEnabled() ? "ON" : "OFF");
+
+    private static string? ResolveBetaDepsDir()
+    {
+        try
+        {
+            var ownPath = typeof(OptionsVMMixin).Assembly.Location;
+            if (string.IsNullOrEmpty(ownPath)) return null;
+            var binDir = System.IO.Path.GetDirectoryName(ownPath);
+            var betaDepsDir = System.IO.Path.GetDirectoryName(binDir);   // BetaDeps\bin\.. -> BetaDeps\
+            return betaDepsDir;
+        }
+        catch { return null; }
+    }
+
+    private static bool IsAutoDisableEnabled()
+    {
+        try
+        {
+            var dir = ResolveBetaDepsDir();
+            if (string.IsNullOrEmpty(dir)) return false;
+            // Convention: auto-disable is OPT-IN. Flag present = enabled.
+            return System.IO.File.Exists(System.IO.Path.Combine(dir!, "auto-disable-enabled.flag"));
+        }
+        catch { return false; }
+    }
+
+    private static bool IsPatchShieldEnabled()
+    {
+        try
+        {
+            var dir = ResolveBetaDepsDir();
+            if (string.IsNullOrEmpty(dir)) return true;  // default ON
+            // Convention: PatchShield is OPT-OUT. Flag present = DISABLED.
+            return !System.IO.File.Exists(System.IO.Path.Combine(dir!, "patchshield-disabled.flag"));
+        }
+        catch { return true; }
+    }
+
+    private static bool IsSaveShieldSwallowEnabled()
+    {
+        try
+        {
+            var dir = ResolveBetaDepsDir();
+            if (string.IsNullOrEmpty(dir)) return true;  // default ON (v0.7.3+)
+            // Convention: SaveShield swallow is OPT-OUT in v0.7.3+. Flag present = DISABLED.
+            return !System.IO.File.Exists(System.IO.Path.Combine(dir!, "saveshield-swallow-disabled.flag"));
+        }
+        catch { return true; }
+    }
+
+    /// <summary>
+    /// Re-notify every toggle-button label + empty-state binding so the
+    /// in-game text refreshes immediately after the user clicks one of
+    /// the toggle buttons (or after RebuildModList changes _registered).
+    /// </summary>
+    private void NotifyVisualState()
+    {
+        try
+        {
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigHasMods));
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigIsEmpty));
+            ViewModel.NotifyPropertyChanged(nameof(AutoDisableButtonText));
+            ViewModel.NotifyPropertyChanged(nameof(PatchShieldButtonText));
+            ViewModel.NotifyPropertyChanged(nameof(SaveShieldButtonText));
+        }
+        catch { }
+    }
+
     /// <summary>
     /// v1.0: mod-list search/filter. EditableTextWidget in the Mod Config header
     /// binds two-way to this. When the user types, ApplyFilter() rebuilds
@@ -329,6 +407,78 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     [DataSourceProperty] public bool   Slot0_IsVisible    => _slots[0] != null || _slotIsHeader[0];
     [DataSourceProperty] public bool   Slot0_IsHeader    => _slotIsHeader[0];
     [DataSourceProperty] public bool   Slot0_IsProperty  => _slots[0] != null && !_slotIsHeader[0];
+    // v0.7.6 click-to-edit shared helper.
+    // EditableTextWidget next to each slider binds two-way to
+    // Slot{n}_EditableValueText. The setter calls this method, which:
+    //   1. Trims + normalises the typed string
+    //   2. Parses as int (for IsInteger slots) or float (for IsFloating slots)
+    //   3. Clamps to the slot's declared [MinValue, MaxValue] range
+    //   4. Writes IntValue or FloatValue back through the slot
+    //   5. Notifies FloatValue + ValueText (but NOT EditableValueText) so the
+    //      slider bar moves but the user's typed text isn't clobbered mid-edit
+    //
+    // Returns true if the typed input changed the underlying value.
+    private bool SetSlotFromEditableText(int slotIndex, string? typed)
+    {
+        if (slotIndex < 0 || slotIndex >= _slots.Length) return false;
+        var p = _slots[slotIndex];
+        if (p == null) return false;
+        if (string.IsNullOrWhiteSpace(typed)) return false;
+        var s = typed!.Trim();
+
+        try
+        {
+            if (p.IsInteger)
+            {
+                int iv;
+                if (!int.TryParse(s, System.Globalization.NumberStyles.Integer,
+                        System.Globalization.CultureInfo.InvariantCulture, out iv))
+                {
+                    // Accept "3.5" on an integer slot too -- round to nearest.
+                    if (float.TryParse(s, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out var fv))
+                        iv = (int)System.Math.Round(fv);
+                    else
+                        return false;
+                }
+                var minI = (int)p.MinValue;
+                var maxI = (int)p.MaxValue;
+                if (iv < minI) iv = minI;
+                if (iv > maxI) iv = maxI;
+                if (p.IntValue != iv)
+                {
+                    p.IntValue = iv;
+                    ViewModel.NotifyPropertyChanged($"Slot{slotIndex}_FloatValue");
+                    ViewModel.NotifyPropertyChanged($"Slot{slotIndex}_IntValue");
+                    ViewModel.NotifyPropertyChanged($"Slot{slotIndex}_ValueText");
+                    return true;
+                }
+            }
+            else if (p.IsFloating)
+            {
+                if (!float.TryParse(s, System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out var fv))
+                    return false;
+                var minF = (float)p.MinValue;
+                var maxF = SafeMaxFloat(p);
+                if (fv < minF) fv = minF;
+                if (fv > maxF) fv = maxF;
+                if (System.Math.Abs(p.FloatValue - fv) > 0.0001f)
+                {
+                    p.FloatValue = fv;
+                    ViewModel.NotifyPropertyChanged($"Slot{slotIndex}_FloatValue");
+                    ViewModel.NotifyPropertyChanged($"Slot{slotIndex}_ValueText");
+                    return true;
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, $"SetSlotFromEditableText(slot={slotIndex})", ex); } catch { }
+        }
+        return false;
+    }
+
     [DataSourceProperty] public string Slot0_DisplayName  => _slots[0]?.DisplayName ?? string.Empty;
     [DataSourceProperty] public string Slot0_GroupHeader => _slotGroupHeaders[0] ?? string.Empty;
     [DataSourceProperty] public string Slot0_HintText     => _slots[0]?.HintText    ?? string.Empty;
@@ -356,7 +506,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot0_IntValue
     {
         get => (float)(_slots[0]?.IntValue ?? 0);
-        set { if (_slots[0] != null) { _slots[0]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot0_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot0_ValueText));} }
+        set { if (_slots[0] != null) { _slots[0]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot0_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot0_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot0_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot0_FloatValue
@@ -379,6 +529,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot0_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot0_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot0_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -439,7 +590,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot1_IntValue
     {
         get => (float)(_slots[1]?.IntValue ?? 0);
-        set { if (_slots[1] != null) { _slots[1]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot1_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot1_ValueText));} }
+        set { if (_slots[1] != null) { _slots[1]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot1_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot1_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot1_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot1_FloatValue
@@ -462,6 +613,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot1_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot1_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot1_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -522,7 +674,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot2_IntValue
     {
         get => (float)(_slots[2]?.IntValue ?? 0);
-        set { if (_slots[2] != null) { _slots[2]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot2_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot2_ValueText));} }
+        set { if (_slots[2] != null) { _slots[2]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot2_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot2_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot2_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot2_FloatValue
@@ -545,6 +697,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot2_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot2_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot2_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -605,7 +758,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot3_IntValue
     {
         get => (float)(_slots[3]?.IntValue ?? 0);
-        set { if (_slots[3] != null) { _slots[3]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot3_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot3_ValueText));} }
+        set { if (_slots[3] != null) { _slots[3]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot3_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot3_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot3_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot3_FloatValue
@@ -628,6 +781,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot3_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot3_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot3_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -688,7 +842,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot4_IntValue
     {
         get => (float)(_slots[4]?.IntValue ?? 0);
-        set { if (_slots[4] != null) { _slots[4]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot4_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot4_ValueText));} }
+        set { if (_slots[4] != null) { _slots[4]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot4_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot4_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot4_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot4_FloatValue
@@ -711,6 +865,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot4_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot4_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot4_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -771,7 +926,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot5_IntValue
     {
         get => (float)(_slots[5]?.IntValue ?? 0);
-        set { if (_slots[5] != null) { _slots[5]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot5_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot5_ValueText));} }
+        set { if (_slots[5] != null) { _slots[5]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot5_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot5_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot5_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot5_FloatValue
@@ -794,6 +949,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot5_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot5_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot5_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -854,7 +1010,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot6_IntValue
     {
         get => (float)(_slots[6]?.IntValue ?? 0);
-        set { if (_slots[6] != null) { _slots[6]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot6_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot6_ValueText));} }
+        set { if (_slots[6] != null) { _slots[6]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot6_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot6_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot6_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot6_FloatValue
@@ -877,6 +1033,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot6_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot6_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot6_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -937,7 +1094,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot7_IntValue
     {
         get => (float)(_slots[7]?.IntValue ?? 0);
-        set { if (_slots[7] != null) { _slots[7]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot7_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot7_ValueText));} }
+        set { if (_slots[7] != null) { _slots[7]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot7_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot7_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot7_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot7_FloatValue
@@ -960,6 +1117,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot7_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot7_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot7_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -1020,7 +1178,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot8_IntValue
     {
         get => (float)(_slots[8]?.IntValue ?? 0);
-        set { if (_slots[8] != null) { _slots[8]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot8_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot8_ValueText));} }
+        set { if (_slots[8] != null) { _slots[8]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot8_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot8_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot8_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot8_FloatValue
@@ -1043,6 +1201,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot8_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot8_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot8_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -1103,7 +1262,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     public float Slot9_IntValue
     {
         get => (float)(_slots[9]?.IntValue ?? 0);
-        set { if (_slots[9] != null) { _slots[9]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot9_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot9_ValueText));} }
+        set { if (_slots[9] != null) { _slots[9]!.IntValue = (int)value; ViewModel.NotifyPropertyChanged(nameof(Slot9_IntValue)); ViewModel.NotifyPropertyChanged(nameof(Slot9_ValueText)); ViewModel.NotifyPropertyChanged(nameof(Slot9_EditableValueText));} }
     }
     [DataSourceProperty]
     public float Slot9_FloatValue
@@ -1126,6 +1285,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             else if (p.IsFloating) p.FloatValue = value;
             ViewModel.NotifyPropertyChanged(nameof(Slot9_FloatValue));
             ViewModel.NotifyPropertyChanged(nameof(Slot9_ValueText));
+            ViewModel.NotifyPropertyChanged(nameof(Slot9_EditableValueText));
         }
     }
     [DataSourceProperty]
@@ -1154,6 +1314,46 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         get => _slots[9]?.TextValue ?? string.Empty;
         set { if (_slots[9] != null) { _slots[9]!.TextValue = value; ViewModel.NotifyPropertyChanged(nameof(Slot9_TextValue));} }
     }
+
+    // ---- v0.7.6 click-to-edit: EditableTextWidget bindings for slots 0-9 ----
+    //
+    // Each EditableValueText getter formats the current IntValue/FloatValue
+    // the same way the read-only ValueText getter does. The setter dispatches
+    // to SetSlotFromEditableText() which parses + clamps + writes back. We do
+    // NOT NotifyPropertyChanged on EditableValueText from the setter -- the
+    // user's typed text shouldn't get clobbered mid-edit. The slider's own
+    // setter notifies EditableValueText so dragging updates the input field.
+    //
+    // Slots 10-19 have matching properties in OptionsVMMixin.SlotProperties.g.cs.
+    // Slots 20+ don't have sliders (BuildUnifiedSliderBlock is gated to n<20),
+    // so they keep the existing read-only RichTextWidget value display.
+
+    private string FormatSlotValueText(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _slots.Length) return string.Empty;
+        var p = _slots[slotIndex];
+        if (p == null) return string.Empty;
+        try
+        {
+            var fmt = p.ValueFormat;
+            if (string.IsNullOrEmpty(fmt) || fmt.StartsWith("{=")) fmt = p.IsInteger ? "0" : "0.##";
+            if (p.IsInteger)  return p.IntValue.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+            if (p.IsFloating) return p.FloatValue.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch { }
+        return string.Empty;
+    }
+
+    [DataSourceProperty] public string Slot0_EditableValueText { get => FormatSlotValueText(0); set { SetSlotFromEditableText(0, value); } }
+    [DataSourceProperty] public string Slot1_EditableValueText { get => FormatSlotValueText(1); set { SetSlotFromEditableText(1, value); } }
+    [DataSourceProperty] public string Slot2_EditableValueText { get => FormatSlotValueText(2); set { SetSlotFromEditableText(2, value); } }
+    [DataSourceProperty] public string Slot3_EditableValueText { get => FormatSlotValueText(3); set { SetSlotFromEditableText(3, value); } }
+    [DataSourceProperty] public string Slot4_EditableValueText { get => FormatSlotValueText(4); set { SetSlotFromEditableText(4, value); } }
+    [DataSourceProperty] public string Slot5_EditableValueText { get => FormatSlotValueText(5); set { SetSlotFromEditableText(5, value); } }
+    [DataSourceProperty] public string Slot6_EditableValueText { get => FormatSlotValueText(6); set { SetSlotFromEditableText(6, value); } }
+    [DataSourceProperty] public string Slot7_EditableValueText { get => FormatSlotValueText(7); set { SetSlotFromEditableText(7, value); } }
+    [DataSourceProperty] public string Slot8_EditableValueText { get => FormatSlotValueText(8); set { SetSlotFromEditableText(8, value); } }
+    [DataSourceProperty] public string Slot9_EditableValueText { get => FormatSlotValueText(9); set { SetSlotFromEditableText(9, value); } }
 
     public OptionsVMMixin(ViewModel vm) : base(vm)
     {
@@ -1263,7 +1463,8 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
 
             _summaryText = _registered.Length == 0
                 ? "No mod settings discovered yet."
-                : $"{_registered.Length} mod(s) registered. Use the Prev/Next buttons to cycle.";
+                : $"{_registered.Length} mod(s) registered. Use the search field or Prev/Next buttons to cycle.";
+            try { NotifyVisualState(); } catch { }
             DiagLog.Log(Tag, $"RebuildModList: surfaced {_registered.Length} mod(s)");
             _filteredRegistered = _registered;
             ApplyFilter();
@@ -1906,6 +2107,108 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     }
 
     /// <summary>
+    /// Body of the "Run Self-Test" affirmative action. Split out from
+    /// ExecuteRunSelfTest so the confirmation inquiry's affirmativeAction
+    /// can fire it as a lambda. Flips the button label to "Running...",
+    /// invokes McmSelfTest.RunAll(), displays the result popup with the
+    /// backup-folder path, restores button state in finally so a future
+    /// click can run again. _selfTestRunning gates re-entry.
+    /// </summary>
+    private void RunSelfTestConfirmed()
+    {
+        _selfTestRunning = true;
+        _selfTestButtonText = "Running...";
+        try { ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText)); } catch { }
+        try
+        {
+            DiagLog.Log(Tag, "RunSelfTestConfirmed: starting McmSelfTest.RunAll()");
+            var report = McmSelfTest.RunAll();
+
+            // Headline counts: passed property round-trips vs failed.
+            // Done/Cancel + duplicate-DLL + visibility-gap detail land in
+            // selftest.log already; the popup is a one-glance summary.
+            int totalMods    = report.TestedMods;
+            int passedProps  = report.PassedProperties;
+            int failedProps  = report.FailedProperties;
+            int passedDone   = report.PassedDone;
+            int failedDone   = report.FailedDone;
+            int passedCancel = report.PassedCancel;
+            int failedCancel = report.FailedCancel;
+            int quirks       = report.QuirkMods;
+
+            var body = new System.Text.StringBuilder();
+            body.AppendLine($"Mods tested:  {totalMods}  (quirks excluded: {quirks})");
+            body.AppendLine($"Properties:   {passedProps} pass / {failedProps} fail");
+            body.AppendLine($"Done flow:    {passedDone} pass / {failedDone} fail");
+            body.AppendLine($"Cancel flow:  {passedCancel} pass / {failedCancel} fail");
+            if (report.VisibilityMissing > 0)
+                body.AppendLine($"Visibility gaps: {report.VisibilityMissing} (see selftest.log)");
+            if (report.DuplicateGroups > 0)
+                body.AppendLine($"Duplicate DLLs: {report.DuplicateGroups} group(s) (see selftest.log)");
+            body.AppendLine();
+            body.AppendLine("Backup folder (restore from here if anything looks wrong):");
+            body.AppendLine(RedactUserPath(report.BackupDir));
+            body.AppendLine();
+            body.AppendLine("Full report:");
+            body.AppendLine(RedactUserPath(System.IO.Path.Combine(
+                System.IO.Path.GetDirectoryName(BetaDeps.Foundation.RuntimeLog.Path) ?? "(unknown)",
+                "selftest.log")));
+
+            string title = failedProps == 0 && failedDone == 0 && failedCancel == 0
+                ? "Self-Test PASS"
+                : "Self-Test FAILURES";
+
+            try
+            {
+                var result = new TaleWorlds.Library.InquiryData(
+                    titleText: title,
+                    text: body.ToString(),
+                    isAffirmativeOptionShown: true,
+                    isNegativeOptionShown: false,
+                    affirmativeText: "OK",
+                    negativeText: string.Empty,
+                    affirmativeAction: () => { },
+                    negativeAction: () => { });
+                TaleWorlds.Library.InformationManager.ShowInquiry(result, pauseGameActiveState: true);
+            }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, "RunSelfTestConfirmed/popup", ex); }
+        }
+        catch (System.Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "RunSelfTestConfirmed", ex);
+        }
+        finally
+        {
+            _selfTestRunning = false;
+            _selfTestButtonText = "Run Self-Test";
+            try { ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText)); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// Substitute the current user's profile prefix with %USERPROFILE% in
+    /// a path string so logs and inquiry popups don't leak the Windows
+    /// username when users copy/paste them into public GitHub issues or
+    /// Nexus comments. Null/empty input returns the input unchanged.
+    /// Case-insensitive prefix match.
+    /// </summary>
+    private static string RedactUserPath(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return path ?? string.Empty;
+        try
+        {
+            var userProfile = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+            if (!string.IsNullOrEmpty(userProfile) &&
+                path!.StartsWith(userProfile, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return "%USERPROFILE%" + path.Substring(userProfile.Length);
+            }
+        }
+        catch { /* fall through to unchanged */ }
+        return path!;
+    }
+
+    /// <summary>
     /// "Send to GitHub" button. Opens the BetaDeps GitHub issues page in
     /// the user's default browser, with the selftest.log path reminder so
     /// they can attach it to the issue. Light-touch by design: GitHub
@@ -2018,6 +2321,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 affirmativeAction: () => { },
                 negativeAction: () => { });
             TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+            try { NotifyVisualState(); } catch { }
         }
         catch (System.Exception ex)
         {
@@ -2091,6 +2395,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 affirmativeAction: () => { },
                 negativeAction: () => { });
             TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+            try { NotifyVisualState(); } catch { }
         }
         catch (System.Exception ex)
         {
@@ -2137,6 +2442,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 affirmativeAction: () => { },
                 negativeAction: () => { });
             TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
+            try { NotifyVisualState(); } catch { }
         }
         catch (System.Exception ex)
         {
@@ -2250,214 +2556,39 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 var disabledPath = System.IO.Path.Combine(dir, "betadeps-disabled-mods.log");
                 if (System.IO.File.Exists(disabledPath))
                 {
-                    var lines = System.IO.File.ReadAllLines(disabledPath)
+                    var disabled = System.IO.File.ReadAllLines(disabledPath)
                         .Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
-                    int take = System.Math.Min(10, lines.Count);
-                    sb.AppendLine($"**Auto-disable history (last {take} of {lines.Count})**:");
-                    sb.AppendLine("```");
-                    foreach (var l in lines.Skip(System.Math.Max(0, lines.Count - take)))
-                        sb.AppendLine(l);
-                    sb.AppendLine("```");
+                    int show = System.Math.Min(20, disabled.Count);
+                    sb.AppendLine($"**Auto-disable history (last {show} of {disabled.Count} entries)**:");
+                    foreach (var l in disabled.Skip(System.Math.Max(0, disabled.Count - show)))
+                        sb.AppendLine($"- {l}");
                 }
                 else
                 {
-                    sb.AppendLine("**Auto-disable history**: empty (no mods have been auto-disabled)");
+                    sb.AppendLine("**Auto-disable history**: none (no incompatible mods recorded)");
                 }
-            }
-        }
-        catch (System.Exception ex) { sb.AppendLine($"(error gathering diagnostics: {ex.Message})"); }
-        sb.AppendLine();
-
-        // v0.7.3+: if SaveShield caught any save-load or mission-init failures
-        // this session, emit a copy-paste-ready markdown block for the most
-        // recent one (CULPRIT table + current API signatures + manifest +
-        // stack). Mod authors who get this issue body see the headline answer
-        // before scrolling.
-        try
-        {
-            var last = BetaDeps.Foundation.SaveShield.LastFailure;
-            if (last != null)
-            {
-                sb.AppendLine("### SaveShield diagnostic (most recent failure this session)");
                 sb.AppendLine();
-                sb.AppendLine(last.ToMarkdownSnippet());
-                sb.AppendLine();
-            }
-        }
-        catch { }
 
-        // Top of selftest.log so reviewer sees the headline pass/fail
-        // numbers without having to download the attachment.
-        sb.AppendLine("### Self-Test headline");
-        try
-        {
-            var rt = BetaDeps.Foundation.RuntimeLog.Path;
-            var dir = System.IO.Path.GetDirectoryName(rt);
-            var selftestPath = string.IsNullOrEmpty(dir) ? null : System.IO.Path.Combine(dir, "selftest.log");
-            if (!string.IsNullOrEmpty(selftestPath) && System.IO.File.Exists(selftestPath))
-            {
-                var head = System.IO.File.ReadAllLines(selftestPath).Take(15);
-                sb.AppendLine("```");
-                foreach (var l in head) sb.AppendLine(l);
-                sb.AppendLine("```");
-            }
-            else
-            {
-                sb.AppendLine("_No selftest.log on disk this session. Click \"Run Self-Test\" in Mod Config before submitting._");
-            }
-        }
-        catch { }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Replace the per-user portion of a Windows path (C:\Users\&lt;name&gt;\OneDrive\Documents\...
-    /// or similar) with a placeholder, so users who screenshot or paste this
-    /// dialog into a public GitHub issue don't accidentally leak their
-    /// Windows username / OneDrive folder structure. Everything after the
-    /// well-known "Documents\Mount and Blade II Bannerlord\..." stays intact
-    /// so the user can still find the folder.
-    /// </summary>
-    private static string RedactUserPath(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return path;
-        try
-        {
-            // Common patterns: C:\Users\Foo\OneDrive\Documents\..., C:\Users\Foo\Documents\...
-            // Replace everything up to and including the username segment.
-            var lower = path.Replace('/', '\\').ToLowerInvariant();
-            var anchor = "\\documents\\";
-            var idx = lower.IndexOf(anchor, System.StringComparison.Ordinal);
-            if (idx >= 0)
-            {
-                // Keep the "...\Documents\" tail intact, redact everything before it.
-                return "<Documents>" + path.Substring(idx + anchor.Length - 1);
-            }
-        }
-        catch { }
-        return path;
-    }
-
-    private void RunSelfTestConfirmed()
-    {
-        if (_selfTestRunning) return;
-        _selfTestRunning = true;
-        _selfTestButtonText = "Running...";
-        ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText));
-        try
-        {
-            DiagLog.Log(Tag, "ExecuteRunSelfTest: starting McmSelfTest.RunAll()");
-            var report = McmSelfTest.RunAll();
-            int passed = 0, failed = 0, quirks = 0;
-            var failedModNames = new System.Collections.Generic.List<string>();
-            var quirkModNames = new System.Collections.Generic.List<string>();
-            foreach (var m in report.Mods)
-            {
-                // Known consumer-mod quirks (e.g. DismembermentPlus's
-                // DismembermentRealism setter intentionally clobbering
-                // DismembermentChance as a "realism preset" feature) aren't
-                // BetaDeps bugs and shouldn't count as failures.
-                bool isQuirk = McmSelfTest.Report.KnownConsumerQuirks.ContainsKey(m.ModId ?? string.Empty);
-                if (isQuirk)
+                var incompatPath = System.IO.Path.Combine(dir, "incompatible-mods.log");
+                if (System.IO.File.Exists(incompatPath))
                 {
-                    quirks++;
-                    quirkModNames.Add(m.ModDisplayName ?? m.ModId ?? string.Empty);
-                    continue;
+                    var content = System.IO.File.ReadAllText(incompatPath);
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        sb.AppendLine("**Incompatible mods (latest post-load scan)**:");
+                        sb.AppendLine("```");
+                        sb.AppendLine(content.Trim());
+                        sb.AppendLine("```");
+                    }
                 }
-                if (m.FatalError != null)
-                {
-                    failed++;
-                    failedModNames.Add($"{m.ModDisplayName ?? m.ModId} (FATAL: {m.FatalError})");
-                    continue;
-                }
-                if (m.DonePassed && m.CancelPassed &&
-                    m.Properties.TrueForAll(p => p.RoundTripPassed))
-                {
-                    passed++;
-                }
-                else
-                {
-                    failed++;
-                    var reasons = new System.Collections.Generic.List<string>();
-                    if (!m.DonePassed) reasons.Add("Done");
-                    if (!m.CancelPassed) reasons.Add("Cancel");
-                    int badProps = m.Properties.Count(p => !p.RoundTripPassed);
-                    if (badProps > 0) reasons.Add($"{badProps} prop(s)");
-                    failedModNames.Add($"{m.ModDisplayName ?? m.ModId} ({string.Join(", ", reasons)})");
-                }
-            }
-            DiagLog.Log(Tag, $"ExecuteRunSelfTest: {passed} passed, {failed} failed, {quirks} quirk(s) skipped (of {report.Mods.Count} mods)");
-
-            // v1.0: in-game popup so the user can see the result without
-            // tabbing out to runtime.log.
-            try
-            {
-                var headline = failed == 0
-                    ? $"All {passed} mod(s) passed!"
-                    : $"{passed} passed · {failed} failed";
-                if (quirks > 0) headline += $" · {quirks} known quirk(s)";
-
-                var sb = new System.Text.StringBuilder();
-                if (failed == 0)
-                {
-                    sb.Append($"BetaDeps round-tripped every [SettingProperty*] declaration across {passed} mod(s) without a single mismatch. Done and Cancel semantics both confirmed.");
-                }
-                else
-                {
-                    var capped = failedModNames.GetRange(0, System.Math.Min(20, failedModNames.Count));
-                    sb.Append("Failing mod(s):\n");
-                    sb.Append(string.Join("\n", capped));
-                    if (failedModNames.Count > 20)
-                        sb.Append($"\n…and {failedModNames.Count - 20} more (see runtime.log)");
-                }
-                if (quirks > 0)
-                {
-                    sb.Append("\n\nKnown consumer-mod quirks (not BetaDeps bugs):\n");
-                    sb.Append(string.Join("\n", quirkModNames));
-                }
-
-                // v0.5.9 (post-Nexus comment): tell the user where their
-                // pre-test JSON backup lives. v0.6: redact the per-user
-                // portion of the path so users who screenshot or paste this
-                // dialog (e.g. into a public GitHub issue) don't leak their
-                // Windows username / OneDrive folder structure. The user
-                // can still find the folder because everything from
-                // "Documents\Mount and Blade II Bannerlord\..." is the
-                // stable, well-known part of the path.
-                if (!string.IsNullOrEmpty(report.BackupDir))
-                {
-                    sb.Append("\n\nPre-test settings backed up to:\n");
-                    sb.Append(RedactUserPath(report.BackupDir));
-                    sb.Append("\n(Copy those .json files back over the live ones if any setting looks wrong.)");
-                }
-                string body = sb.ToString();
-
-                var inquiry = new TaleWorlds.Library.InquiryData(
-                    titleText: $"BetaDeps Self-Test — {headline}",
-                    text: body,
-                    isAffirmativeOptionShown: true,
-                    isNegativeOptionShown: false,
-                    affirmativeText: "OK",
-                    negativeText: string.Empty,
-                    affirmativeAction: () => { },
-                    negativeAction: () => { });
-                TaleWorlds.Library.InformationManager.ShowInquiry(inquiry, pauseGameActiveState: true);
-            }
-            catch (System.Exception inqEx)
-            {
-                DiagLog.LogCaught(Tag, "ExecuteRunSelfTest/inquiry", inqEx);
             }
         }
         catch (System.Exception ex)
         {
-            DiagLog.LogCaught(Tag, "ExecuteRunSelfTest", ex);
+            DiagLog.LogCaught(Tag, "BuildGitHubIssueBody/diagnostics", ex);
         }
-        finally
-        {
-            _selfTestRunning = false;
-            _selfTestButtonText = "Run Self-Test";
-            ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText));
-        }
+        sb.AppendLine();
+
+        return sb.ToString();
     }
 }

@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  BetaDeps alias stub for Bannerlord.ButterLib. The actual ButterLib work
-  is done by Bannerlord.ButterLib.dll inside Modules\BetaDeps\.
+  v0.8 step 3: REAL Bannerlord.ButterLib module (no longer an alias stub).
+
+  Same pattern as v0.8 steps 1 (Bannerlord.Harmony) and 2 (Bannerlord.UIExtenderEx).
+  Holds Bannerlord.ButterLib.dll directly and runs ButterLibSubModule. Loads
+  BEFORE BetaDeps because BetaDeps's SubModule.xml carries
+  <DependedModule Id="Bannerlord.ButterLib" />.
+
+  Load order in v0.8 step 3:
+    Bannerlord.Harmony            (real module, step 1)
+    Bannerlord.UIExtenderEx       (real module, step 2)
+    Bannerlord.ButterLib          (real module, this step)
+    Bannerlord.MBOptionScreen     (still alias stub — promoted in step 4)
+    BetaDeps                      (loads after all of the above)
+
+  Assemblies block includes the full DI fan (Microsoft.Extensions.*) plus
+  Serilog so ButterLibSubModule's OnSubModuleLoad has every type resolvable
+  when it builds the DI container.
+
+  DependedModule on BetaDeps REMOVED — we load before BetaDeps now.
+  DependedModule on Bannerlord.Harmony + Bannerlord.UIExtenderEx retained
+  because ButterLib.dll references both at the IL level (Harmony for the
+  underlying patcher, UIExtenderEx for the BUTR.CrashReport integration).
 -->
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
@@ -17,18 +37,41 @@
   <Url value="" />
 
   <DependedModules>
-    <DependedModule Id="BetaDeps" />
     <DependedModule Id="Bannerlord.Harmony" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" />
   </DependedModules>
 
   <DependedModuleMetadatas />
 
-  <!-- v0.7.5: SubModule entry restored (see Harmony alias for rationale). -->
   <SubModules>
     <SubModule>
-      <Name value="Bannerlord.ButterLib Alias Stub" />
-      <DLLName value="BetaDeps.Foundation.dll" />
-      <SubModuleClassType value="BetaDeps.Foundation.AliasStubSubModule" />
+      <Name value="Bannerlord.ButterLib" />
+      <DLLName value="Bannerlord.ButterLib.dll" />
+      <SubModuleClassType value="Bannerlord.ButterLib.ButterLibSubModule" />
+      <Assemblies>
+        <!-- BetaDeps.Foundation FIRST so its [ModuleInitializer] resolve hook
+             is primed before any ButterLib type JIT'd. -->
+        <Assembly value="BetaDeps.Foundation.dll" />
+        <Assembly value="Bannerlord.ButterLib.dll" />
+        <!-- DI runtime stack ButterLibSubModule.OnSubModuleLoad needs available
+             in the AppDomain by the time it builds the container. All MIT-
+             licensed Microsoft Foundation Libraries. -->
+        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.dll" />
+        <Assembly value="Microsoft.Extensions.Options.dll" />
+        <Assembly value="Microsoft.Extensions.Primitives.dll" />
+        <!-- System.Runtime.CompilerServices.Unsafe ships in BCL via type
+             forwarders but listing explicitly keeps the launcher's preload
+             deterministic on edge .NET 4.7.2 patch levels. -->
+        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
+        <!-- Serilog: ship our v2.10.0 so consumer mods compiled against
+             arbitrary Serilog versions resolve to our copy via
+             AssemblyVersionShim, matching the Action<Serilog.LoggerConfiguration>
+             parameter type in our AddSerilogLoggerProvider overloads. -->
+        <Assembly value="Serilog.dll" />
+      </Assemblies>
       <Tags />
     </SubModule>
   </SubModules>
