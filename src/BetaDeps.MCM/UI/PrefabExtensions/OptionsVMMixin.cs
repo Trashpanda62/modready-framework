@@ -79,9 +79,6 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     //     so users can read current state without clicking. Backed by flag files.
     [DataSourceProperty] public bool BetaDepsModConfigHasMods   => _registered != null && _registered.Length > 0;
     [DataSourceProperty] public bool BetaDepsModConfigIsEmpty   => !BetaDepsModConfigHasMods;
-    [DataSourceProperty] public string AutoDisableButtonText    => "Auto-Disable: "       + (IsAutoDisableEnabled()    ? "ON" : "OFF");
-    [DataSourceProperty] public string PatchShieldButtonText    => "PatchShield: "        + (IsPatchShieldEnabled()    ? "ON" : "OFF");
-    [DataSourceProperty] public string SaveShieldButtonText     => "SaveShield Swallow: " + (IsSaveShieldSwallowEnabled() ? "ON" : "OFF");
 
     private static string? ResolveBetaDepsDir()
     {
@@ -96,41 +93,8 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         catch { return null; }
     }
 
-    private static bool IsAutoDisableEnabled()
-    {
-        try
-        {
-            var dir = ResolveBetaDepsDir();
-            if (string.IsNullOrEmpty(dir)) return false;
-            // Convention: auto-disable is OPT-IN. Flag present = enabled.
-            return System.IO.File.Exists(System.IO.Path.Combine(dir!, "auto-disable-enabled.flag"));
-        }
-        catch { return false; }
-    }
 
-    private static bool IsPatchShieldEnabled()
-    {
-        try
-        {
-            var dir = ResolveBetaDepsDir();
-            if (string.IsNullOrEmpty(dir)) return true;  // default ON
-            // Convention: PatchShield is OPT-OUT. Flag present = DISABLED.
-            return !System.IO.File.Exists(System.IO.Path.Combine(dir!, "patchshield-disabled.flag"));
-        }
-        catch { return true; }
-    }
 
-    private static bool IsSaveShieldSwallowEnabled()
-    {
-        try
-        {
-            var dir = ResolveBetaDepsDir();
-            if (string.IsNullOrEmpty(dir)) return true;  // default ON (v0.7.3+)
-            // Convention: SaveShield swallow is OPT-OUT in v0.7.3+. Flag present = DISABLED.
-            return !System.IO.File.Exists(System.IO.Path.Combine(dir!, "saveshield-swallow-disabled.flag"));
-        }
-        catch { return true; }
-    }
 
     /// <summary>
     /// Re-notify every toggle-button label + empty-state binding so the
@@ -143,9 +107,6 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         {
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigHasMods));
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigIsEmpty));
-            ViewModel.NotifyPropertyChanged(nameof(AutoDisableButtonText));
-            ViewModel.NotifyPropertyChanged(nameof(PatchShieldButtonText));
-            ViewModel.NotifyPropertyChanged(nameof(SaveShieldButtonText));
         }
         catch { }
     }
@@ -2054,136 +2015,11 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     // shown. Flip to false (or wire to a build constant) before shipping
     // v1.0 if you want to hide it from end users.
 
+    // v0.8 UI cleanup: ExecuteRunSelfTest, RunSelfTestConfirmed, and the
+    // @SelfTestButtonText binding were removed when Self-Test got folded
+    // into Report-a-Bug. _selfTestRunning stays — it's still used by
+    // RunSelfTestQuiet as a re-entrancy gate.
     private bool _selfTestRunning;
-    // v0.5.x: button text is dynamic so we can flip the label to "Running..."
-    // while the harness is in flight. Field initialized to "Run Self-Test"
-    // matches the prefab's @SelfTestButtonText binding default.
-    private string _selfTestButtonText = "Run Self-Test";
-    [DataSourceProperty] public string SelfTestButtonText => _selfTestButtonText;
-
-    /// <summary>
-    /// Run the McmSelfTest harness across every registered settings instance.
-    /// Wired to the "Run Self-Test" button on the Mod Config tab. Concurrency-
-    /// guarded with _selfTestRunning so a double-click only runs the test
-    /// once. The full pass/fail report is written to runtime.log by McmSelfTest
-    /// itself; this method just kicks it off and flips the button label.
-    /// </summary>
-    [DataSourceMethod]
-    public void ExecuteRunSelfTest()
-    {
-        if (_selfTestRunning)
-        {
-            DiagLog.Log(Tag, "ExecuteRunSelfTest: already running; ignored");
-            return;
-        }
-        // v0.5.9 (post-Nexus comment): show a confirmation dialog before
-        // running. Self-Test mutates each property, saves to disk, and
-        // restores from a timestamped backup. If the restore step is
-        // interrupted (game crash, alt-tab kill, etc.) the user's live
-        // settings could be left in a test-mutated state. The Nexus
-        // commenter who reported "I cannot load the saved values of the
-        // mode due to the AI Influence Settings PASS" was likely a victim
-        // of this — they ran the test, settings got mutated, and they
-        // didn't know about the backup folder. Confirming up-front + telling
-        // them about the backup path in the result popup makes both the
-        // risk and the recovery path explicit.
-        try
-        {
-            var confirm = new TaleWorlds.Library.InquiryData(
-                titleText: "Run BetaDeps Self-Test?",
-                text: "The Self-Test mutates every registered mod's settings, writes them to disk, reloads them, and restores from a timestamped backup at the end. Your settings should be unchanged when it finishes.\n\nBefore running, your current JSON files are copied to:\nDocuments\\Mount and Blade II Bannerlord\\Configs\\ModSettings\\Global\\SelfTestBackup-<timestamp>\\\n\nIf anything looks wrong afterwards, restore from that folder.\n\nProceed?",
-                isAffirmativeOptionShown: true,
-                isNegativeOptionShown: true,
-                affirmativeText: "Run Self-Test",
-                negativeText: "Cancel",
-                affirmativeAction: () => RunSelfTestConfirmed(),
-                negativeAction: () => { });
-            TaleWorlds.Library.InformationManager.ShowInquiry(confirm, pauseGameActiveState: true);
-        }
-        catch (System.Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "ExecuteRunSelfTest/confirm", ex);
-        }
-    }
-
-    /// <summary>
-    /// Body of the "Run Self-Test" affirmative action. Split out from
-    /// ExecuteRunSelfTest so the confirmation inquiry's affirmativeAction
-    /// can fire it as a lambda. Flips the button label to "Running...",
-    /// invokes McmSelfTest.RunAll(), displays the result popup with the
-    /// backup-folder path, restores button state in finally so a future
-    /// click can run again. _selfTestRunning gates re-entry.
-    /// </summary>
-    private void RunSelfTestConfirmed()
-    {
-        _selfTestRunning = true;
-        _selfTestButtonText = "Running...";
-        try { ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText)); } catch { }
-        try
-        {
-            DiagLog.Log(Tag, "RunSelfTestConfirmed: starting McmSelfTest.RunAll()");
-            var report = McmSelfTest.RunAll();
-
-            // Headline counts: passed property round-trips vs failed.
-            // Done/Cancel + duplicate-DLL + visibility-gap detail land in
-            // selftest.log already; the popup is a one-glance summary.
-            int totalMods    = report.TestedMods;
-            int passedProps  = report.PassedProperties;
-            int failedProps  = report.FailedProperties;
-            int passedDone   = report.PassedDone;
-            int failedDone   = report.FailedDone;
-            int passedCancel = report.PassedCancel;
-            int failedCancel = report.FailedCancel;
-            int quirks       = report.QuirkMods;
-
-            var body = new System.Text.StringBuilder();
-            body.AppendLine($"Mods tested:  {totalMods}  (quirks excluded: {quirks})");
-            body.AppendLine($"Properties:   {passedProps} pass / {failedProps} fail");
-            body.AppendLine($"Done flow:    {passedDone} pass / {failedDone} fail");
-            body.AppendLine($"Cancel flow:  {passedCancel} pass / {failedCancel} fail");
-            if (report.VisibilityMissing > 0)
-                body.AppendLine($"Visibility gaps: {report.VisibilityMissing} (see selftest.log)");
-            if (report.DuplicateGroups > 0)
-                body.AppendLine($"Duplicate DLLs: {report.DuplicateGroups} group(s) (see selftest.log)");
-            body.AppendLine();
-            body.AppendLine("Backup folder (restore from here if anything looks wrong):");
-            body.AppendLine(RedactUserPath(report.BackupDir));
-            body.AppendLine();
-            body.AppendLine("Full report:");
-            body.AppendLine(RedactUserPath(System.IO.Path.Combine(
-                System.IO.Path.GetDirectoryName(BetaDeps.Foundation.RuntimeLog.Path) ?? "(unknown)",
-                "selftest.log")));
-
-            string title = failedProps == 0 && failedDone == 0 && failedCancel == 0
-                ? "Self-Test PASS"
-                : "Self-Test FAILURES";
-
-            try
-            {
-                var result = new TaleWorlds.Library.InquiryData(
-                    titleText: title,
-                    text: body.ToString(),
-                    isAffirmativeOptionShown: true,
-                    isNegativeOptionShown: false,
-                    affirmativeText: "OK",
-                    negativeText: string.Empty,
-                    affirmativeAction: () => { },
-                    negativeAction: () => { });
-                TaleWorlds.Library.InformationManager.ShowInquiry(result, pauseGameActiveState: true);
-            }
-            catch (System.Exception ex) { DiagLog.LogCaught(Tag, "RunSelfTestConfirmed/popup", ex); }
-        }
-        catch (System.Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "RunSelfTestConfirmed", ex);
-        }
-        finally
-        {
-            _selfTestRunning = false;
-            _selfTestButtonText = "Run Self-Test";
-            try { ViewModel.NotifyPropertyChanged(nameof(SelfTestButtonText)); } catch { }
-        }
-    }
 
     /// <summary>
     /// Substitute the current user's profile prefix with %USERPROFILE% in
@@ -2260,12 +2096,11 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     }
 
     /// <summary>
-    /// Quiet variant of RunSelfTestConfirmed used by Report-a-Bug. Runs the
-    /// McmSelfTest harness synchronously, writes selftest.log + selftest.json
-    /// to disk via the existing harness, but does NOT show a result popup.
-    /// The Report-a-Bug flow proceeds directly to opening the GitHub issue
-    /// draft after this returns. Wrapped in try/catch so a self-test failure
-    /// (e.g. one mod's settings throwing) doesn't abort the bug-report flow.
+    /// Self-Test invoked from Report-a-Bug. Runs the McmSelfTest harness
+    /// synchronously and writes selftest.log + selftest.json to disk; does
+    /// NOT show a result popup (Report-a-Bug proceeds directly to opening
+    /// the GitHub issue draft afterwards). Wrapped in try/catch so a
+    /// self-test failure on one mod doesn't abort the bug-report flow.
     /// </summary>
     private void RunSelfTestQuiet()
     {
@@ -2288,204 +2123,6 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         finally
         {
             _selfTestRunning = false;
-        }
-    }
-
-    /// <summary>
-    /// "Toggle Auto-Disable" button.
-    /// Default behavior in v0.7.1+ is auto-disable OFF -- users opt IN by
-    /// clicking this button, which creates the marker file
-    /// `Modules\BetaDeps\auto-disable-enabled.flag`. When the flag exists,
-    /// IncompatibleModDetector.RunEarlyPhase and SubModuleConstructionGuard
-    /// install their full recovery pipeline. When it doesn't exist, BetaDeps
-    /// stays out of the way -- crashes happen naturally, mod authors can
-    /// debug their own work without interference.
-    ///
-    /// Why default OFF: Bhelogan (Nexus mod author) flagged v0.6's
-    /// auto-disable-by-default as a major roadblock for mod developers, and
-    /// the v0.7 single-launch Harmony patch made the problem more aggressive.
-    /// Opt-in semantics keep us conservative for the population that doesn't
-    /// need recovery, while one click upgrades anyone who does need it.
-    /// </summary>
-    [DataSourceMethod]
-    public void ExecuteToggleAutoDisable()
-    {
-        DiagLog.Log(Tag, "ExecuteToggleAutoDisable: click received");
-        try
-        {
-            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
-            var dir = System.IO.Path.GetDirectoryName(rtPath);
-            if (string.IsNullOrEmpty(dir))
-            {
-                DiagLog.Log(Tag, "ExecuteToggleAutoDisable: could not resolve BetaDeps directory; abort.");
-                return;
-            }
-            var flagPath = System.IO.Path.Combine(dir!, "auto-disable-enabled.flag");
-
-            bool nowEnabled;
-            if (System.IO.File.Exists(flagPath))
-            {
-                System.IO.File.Delete(flagPath);
-                nowEnabled = false;
-                DiagLog.Log(Tag, $"ExecuteToggleAutoDisable: flag deleted ({RedactUserPath(flagPath)}); auto-disable now OFF.");
-            }
-            else
-            {
-                System.IO.File.WriteAllText(flagPath,
-                    $"Created via Mod Config 'Toggle Auto-Disable' on {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}.{System.Environment.NewLine}" +
-                    "Delete this file (or click Toggle Auto-Disable in Mod Config again) to return BetaDeps to its default passive mode.");
-                nowEnabled = true;
-                DiagLog.Log(Tag, $"ExecuteToggleAutoDisable: flag written ({RedactUserPath(flagPath)}); auto-disable now ON.");
-            }
-
-            var title = nowEnabled ? "Auto-disable ENABLED" : "Auto-disable DISABLED";
-            var body = nowEnabled
-                ? "Crash recovery is now ENABLED.\n\n" +
-                  "On the NEXT launch, BetaDeps will record which mods load cleanly to the main menu. " +
-                  "If a future launch crashes before reaching the main menu, BetaDeps will diff your enabled mods against that baseline " +
-                  "and block the newly-broken mod from loading. The game boots, you keep playing.\n\n" +
-                  "Restart Bannerlord for the change to take effect."
-                : "Crash recovery is now DISABLED.\n\n" +
-                  "BetaDeps will no longer touch your mod list. Crashes will happen naturally and no mod will be quarantined. " +
-                  "Mod authors who are debugging their own work should keep this off.\n\n" +
-                  "Click this button again any time to re-enable recovery. Restart Bannerlord for the change to take effect.";
-
-            var prompt = new TaleWorlds.Library.InquiryData(
-                titleText: title,
-                text: body,
-                isAffirmativeOptionShown: true,
-                isNegativeOptionShown: false,
-                affirmativeText: "OK",
-                negativeText: null,
-                affirmativeAction: () => { },
-                negativeAction: () => { });
-            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
-            try { NotifyVisualState(); } catch { }
-        }
-        catch (System.Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "ExecuteToggleAutoDisable", ex);
-        }
-    }
-
-    /// <summary>
-    /// "Toggle PatchShield" button.
-    /// Default behavior is PatchShield ON (catches MissingMethod/MissingField/
-    /// TypeLoad exceptions from consumer-mod prefixes, unpatches the offending
-    /// prefix). Mod authors debugging their own work, or users who suspect
-    /// PatchShield is interfering with another shim, can click this to write
-    /// `Modules\BetaDeps\patchshield-disabled.flag`. When the flag exists,
-    /// PatchShield.Install() bails on every lifecycle pass and consumer-mod
-    /// exceptions propagate unmodified.
-    ///
-    /// Asymmetry with Toggle Auto-Disable on purpose: auto-disable is opt-IN
-    /// (file presence ENABLES the recovery pipeline because it modifies
-    /// LauncherData.xml), PatchShield is opt-OUT (file presence DISABLES it
-    /// because the conservative default for an in-memory exception catcher
-    /// is "on, catching things" rather than "off, let it crash").
-    /// </summary>
-    [DataSourceMethod]
-    public void ExecuteTogglePatchShield()
-    {
-        DiagLog.Log(Tag, "ExecuteTogglePatchShield: click received");
-        try
-        {
-            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
-            var dir = System.IO.Path.GetDirectoryName(rtPath);
-            if (string.IsNullOrEmpty(dir))
-            {
-                DiagLog.Log(Tag, "ExecuteTogglePatchShield: could not resolve BetaDeps directory; abort.");
-                return;
-            }
-            var flagPath = System.IO.Path.Combine(dir!, "patchshield-disabled.flag");
-
-            bool nowEnabled;
-            if (System.IO.File.Exists(flagPath))
-            {
-                System.IO.File.Delete(flagPath);
-                nowEnabled = true;
-                DiagLog.Log(Tag, $"ExecuteTogglePatchShield: flag deleted ({RedactUserPath(flagPath)}); PatchShield now ON.");
-            }
-            else
-            {
-                System.IO.File.WriteAllText(flagPath,
-                    $"Created via Mod Config 'Toggle PatchShield' on {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}.{System.Environment.NewLine}" +
-                    "Delete this file (or click Toggle PatchShield in Mod Config again) to re-enable the shield.");
-                nowEnabled = false;
-                DiagLog.Log(Tag, $"ExecuteTogglePatchShield: flag written ({RedactUserPath(flagPath)}); PatchShield now OFF.");
-            }
-
-            var title = nowEnabled ? "PatchShield ENABLED" : "PatchShield DISABLED";
-            var body = nowEnabled
-                ? "PatchShield is now ENABLED (default).\n\n" +
-                  "On the NEXT launch, BetaDeps will wrap every Harmony-patched method with a finalizer that catches MissingMethodException, MissingFieldException, and TypeLoadException thrown by consumer-mod prefixes built against older TaleWorlds APIs. Caught exceptions are logged and the offending prefix is unpatched so subsequent calls run the unmodified original.\n\n" +
-                  "Restart Bannerlord for the change to take effect."
-                : "PatchShield is now DISABLED.\n\n" +
-                  "BetaDeps will no longer catch or unpatch consumer-mod prefixes that throw MissingMethod/MissingField/TypeLoad exceptions. Crashes that PatchShield would have caught will now propagate to the game and likely CTD.\n\n" +
-                  "Useful if you're a mod author debugging your own work and want exceptions to surface unmodified. Click this button again any time to re-enable. Restart Bannerlord for the change to take effect.";
-
-            var prompt = new TaleWorlds.Library.InquiryData(
-                titleText: title,
-                text: body,
-                isAffirmativeOptionShown: true,
-                isNegativeOptionShown: false,
-                affirmativeText: "OK",
-                negativeText: null,
-                affirmativeAction: () => { },
-                negativeAction: () => { });
-            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
-            try { NotifyVisualState(); } catch { }
-        }
-        catch (System.Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "ExecuteTogglePatchShield", ex);
-        }
-    }
-
-    /// <summary>
-    /// v0.7.3+ Mod Config button: toggle SaveShield swallow-mode by creating
-    /// or deleting saveshield-swallow.flag next to runtime.log. When enabled,
-    /// SaveShield logs save-load / mission-init failures from consumer mods
-    /// but DOES NOT re-throw -- the mod's broken handler is dropped at the
-    /// failing call site and the game continues. Off by default; turning it
-    /// on lets users play battles even with API-broken mods like
-    /// ReinforcementSystem still enabled, at the cost of that mod's
-    /// specific in-battle feature not actually firing.
-    /// </summary>
-    [DataSourceMethod]
-    public void ExecuteToggleSaveShieldSwallow()
-    {
-        DiagLog.Log(Tag, "ExecuteToggleSaveShieldSwallow: click received");
-        try
-        {
-            bool nowEnabled = BetaDeps.Foundation.SaveShield.ToggleSwallow();
-
-            var title = nowEnabled ? "SaveShield Swallow-Mode ENABLED" : "SaveShield Swallow-Mode DISABLED";
-            var body = nowEnabled
-                ? "SaveShield swallow-mode is now ENABLED (default in v0.7.3+).\n\n" +
-                  "On the NEXT launch, SaveShield will continue to LOG every save-load and mission-init failure from consumer-mod frames -- but it will NOT re-throw the exception. The mod's broken handler is dropped at the failing call site so the game keeps running.\n\n" +
-                  "What you get: battles still load even when a mod was compiled against an older Bannerlord API. The mod's specific in-battle feature won't fire, but the rest of the game runs.\n\n" +
-                  "What you lose: any feature the broken handler was supposed to add (extra spawns, custom logic, etc.) is missing. Some mods are tightly coupled to engine state and may still cause a downstream crash inside TaleWorlds code -- if that happens, disable the named CULPRIT mod from the SaveShield FAILURE block in runtime.log.\n\n" +
-                  "Restart Bannerlord for the change to take effect."
-                : "SaveShield swallow-mode is now DISABLED.\n\n" +
-                  "Save-load and mission-init failures from consumer-mod code will re-throw and crash the game. Diagnostic blocks still get written to runtime.log so you can find which mod to disable. Useful if you're a mod author debugging your own work and want exceptions to surface unmodified.\n\n" +
-                  "Click this button again any time to re-enable swallow-mode (the default). Restart Bannerlord for the change to take effect.";
-
-            var prompt = new TaleWorlds.Library.InquiryData(
-                titleText: title,
-                text: body,
-                isAffirmativeOptionShown: true,
-                isNegativeOptionShown: false,
-                affirmativeText: "OK",
-                negativeText: null,
-                affirmativeAction: () => { },
-                negativeAction: () => { });
-            TaleWorlds.Library.InformationManager.ShowInquiry(prompt, pauseGameActiveState: true);
-            try { NotifyVisualState(); } catch { }
-        }
-        catch (System.Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "ExecuteToggleSaveShieldSwallow", ex);
         }
     }
 

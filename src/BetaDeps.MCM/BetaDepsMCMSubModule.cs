@@ -92,5 +92,60 @@ public class MCMSubModule : MBSubModuleBase
         {
             DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/MarkBootSuccessful", ex);
         }
+
+        // v0.8: auto-run McmSelfTest if `betadeps-run-selftest.flag` is
+        // present in Modules\BetaDeps\. Replaces the "Run Self-Test" UI
+        // button that was removed in the v0.8 UI cleanup. Use cases:
+        //   - Quick-Test dev loop drops the flag before each launch so
+        //     selftest.log is always fresh when the script copies logs
+        //     back to C:\dev\bannerlord.
+        //   - Modders writing CI / automated test harnesses can drop the
+        //     flag and parse selftest.json after boot.
+        //   - End users will rarely hit this path — Report-a-Bug button
+        //     in Mod Config triggers RunSelfTestQuiet() directly without
+        //     needing the flag.
+        // The flag deletes itself after a successful run so repeated
+        // launches don't keep re-running.
+        try
+        {
+            TryAutoRunSelfTestFromFlag();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/AutoRunSelfTest", ex);
+        }
+    }
+
+    private const string RunSelfTestFlagName = "betadeps-run-selftest.flag";
+
+    private static void TryAutoRunSelfTestFromFlag()
+    {
+        var rtPath = RuntimeLog.Path;
+        var dir = System.IO.Path.GetDirectoryName(rtPath);
+        if (string.IsNullOrEmpty(dir)) return;
+
+        var flagPath = System.IO.Path.Combine(dir!, RunSelfTestFlagName);
+        if (!System.IO.File.Exists(flagPath)) return;
+
+        DiagLog.Log("MCMSubModule",
+            $"betadeps-run-selftest.flag detected at {flagPath} — auto-running McmSelfTest.RunAll()");
+
+        try
+        {
+            McmSelfTest.RunAll();
+            DiagLog.Log("MCMSubModule", "auto-run McmSelfTest.RunAll() complete; deleting flag");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught("MCMSubModule", "auto-run McmSelfTest.RunAll()", ex);
+        }
+        finally
+        {
+            // Delete the flag whether the test succeeded or not, so a
+            // crashing self-test doesn't put the user in an infinite
+            // boot-then-crash loop.
+            try { System.IO.File.Delete(flagPath); }
+            catch (Exception ex) { DiagLog.LogCaught("MCMSubModule", "delete run-selftest flag", ex); }
+        }
     }
 }
