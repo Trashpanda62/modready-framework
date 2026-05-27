@@ -18,11 +18,16 @@ internal sealed class MCMTabTogglePatch : PrefabExtensionInsertPatch
 
     [PrefabExtensionText]
     public string XmlContent =>
+        // Polish #10: tab label is "Mod Configuration" (was "Mod Config"),
+        // matching the in-page title verbatim. Longer tab text reads as
+        // "this is a different kind of tab" against the vanilla
+        // Video / Audio / Gameplay / Keybindings labels and pulls the
+        // user's eye to it without needing an icon prefix.
         "<OptionsTabToggle Id=\"BetaDepsModConfigTabToggle\" Parameter.TabName=\"BetaDepsModConfigPage\">\n"
         + "  <Children>\n"
         + "    <TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\"\n"
         + "                HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\"\n"
-        + "                DoNotAcceptEvents=\"true\" Text=\"Mod Config\" />\n"
+        + "                DoNotAcceptEvents=\"true\" Text=\"Mod Configuration\" />\n"
         + "  </Children>\n"
         + "</OptionsTabToggle>";
 }
@@ -45,15 +50,36 @@ internal sealed class MCMDescriptionsRightPanelPatch : PrefabExtensionInsertPatc
 
     [PrefabExtensionText]
     public string XmlContent =>
-        // ListPanel sits at the top of DescriptionsRightPanel, sized to the
-        // same 650-px width vanilla uses for its CurrentOptionNameWidget /
-        // CurrentOptionDescriptionWidget pair. MarginTop=50 leaves a gap from
-        // the top of the right-side area so the name doesn't smack against
-        // the panel edge.
-        "<ListPanel Id=\"BetaDepsHintPanel\" IsVisible=\"@IsHintVisible\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Top\" MarginTop=\"50\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+        // Polish (post-v0.8): right-side hint panel narrowed AND visually
+        // separated from the main settings column via a vertical divider line.
+        //
+        // Structural fix vs the first attempt: instead of a no-layout Widget
+        // wrapper with overlapping children (which rendered the divider but
+        // suppressed the text — the inner StretchToParent + HorizontalAlignment
+        // combination didn't produce a visible bounding box for the
+        // RichTextWidgets), use an explicit HorizontalLeftToRight ListPanel
+        // with two sibling columns: a 2-px separator column on the left
+        // and a 338-px text column on the right (2 + 20 margin + 338 = 360).
+        //
+        //   [ separator | <margin> | name + description text ]
+        //
+        // 360 px total replaces the previous StretchToParent which let
+        // the panel eat ~600+ px of horizontal screen space.
+        "<ListPanel Id=\"BetaDepsHintPanelWrapper\" IsVisible=\"@IsHintVisible\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"360\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Right\" VerticalAlignment=\"Top\" MarginTop=\"50\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "  <Children>\n"
-        + "    <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" Brush=\"SPOptions.Description.Title.Text\" Text=\"@HoveredOptionName\" />\n"
-        + "    <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" MarginTop=\"25\" Brush=\"SPOptions.Description.Text\" Text=\"@HoveredHintText\" />\n"
+        + "    <Widget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"2\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"600\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
+        + "    <ListPanel WidthSizePolicy=\"Fixed\" SuggestedWidth=\"338\" HeightSizePolicy=\"CoverChildren\" MarginLeft=\"8\" VerticalAlignment=\"Top\" HorizontalAlignment=\"Left\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+        + "      <Children>\n"
+        // Post-screenshot fix: text now explicitly left-aligned via
+        // TextHorizontalAlignment + HorizontalAlignment=Left. Previously
+        // the brush's baked-in alignment was right-aligning long titles like
+        // "Join Discord - Support & Community" against the right edge of
+        // the 338-px column, causing the wrap to look like the text was
+        // getting cut off. Left-aligned wrapping reads as a natural paragraph.
+        + "        <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" TextHorizontalAlignment=\"Left\" Brush=\"SPOptions.Description.Title.Text\" Text=\"@HoveredOptionName\" />\n"
+        + "        <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" TextHorizontalAlignment=\"Left\" MarginTop=\"25\" Brush=\"SPOptions.Description.Text\" Text=\"@HoveredHintText\" />\n"
+        + "      </Children>\n"
+        + "    </ListPanel>\n"
         + "  </Children>\n"
         + "</ListPanel>";
 }
@@ -144,55 +170,85 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
     private const string HeaderXml =
         "<ListPanel Id=\"BetaDepsModConfigPage\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Top\" MarginTop=\"10\" MarginBottom=\"10\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "  <Children>\n"
-        + "    <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.Description.Title.Text\" Text=\"@BetaDepsModConfigTitle\" />\n"
-        // v0.7.6 visual change #5: thin divider under the title row. Width 1100 keeps it
-        // narrower than the panel content so it doesn't visually extend past
-        // the search row's full span. Brush reuses the vanilla SP options
-        // section divider so it picks up theme-correct color/shadow.
-        + "    <Widget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"1100\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"2\" HorizontalAlignment=\"Center\" MarginTop=\"6\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
-        + "    <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"8\" Brush=\"SPOptions.Group.Title.Text\" Text=\"@BetaDepsModConfigSummary\" />\n"
+        // Post-screenshot polish: "Mod Configuration · 35 mods" title row was
+        // removed. The tab itself reads "Mod Configuration" (see
+        // MCMTabTogglePatch) so a duplicate title underneath added no
+        // information; the divider that used to sit beneath it was also part
+        // of that same header block and is gone with it. Page now opens
+        // directly into the search field, which becomes the visual entry point.
+        // The BetaDepsModConfigTitle / BetaDepsModConfigSummary VM properties
+        // are kept (other prefab patches or future scenarios may still use
+        // them) but no longer rendered here.
+
         // v0.7.6 visual change #4: empty-state hint. Visible only when no
         // mods have registered MCM settings. BetaDepsModConfigIsEmpty is
         // the inverse of HasMods; bound on the VM side. When true, the
         // settings slot panel below renders nothing but at least the user
         // sees a friendly explanation instead of an empty page.
-        + "    <RichTextWidget IsVisible=\"@BetaDepsModConfigIsEmpty\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"24\" Brush=\"SPOptions.Description.Title.Text\" Text=\"No mod settings found. Mods that expose settings will appear here automatically.\" />\n"
-        // v0.7.6: combined search row + mod-cycler row into a single
-        // horizontal row. Previous layout had Search on its own row above
-        // a separate Prev/ModName/Next row -- ~50 px of vertical real
-        // estate spent on two near-empty bands. Now everything sits in one
-        // panel: [< Prev Mod] [Search input] [Clear] [Mod Name + Summary] [Next Mod >]
+        // Polish #11: empty-state text rewritten from "No mod settings found.
+        // Mods that expose settings will appear here automatically." to a
+        // friendlier two-line message that tells the user (a) nothing is
+        // wrong, (b) what to do next. CoverChildren means the parent panel
+        // collapses to zero height once mods register, so this only
+        // occupies vertical space when actually needed.
+        + "    <ListPanel IsVisible=\"@BetaDepsModConfigIsEmpty\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"24\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+        + "      <Children>\n"
+        + "        <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.Description.Title.Text\" Text=\"No mod settings registered yet.\" />\n"
+        + "        <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"6\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Install any BUTR / BetaDeps-compatible mod that exposes options and it will appear here on next launch.\" />\n"
+        + "      </Children>\n"
+        + "    </ListPanel>\n"
+        // Polish (post-v0.8) #4 + #5: search and cycler back on SEPARATE rows.
+        // ROW A: search input + (conditional) Clear button, centered.
+        //        Wider than before (340 px) so users perceive it as the primary
+        //        action and the Search mods… placeholder reads at a glance.
+        // ROW B: [< Prev Mod] [Mod Name + Mod-N-of-N indicator] [Next Mod >].
+        //        SelectedModName now uses a heading brush distinct from the
+        //        page-level "Mod Configuration" title above, so the visual
+        //        hierarchy reads cleanly:
+        //          page title  (largest / most weight)
+        //          → search row
+        //          → mod-name + nav (largest within the cycler)
+        //          → settings rows below
         //
-        // Live mod-list search/filter. EditableTextWidget binds two-way to
-        // BetaDepsModSearchText; the setter calls ApplyFilter() on every
-        // keystroke, so the cycler narrows as the user types.
-        //
-        // Q/E tab-switching conflict (OptionsVM.SelectPreviousCategory /
-        // SelectNextCategory fire from a game-input hotkey, independent of
-        // UI focus) is handled by TabSwitchGuardPatch.cs which suppresses
-        // tab switches when any EditableTextWidget has focus.
-        //
-        // Row width: 140 + 20 + 240 + 6 + 70 + 20 + 640 + 20 + 140 = 1296 px.
-        // Sits inside the Options screen's ~1500 px content area with room.
+        // Live mod-list search/filter still binds the same way:
+        // EditableTextWidget two-way to BetaDepsModSearchText; the setter
+        // calls ApplyFilter() on every keystroke. Q/E tab-switching conflict
+        // (OptionsVM.SelectPreviousCategory / SelectNextCategory fire from a
+        // game-input hotkey independent of UI focus) is handled by
+        // TabSwitchGuardPatch.cs which suppresses tab switches when any
+        // EditableTextWidget has focus.
+
+        // ROW A — search field + clear button (centered, own row).
         + "    <ListPanel WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"12\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
+        + "      <Children>\n"
+        + "        <EditableTextWidget Id=\"BetaDepsSearchInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"340\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"36\" VerticalAlignment=\"Center\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@BetaDepsModSearchText\" GamepadNavigationIndex=\"0\">\n"
+        + "          <Children>\n"
+        + "            <RichTextWidget IsVisible=\"@BetaDepsSearchPlaceholderVisible\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Search mods…\" />\n"
+        + "          </Children>\n"
+        + "        </EditableTextWidget>\n"
+        + "        <ButtonWidget Command.Click=\"ExecuteClearSearch\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"80\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"36\" MarginLeft=\"8\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\" IsVisible=\"@BetaDepsSearchClearVisible\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Clear\" /></Children>\n"
+        + "        </ButtonWidget>\n"
+        + "      </Children>\n"
+        + "    </ListPanel>\n"
+
+        // ROW B — Prev Mod [Mod name + Mod-N-of-N] Next Mod.
+        + "    <ListPanel WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "      <Children>\n"
         + "        <ButtonWidget Command.Click=\"ExecutePrevMod\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"140\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"48\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
         + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"&lt; Prev Mod\" /></Children>\n"
         + "        </ButtonWidget>\n"
-        + "        <EditableTextWidget Id=\"BetaDepsSearchInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"240\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"36\" MarginLeft=\"20\" VerticalAlignment=\"Center\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@BetaDepsModSearchText\" GamepadNavigationIndex=\"0\" />\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteClearSearch\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"70\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"36\" MarginLeft=\"6\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\" IsVisible=\"@BetaDepsSearchClearVisible\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Clear\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        // Mod-name / summary panel. Fixed-width vertical-stack container so
-        // RichTextWidget shrinks to its text (CoverChildren) and centers
-        // inside the 640-px column. RichTextWidget honors the brush's
-        // baked-in alignment (SPOptions.Description.Title.Text is left-
-        // aligned), so StretchToParent + TextHorizontalAlignment doesn't
-        // work for centering -- has to be CoverChildren + HorizontalAlignment.
-        + "        <ListPanel WidthSizePolicy=\"Fixed\" SuggestedWidth=\"640\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" MarginRight=\"20\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+        // Mod-name / mod-index panel. Polish #5 + post-screenshot adjustment:
+        // SelectedModName uses SPOptions.Tab.Text (heading-weight, larger) so
+        // it visually outranks the per-row labels but doesn't compete with
+        // the page title above. Container height bumped 52 -> 72 and the
+        // MarginTop between the two rows bumped 2 -> 10 so the mod name
+        // and the "Mod N of M" subtitle have actual breathing room instead
+        // of stacking like one cramped block.
+        + "        <ListPanel WidthSizePolicy=\"Fixed\" SuggestedWidth=\"640\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"72\" MarginLeft=\"20\" MarginRight=\"20\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "          <Children>\n"
-        + "            <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.Description.Title.Text\" Text=\"@SelectedModName\" />\n"
-        + "            <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"2\" Brush=\"SPOptions.Group.Title.Text\" Text=\"@SelectedModSummary\" />\n"
+        + "            <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.Tab.Text\" Text=\"@SelectedModName\" />\n"
+        + "            <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" Brush=\"SPOptions.Group.Title.Text\" Text=\"@SelectedModSummary\" />\n"
         + "          </Children>\n"
         + "        </ListPanel>\n"
         + "        <ButtonWidget Command.Click=\"ExecuteNextMod\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"140\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"48\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
@@ -232,7 +288,7 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // v0.7.6 visual change #6: footer hint above the action button bar.
         // Tells users about keyboard shortcuts they wouldn't otherwise
         // discover. Small text, low contrast, doesn't compete with buttons.
-        + "    <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"15\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Q / E switches tabs   ·   Click and drag sliders   ·   Toggle buttons show current state\" />\n"
+        + "    <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"15\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Q / E switches tabs   ·   Drag sliders, or click a slider value to type it directly\" />\n"
         // v0.7.6 visual change #1: split the 6-button action bar into two rows.
         // Row A: per-mod / diagnostic actions (Reset to Defaults, Run Self-Test,
         // Send to GitHub) -- 3 x 260 = 820 px, easy fit.
@@ -254,8 +310,13 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "        <ButtonWidget Command.Click=\"ExecuteResetDefaults\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
         + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Reset to Defaults\" /></Children>\n"
         + "        </ButtonWidget>\n"
+        // Polish #12: button reads "Send Bug Report" (was "Report a Bug").
+        // The new label is action-oriented (verb-first) and signals what
+        // actually happens — the click runs Self-Test, builds a pre-filled
+        // GitHub issue body, and opens the browser. "Report a Bug" sounded
+        // descriptive; "Send Bug Report" sounds active.
         + "        <ButtonWidget Command.Click=\"ExecuteSendToGitHub\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"260\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"52\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Report a Bug\" /></Children>\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Send Bug Report\" /></Children>\n"
         + "        </ButtonWidget>\n"
         + "      </Children>\n"
         + "    </ListPanel>\n"
@@ -329,7 +390,18 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         return
             "        <Widget IsVisible=\"@Slot" + s + "_IsVisible\" Command.HoverBegin=\"ExecuteSlot" + s + "Hover\" Command.HoverEnd=\"ExecuteSlot" + s + "HoverEnd\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" SuggestedHeight=\"50\" MarginTop=\"4\">\n"
             + "          <Children>\n"
-            + "            <RichTextWidget IsVisible=\"@Slot" + s + "_IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Text=\"@Slot" + s + "_GroupHeader\" />\n"
+            // Polish #8: when this slot is a group-header row, render the
+            // header text AND a thin divider line beneath it. The divider
+            // visually separates the group from the slot rows that follow,
+            // matching vanilla SP-options' Video/Audio/Gameplay section
+            // dividers. ListPanel container stacks the two children
+            // vertically; both are gated on the same Slot{n}_IsHeader flag.
+            + "            <ListPanel IsVisible=\"@Slot" + s + "_IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+            + "              <Children>\n"
+            + "                <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Text=\"@Slot" + s + "_GroupHeader\" />\n"
+            + "                <Widget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"600\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" HorizontalAlignment=\"Center\" MarginTop=\"3\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
+            + "              </Children>\n"
+            + "            </ListPanel>\n"
             + "            <ListPanel IsVisible=\"@Slot" + s + "_IsProperty\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
             + "              <Children>\n"
             + "                <TextWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"500\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Right\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@Slot" + s + "_DisplayName\" />\n"
@@ -439,7 +511,14 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
             + "                          </Children>\n"
             + "                        </Widget>\n"
             + "                        <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"400\" SuggestedHeight=\"65\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Sprite=\"SPGeneral\\SPOptions\\standart_slider_frame\" DoNotAcceptEvents=\"true\" />\n"
-            + "                        <ImageWidget Id=\"" + handleId + "\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"14\" SuggestedHeight=\"38\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Handle\" />\n"
+            // Polish #9: slider handle widened from 14 to 18 px and given a
+            // small vertical bump (38 -> 42) so it sits visually proud of the
+            // track and is easier to click on without sub-pixel precision.
+            // Vanilla SP Options sliders use roughly this footprint; the
+            // pre-polish 14×38 was a hair smaller than the surrounding
+            // controls and looked under-sized next to the click-to-edit
+            // numeric field to the right.
+            + "                        <ImageWidget Id=\"" + handleId + "\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"18\" SuggestedHeight=\"42\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Handle\" />\n"
             + "                      </Children>\n"
             + "                    </SliderWidget>\n"
             // v0.7.6 click-to-edit: replaced read-only RichTextWidget with an

@@ -68,7 +68,30 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     private string _selectedPageSummary = string.Empty;
 
     [DataSourceProperty] public bool   BetaDepsModConfigTabVisible           { get => _modConfigVisible; set { _modConfigVisible = value; } }
-    [DataSourceProperty] public string BetaDepsModConfigTitle                { get => _modConfigTitle;   set { _modConfigTitle = value; } }
+
+    /// <summary>
+    /// Title shown at the top of the Mod Config page. Polish (post-v0.8):
+    /// when one or more mods have registered settings, the title appends
+    /// "  ·  N mods" so users can see at a glance how many mods registered
+    /// without having to cycle through the Prev/Next buttons. Empty modlist
+    /// still shows just "Mod Configuration" — the empty-state hint below
+    /// already explains there's nothing to see.
+    ///
+    /// RebuildModList notifies this property after _registered changes so
+    /// the count refreshes when mods register late (e.g. fluent-builder
+    /// settings created in a consumer mod's OnSubModuleLoad).
+    /// </summary>
+    [DataSourceProperty]
+    public string BetaDepsModConfigTitle
+    {
+        get
+        {
+            var count = _registered?.Length ?? 0;
+            if (count <= 0) return _modConfigTitle;
+            return $"{_modConfigTitle}  ·  {count} mod{(count == 1 ? "" : "s")}";
+        }
+        set { _modConfigTitle = value; }
+    }
     [DataSourceProperty] public string BetaDepsModConfigRegisteredModsList   { get => _registeredModsList; set { _registeredModsList = value; } }
     [DataSourceProperty] public string BetaDepsModConfigSummary              { get => _summaryText; set { _summaryText = value; } }
 
@@ -107,6 +130,15 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         {
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigHasMods));
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigIsEmpty));
+            // Polish (post-v0.8): the title contains the registered-mod count
+            // dynamically. Refresh after RebuildModList changes _registered so
+            // late-registering fluent settings update the count in real time.
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigTitle));
+            // RebuildModList clears _summaryText (the old "N mod(s) registered"
+            // line was redundant with the title's count). Notify so the
+            // RichTextWidget bound to BetaDepsModConfigSummary collapses
+            // in-place after the polish change.
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsModConfigSummary));
         }
         catch { }
     }
@@ -130,6 +162,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             ApplyFilter();
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsModSearchText));
             ViewModel.NotifyPropertyChanged(nameof(BetaDepsSearchClearVisible));
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsSearchPlaceholderVisible));
         }
     }
 
@@ -139,6 +172,18 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     /// </summary>
     [DataSourceProperty]
     public bool BetaDepsSearchClearVisible => !string.IsNullOrEmpty(_modSearchText);
+
+    /// <summary>
+    /// Polish (post-v0.8): inverse of SearchClearVisible. The prefab uses this
+    /// to render a "Search mods…" placeholder text overlay on top of the
+    /// EditableTextWidget when the search field is empty. Bannerlord's
+    /// EditableTextWidget has no native placeholder attribute, so the
+    /// prefab overlays a RichTextWidget with DoNotAcceptEvents=true and
+    /// IsVisible bound here; the overlay disappears as soon as the user
+    /// starts typing.
+    /// </summary>
+    [DataSourceProperty]
+    public bool BetaDepsSearchPlaceholderVisible => string.IsNullOrEmpty(_modSearchText);
 
     [DataSourceProperty] public string SelectedModName     => _selectedModName;
     [DataSourceProperty] public string SelectedModSummary  => _selectedModSummary;
@@ -1422,9 +1467,13 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             }
             catch (System.Exception dex) { DiagLog.LogCaught(Tag, "RebuildModList/disambiguate", dex); }
 
-            _summaryText = _registered.Length == 0
-                ? "No mod settings discovered yet."
-                : $"{_registered.Length} mod(s) registered. Use the search field or Prev/Next buttons to cycle.";
+            // Polish (post-v0.8): the subtitle was "N mod(s) registered. Use
+            // the search field or Prev/Next buttons to cycle." That duplicated
+            // the mod-count badge now in the title AND repeated guidance that
+            // the empty-state hint + footer hint already cover. Setting to
+            // empty collapses the RichTextWidget (CoverChildren height) so
+            // the title sits directly above the search/cycler row.
+            _summaryText = string.Empty;
             try { NotifyVisualState(); } catch { }
             DiagLog.Log(Tag, $"RebuildModList: surfaced {_registered.Length} mod(s)");
             _filteredRegistered = _registered;
