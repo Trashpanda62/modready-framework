@@ -592,6 +592,20 @@ Reference implementations using these APIs live in:
 
 ## Debugging your mod against BetaDeps
 
+### Running against the raw BUTR-equivalent stack (no PatchShield / SaveShield / MCM extras)
+
+If you want a clean BUTR-equivalent target to develop your patches
+against — same Harmony, UIExtenderEx, ButterLib, and MCM DLLs the
+ecosystem has shipped for years, but without BetaDeps's defensive
+finalizers or Mod Configuration surface — disable the `BetaDeps`
+module in your launcher and leave the four dependency modules
+(`Bannerlord.Harmony`, `Bannerlord.UIExtenderEx`, `Bannerlord.ButterLib`,
+`Bannerlord.MBOptionScreen`) enabled. As of v0.8 those four are real
+modules carrying the canonical DLLs and run standalone. Re-enable
+BetaDeps once you want the safety net back.
+
+### Disabling specific defensive layers while leaving BetaDeps enabled
+
 When you're iterating on your own Harmony patches or save-load code,
 BetaDeps's defensive layers will catch exceptions and silently unpatch
 the offending hook — which is exactly what you want in production, but

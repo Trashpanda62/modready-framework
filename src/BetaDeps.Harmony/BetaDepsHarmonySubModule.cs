@@ -128,6 +128,29 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         try { BootstrapAliasFolders(); }
         catch (Exception ex) { DiagLog.LogCaught(Tag, "BootstrapAliasFolders", ex); }
 
+        // v0.8.2: unconditionally write the User-scope CREST_SHOW_STUBS=1 env
+        // var so BLSE LauncherEx's hide-stubs filter (which would otherwise
+        // hide our 4 dependency modules from the launcher modlist) bails out
+        // on the NEXT BLSE launch. BLSE reads this env var once at launcher
+        // startup, before BetaDeps loads, so on a fresh install the dep
+        // modules become visible starting on the second launch.
+        //
+        // There is no opt-out toggle: modders who want the raw 4-dep stack
+        // without BetaDeps's PatchShield/SaveShield/MCM extras can simply
+        // disable the BetaDeps module in the launcher — the 4 dependency
+        // modules ship the canonical DLLs and run standalone (v0.8+).
+        try
+        {
+            const string envName = "CREST_SHOW_STUBS";
+            var current = System.Environment.GetEnvironmentVariable(envName, System.EnvironmentVariableTarget.User);
+            if (current != "1")
+            {
+                System.Environment.SetEnvironmentVariable(envName, "1", System.EnvironmentVariableTarget.User);
+                DiagLog.Log(Tag, $"set User env {envName}=1 (was '{current ?? "<null>"}'); BLSE will surface dep modules from the next launch");
+            }
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "Set CREST_SHOW_STUBS", ex); }
+
         // Install AssemblyResolve redirect first so any subsequent assembly
         // load triggered downstream resolves to our already-loaded copies.
         try
@@ -365,6 +388,29 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         var betaDepsModule = System.IO.Path.GetDirectoryName(betaDepsBin);       // BetaDeps
         var modulesRoot    = System.IO.Path.GetDirectoryName(betaDepsModule);    // Modules
         if (string.IsNullOrEmpty(betaDepsModule) || string.IsNullOrEmpty(modulesRoot)) return;
+
+        // v0.8 task #14: under MO2/USVFS the modulesRoot derived above is the
+        // VIRTUALISED path. Writes there land in MO2's Overwrite folder, not
+        // on the real game disk, so on the next real launch the launcher
+        // doesn't see the alias folders we materialise. MO2Bootstrap detects
+        // USVFS and resolves the real on-disk Modules path via the kernel-
+        // provided MainModule.FileName (which USVFS doesn't hook). If
+        // detected, we redirect the materialisation target there.
+        if (BetaDeps.Foundation.MO2Bootstrap.IsUnderMO2())
+        {
+            var realModules = BetaDeps.Foundation.MO2Bootstrap.TryGetRealModulesPath();
+            if (!string.IsNullOrEmpty(realModules))
+            {
+                DiagLog.Log(Tag, $"BootstrapAliasFolders: MO2 detected ({BetaDeps.Foundation.MO2Bootstrap.DetectionReason}); " +
+                                  $"redirecting materialisation from virtual '{modulesRoot}' to real '{realModules}'");
+                modulesRoot = realModules!;
+            }
+            else
+            {
+                DiagLog.Log(Tag, $"BootstrapAliasFolders: MO2 detected ({BetaDeps.Foundation.MO2Bootstrap.DetectionReason}) " +
+                                  "but real Modules path could not be derived; falling back to virtualised path (alias folders may not survive)");
+            }
+        }
 
         var aliasStaging = System.IO.Path.Combine(betaDepsModule!, "aliases");
         if (!System.IO.Directory.Exists(aliasStaging))
