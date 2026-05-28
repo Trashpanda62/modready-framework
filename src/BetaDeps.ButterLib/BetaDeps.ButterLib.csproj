@@ -25,7 +25,7 @@
          carries our actual BetaDeps build version for diagnostic purposes. -->
     <AssemblyVersion>2.10.4.0</AssemblyVersion>
     <FileVersion>2.10.4.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.8.0</InformationalVersion>
+    <InformationalVersion>BetaDeps 0.8.1</InformationalVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection and friends must land in bin
          so the DI container is usable at runtime. -->
