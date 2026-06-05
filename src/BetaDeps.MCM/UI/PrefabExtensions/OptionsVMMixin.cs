@@ -43,6 +43,17 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     private RegisteredSettings[] _filteredRegistered = System.Array.Empty<RegisteredSettings>();
     private string _modSearchText = string.Empty;
     private int _currentModIndex;
+
+    // ----- Preset cycle-row state (v0.8.2 Suberfudge feature) -----
+    // _presetCycle is a synthetic walk over: index 0 = "(Current settings)" sentinel,
+    // 1..N = saved preset names for the current mod, last = "(Save current as new...)"
+    // sentinel. ExecutePresetCycleNext/Prev rotate _presetCycleIndex; ExecutePresetApply
+    // dispatches based on the kind. Rebuilt on every SelectMod.
+    private string[] _presetCycle = new[] { "(Current settings)" };
+    private int _presetCycleIndex;
+    private const string PRESET_SENTINEL_CURRENT = "(Current settings)";
+    private const string PRESET_SENTINEL_SAVE    = "(Save current as new...)";
+
     private SettingsVM? _currentSettingsVM;
     private List<SettingsPropertyVM> _currentFlatProps = new();
     private int _currentPageIndex;
@@ -1570,6 +1581,9 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 DiagLog.LogCaught(Tag, $"SettingsVM ctor for {entry.Id}", ex);
                 _currentSettingsVM = null;
             }
+            // v0.8.2: refresh the preset cycle row for whichever mod is now selected.
+            try { RebuildPresetCycle(entry.Id); }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"RebuildPresetCycle/{entry.Id}", ex); }
 
             _currentFlatProps = new List<SettingsPropertyVM>();
             _presentation = new List<(string, SettingsPropertyVM?)>();
@@ -2142,6 +2156,225 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         {
             DiagLog.LogCaught(Tag, "ExecuteSendToGitHub", ex);
         }
+    }
+
+    // ---------- Preset cycle row (v0.8.2 Suberfudge feature) ----------
+
+    /// <summary>Display string for the currently-cycled preset entry.</summary>
+    [DataSourceProperty]
+    public string PresetCycleText
+    {
+        get
+        {
+            if (_presetCycle == null || _presetCycle.Length == 0) return PRESET_SENTINEL_CURRENT;
+            if (_presetCycleIndex < 0 || _presetCycleIndex >= _presetCycle.Length) return PRESET_SENTINEL_CURRENT;
+            return _presetCycle[_presetCycleIndex];
+        }
+    }
+
+    /// <summary>True when the per-mod panel has at least one saved preset
+    /// (i.e. cycle has more than the two sentinels). Used by the XML to
+    /// hide the cycle row entirely when there's nothing meaningful to show.</summary>
+    [DataSourceProperty]
+    public bool PresetCycleVisible => _presetCycle != null && _presetCycle.Length > 0;
+
+    [DataSourceMethod] public void ExecutePresetCycleNext() => CyclePreset(+1);
+    [DataSourceMethod] public void ExecutePresetCyclePrev() => CyclePreset(-1);
+
+    private void CyclePreset(int delta)
+    {
+        try
+        {
+            var n = _presetCycle?.Length ?? 0;
+            if (n <= 0) return;
+            _presetCycleIndex = ((_presetCycleIndex + delta) % n + n) % n;
+            ViewModel.NotifyPropertyChanged(nameof(PresetCycleText));
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"CyclePreset({delta})", ex); }
+    }
+
+    /// <summary>
+    /// Apply the currently-cycled preset entry:
+    ///   - "(Current settings)" sentinel -> no-op, just shows confirmation
+    ///   - "(Save current as new...)" sentinel -> prompt for name, save
+    ///   - any other entry -> load that preset and refresh the panel
+    /// </summary>
+    [DataSourceMethod]
+    public void ExecutePresetApply()
+    {
+        try
+        {
+            if (_filteredRegistered == null || _filteredRegistered.Length == 0) return;
+            var entry = _filteredRegistered[_currentModIndex];
+            var settingsId = entry?.Id ?? string.Empty;
+            if (string.IsNullOrEmpty(settingsId)) return;
+
+            var pick = PresetCycleText;
+            DiagLog.Log(Tag, $"ExecutePresetApply: id={settingsId} pick='{pick}'");
+
+            if (pick == PRESET_SENTINEL_CURRENT)
+            {
+                ShowInfo("No change", "'(Current settings)' is already applied — nothing to do.");
+                return;
+            }
+            if (pick == PRESET_SENTINEL_SAVE)
+            {
+                PromptSavePresetName(entry!, settingsId);
+                return;
+            }
+            ApplyPresetLoad(entry!, settingsId, pick);
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "ExecutePresetApply", ex); }
+    }
+
+    /// <summary>
+    /// Rebuild _presetCycle for the currently-selected mod. Called from
+    /// SelectMod after _filteredRegistered[_currentModIndex] is set, and
+    /// from ApplyPresetLoad after a save/load mutates the on-disk preset
+    /// list (so the cycle picks up the new name).
+    /// </summary>
+    private void RebuildPresetCycle(string settingsId)
+    {
+        try
+        {
+            var saved = MCM.Internal.SettingsStorage.EnumeratePresets(settingsId);
+            var list = new List<string>(saved.Count + 2) { PRESET_SENTINEL_CURRENT };
+            foreach (var n in saved) list.Add(n);
+            list.Add(PRESET_SENTINEL_SAVE);
+            _presetCycle = list.ToArray();
+            _presetCycleIndex = 0;
+            ViewModel.NotifyPropertyChanged(nameof(PresetCycleText));
+            ViewModel.NotifyPropertyChanged(nameof(PresetCycleVisible));
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"RebuildPresetCycle({settingsId})", ex); }
+    }
+
+    private void PromptSavePresetName(MCM.Internal.RegisteredSettings entry, string settingsId)
+    {
+        try
+        {
+            TaleWorlds.Library.InformationManager.ShowTextInquiry(new TaleWorlds.Library.TextInquiryData(
+                titleText: "Name this preset",
+                text: $"Snapshot the current {entry.DisplayName} settings under what name?\n(Letters, digits, spaces, hyphens — unsafe characters will be replaced with _)",
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: true,
+                affirmativeText: "Save",
+                negativeText: "Cancel",
+                affirmativeAction: name =>
+                {
+                    // Flush in-memory singleton -> Global\<id>.json FIRST so the
+                    // preset captures whatever the user is currently seeing in
+                    // the panel (including unsaved changes from this MCM session).
+                    // Without this, SavePreset snapshots stale disk content from
+                    // before the user touched anything — the preset would not
+                    // match what's on screen and Apply would appear to "not stick".
+                    try { MCM.Internal.SettingsStorage.Save(entry.Instance, settingsId); }
+                    catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"PromptSavePresetName/flush({settingsId})", ex); }
+
+                    var ok = MCM.Internal.SettingsStorage.SavePreset(settingsId, name);
+                    if (ok)
+                    {
+                        // Refresh the cycle so the new preset name appears
+                        // between (Current settings) and (Save current as new...).
+                        try { RebuildPresetCycle(settingsId); }
+                        catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"PromptSavePresetName/RebuildPresetCycle({settingsId})", ex); }
+                    }
+                    ShowInfo(ok ? "Preset saved" : "Save failed",
+                             ok ? $"Saved '{name}' for {entry.DisplayName}. It will now appear in the preset dropdown at the top of the panel."
+                                : $"Could not save preset '{name}'. Check runtime.log for the error.");
+                },
+                negativeAction: () => { },
+                shouldInputBeObfuscated: false
+            ), pauseGameActiveState: true);
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "PromptSavePresetName", ex); }
+    }
+
+    private void PromptLoadPreset(MCM.Internal.RegisteredSettings entry, string settingsId,
+        System.Collections.Generic.IReadOnlyList<string> presets)
+    {
+        try
+        {
+            if (presets == null || presets.Count == 0)
+            {
+                ShowInfo("No presets to load",
+                         $"You haven't saved any presets for {entry.DisplayName} yet. Use 'Save as new...' first.");
+                return;
+            }
+            ShowPresetPicker(entry, settingsId, presets, index: 0);
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "PromptLoadPreset", ex); }
+    }
+
+    private void ShowPresetPicker(MCM.Internal.RegisteredSettings entry, string settingsId,
+        System.Collections.Generic.IReadOnlyList<string> presets, int index)
+    {
+        try
+        {
+            if (index < 0 || index >= presets.Count) index = 0;
+            var name = presets[index];
+            var counter = $"Preset {index + 1} of {presets.Count}";
+            // Cycling navigation: Affirmative = Load this one, Negative = Next.
+            // For the last entry, Negative wraps back to 0.
+            var nextIndex = (index + 1) % presets.Count;
+
+            TaleWorlds.Library.InformationManager.ShowInquiry(new TaleWorlds.Library.InquiryData(
+                titleText: $"Load preset — {entry.DisplayName}",
+                text: $"{counter}\n\n  {name}\n\nLoad this preset into the live settings? The current values will be overwritten.",
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: presets.Count > 1,
+                affirmativeText: "Load this",
+                negativeText: presets.Count > 1 ? "Next preset" : "",
+                affirmativeAction: () => ApplyPresetLoad(entry, settingsId, name),
+                negativeAction: () => ShowPresetPicker(entry, settingsId, presets, nextIndex)
+            ), pauseGameActiveState: true);
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "ShowPresetPicker", ex); }
+    }
+
+    private void ApplyPresetLoad(MCM.Internal.RegisteredSettings entry, string settingsId, string presetName)
+    {
+        try
+        {
+            if (!MCM.Internal.SettingsStorage.LoadPresetIntoLiveFile(settingsId, presetName))
+            {
+                ShowInfo("Load failed",
+                         $"Could not load preset '{presetName}'. Check runtime.log for the error.");
+                return;
+            }
+            // Reload the in-memory singleton from the freshly-overwritten
+            // live file so the UI reflects the new values immediately.
+            try { MCM.Internal.SettingsStorage.Load(entry.Instance, settingsId); }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"ApplyPresetLoad/reload({settingsId})", ex); }
+
+            // Re-bind the SettingsVM so the UI surfaces the new values.
+            // SelectMod with the current index reconstructs _currentSettingsVM
+            // against the now-updated entry.Instance.
+            try { SelectMod(_currentModIndex); }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"ApplyPresetLoad/SelectMod({settingsId})", ex); }
+
+            ShowInfo("Preset loaded",
+                     $"Loaded '{presetName}' into {entry.DisplayName}. Click Done to persist, or change values and Done to save on top of the preset.");
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "ApplyPresetLoad", ex); }
+    }
+
+    private static void ShowInfo(string title, string body)
+    {
+        try
+        {
+            TaleWorlds.Library.InformationManager.ShowInquiry(new TaleWorlds.Library.InquiryData(
+                titleText: title,
+                text: body,
+                isAffirmativeOptionShown: true,
+                isNegativeOptionShown: false,
+                affirmativeText: "OK",
+                negativeText: "",
+                affirmativeAction: () => { },
+                negativeAction: () => { }
+            ), pauseGameActiveState: true);
+        }
+        catch { /* never let an info popup break the calling action */ }
     }
 
     /// <summary>

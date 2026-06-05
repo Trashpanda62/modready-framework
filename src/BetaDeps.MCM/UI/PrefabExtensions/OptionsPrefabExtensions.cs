@@ -256,6 +256,25 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "        </ButtonWidget>\n"
         + "      </Children>\n"
         + "    </ListPanel>\n"
+        // v0.8.2 Suberfudge feature: preset cycle row. Lives between the
+        // mod-name/cycler header and the property list. Hidden when
+        // PresetCycleVisible is false (defensive — covers the edge case
+        // where no mod is selected yet). Layout: [Preset:] [< ] [name] [ >] [Apply]
+        + "    <ListPanel IsVisible=\"@PresetCycleVisible\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
+        + "      <Children>\n"
+        + "        <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginRight=\"12\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Preset:\" />\n"
+        + "        <ButtonWidget Command.Click=\"ExecutePresetCyclePrev\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"42\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"42\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"&lt;\" /></Children>\n"
+        + "        </ButtonWidget>\n"
+        + "        <RichTextWidget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"320\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"8\" MarginRight=\"8\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@PresetCycleText\" />\n"
+        + "        <ButtonWidget Command.Click=\"ExecutePresetCycleNext\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"42\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"42\" VerticalAlignment=\"Center\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"&gt;\" /></Children>\n"
+        + "        </ButtonWidget>\n"
+        + "        <ButtonWidget Command.Click=\"ExecutePresetApply\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"110\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"42\" VerticalAlignment=\"Center\" MarginLeft=\"16\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
+        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Apply\" /></Children>\n"
+        + "        </ButtonWidget>\n"
+        + "      </Children>\n"
+        + "    </ListPanel>\n"
         // v1.0 (task #5 v2): hint panel moved AGAIN to the vanilla
         // DescriptionsRightPanel on the right side of the Options screen
         // (see MCMDescriptionsRightPanelPatch above). That's where vanilla

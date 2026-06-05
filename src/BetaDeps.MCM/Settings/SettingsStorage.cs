@@ -113,6 +113,149 @@ internal static class SettingsStorage
         return Path.Combine(dir, (settingsId ?? "Unnamed") + ".json");
     }
 
+    // ---------- Preset file-system layer (Suberfudge feature, v0.8.2) ----------
+    //
+    // Per-mod preset snapshots live at:
+    //   Documents\Mount and Blade II Bannerlord\Configs\ModSettings\<SettingsId>\Presets\<PresetName>.json
+    //
+    // The file format is identical to Global\<SettingsId>.json — same JSON
+    // schema, just renamed. "Load preset" copies a preset file's content into
+    // the live Global file then re-runs Load(); "save preset" writes the
+    // current live Global file out under a user-chosen name. This means
+    // users can hand-author preset files outside the game (export from a
+    // friend's install, hand-edit, version-control them, etc.) and they'll
+    // be discovered automatically.
+
+    /// <summary>
+    /// Returns the directory holding preset JSON files for the given
+    /// settings id. Does not create the directory; caller decides.
+    /// </summary>
+    public static string ResolvePresetsDirectory(string settingsId)
+    {
+        var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(docs, "Mount and Blade II Bannerlord", "Configs", "ModSettings",
+                            settingsId ?? "Unnamed", "Presets");
+    }
+
+    /// <summary>
+    /// Returns the full path of a preset JSON file for the given settings id
+    /// and preset name. Caller is responsible for any name sanitisation.
+    /// </summary>
+    public static string ResolvePresetPath(string settingsId, string presetName)
+    {
+        return Path.Combine(ResolvePresetsDirectory(settingsId),
+                            SanitisePresetName(presetName) + ".json");
+    }
+
+    /// <summary>
+    /// Enumerate all preset names available for the given settings id.
+    /// Returns an empty list when the directory doesn't exist (the common
+    /// first-run case). Names are returned without the .json extension.
+    /// </summary>
+    public static System.Collections.Generic.IReadOnlyList<string> EnumeratePresets(string settingsId)
+    {
+        var list = new System.Collections.Generic.List<string>();
+        try
+        {
+            var dir = ResolvePresetsDirectory(settingsId);
+            if (!Directory.Exists(dir)) return list;
+            foreach (var f in Directory.GetFiles(dir, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                list.Add(Path.GetFileNameWithoutExtension(f));
+            }
+            list.Sort(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"EnumeratePresets({settingsId})", ex); }
+        return list;
+    }
+
+    /// <summary>
+    /// Write the current Global\&lt;id&gt;.json out to a preset file with
+    /// the given name. Overwrites any existing preset of the same name.
+    /// Returns true on success.
+    /// </summary>
+    public static bool SavePreset(string settingsId, string presetName)
+    {
+        try
+        {
+            var src = ResolvePath(settingsId);
+            if (!File.Exists(src))
+            {
+                DiagLog.Log(Tag, $"SavePreset({settingsId},{presetName}): no live settings file at {src} -- nothing to snapshot");
+                return false;
+            }
+            var dstDir = ResolvePresetsDirectory(settingsId);
+            Directory.CreateDirectory(dstDir);
+            var dst = ResolvePresetPath(settingsId, presetName);
+            File.Copy(src, dst, overwrite: true);
+            DiagLog.Log(Tag, $"SavePreset: wrote {dst}");
+            return true;
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"SavePreset({settingsId},{presetName})", ex); return false; }
+    }
+
+    /// <summary>
+    /// Replace the live Global\&lt;id&gt;.json with the contents of the named
+    /// preset file. Returns true on success. Caller is expected to re-run
+    /// Load() afterwards (or to recreate the settings singleton) so the
+    /// in-memory state reflects the new values.
+    /// </summary>
+    public static bool LoadPresetIntoLiveFile(string settingsId, string presetName)
+    {
+        try
+        {
+            var src = ResolvePresetPath(settingsId, presetName);
+            if (!File.Exists(src))
+            {
+                DiagLog.Log(Tag, $"LoadPreset({settingsId},{presetName}): preset file not found at {src}");
+                return false;
+            }
+            var dst = ResolvePath(settingsId);
+            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+            File.Copy(src, dst, overwrite: true);
+            DiagLog.Log(Tag, $"LoadPreset: copied {src} -> {dst}");
+            return true;
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"LoadPreset({settingsId},{presetName})", ex); return false; }
+    }
+
+    /// <summary>
+    /// Delete a preset file. Returns true if the file was present and
+    /// successfully removed.
+    /// </summary>
+    public static bool DeletePreset(string settingsId, string presetName)
+    {
+        try
+        {
+            var p = ResolvePresetPath(settingsId, presetName);
+            if (!File.Exists(p)) return false;
+            File.Delete(p);
+            DiagLog.Log(Tag, $"DeletePreset: removed {p}");
+            return true;
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"DeletePreset({settingsId},{presetName})", ex); return false; }
+    }
+
+    // Strip filesystem-unsafe characters from a user-supplied preset name so
+    // we never write an invalid path. Replace with '_'; collapse runs.
+    private static string SanitisePresetName(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "Unnamed";
+        var bad = Path.GetInvalidFileNameChars();
+        var sb = new System.Text.StringBuilder(raw.Length);
+        var lastUnderscore = false;
+        foreach (var c in raw)
+        {
+            if (Array.IndexOf(bad, c) >= 0)
+            {
+                if (!lastUnderscore) { sb.Append('_'); lastUnderscore = true; }
+            }
+            else { sb.Append(c); lastUnderscore = false; }
+        }
+        var s = sb.ToString().Trim('_', ' ', '.');
+        return string.IsNullOrEmpty(s) ? "Unnamed" : s;
+    }
+
     public static void Load(object instance, string settingsId)
     {
         // v0.7.5: feedback-loop guard. See IsRecursingLoad doc.
