@@ -1512,8 +1512,11 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                     var asmSquished = asm.Replace(" ", "").Replace(".", "");
                     if (dnSquished.IndexOf(asmSquished, System.StringComparison.OrdinalIgnoreCase) >= 0) continue;
                     if (asmSquished.IndexOf(dnSquished, System.StringComparison.OrdinalIgnoreCase) >= 0) continue;
-                    r.DisplayName = asm + " — " + dn;
-                    _prefixedSettings.Add(r);
+                    // v0.9.0: prefix removed -- show the mod's own DisplayName
+                    // verbatim (no "<Assembly> — " clutter). _prefixedSettings is
+                    // left empty; consolidation below picks the first settings as
+                    // the primary entry, and the duplicate-name disambiguator still
+                    // runs to keep same-named mods distinguishable.
                 }
             }
             catch (System.Exception fex) { DiagLog.LogCaught(Tag, "RebuildModList/prefix", fex); }

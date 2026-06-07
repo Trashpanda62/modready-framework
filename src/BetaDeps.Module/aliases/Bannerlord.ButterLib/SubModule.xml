@@ -37,11 +37,14 @@
   <Url value="" />
 
   <DependedModules>
-    <DependedModule Id="Bannerlord.Harmony" />
-    <DependedModule Id="Bannerlord.UIExtenderEx" />
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.14.99.0" />
   </DependedModules>
 
-  <DependedModuleMetadatas />
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
+  </DependedModuleMetadatas>
 
   <SubModules>
     <SubModule>

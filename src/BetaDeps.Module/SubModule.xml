@@ -3,7 +3,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="BetaDeps" />
   <Name value="Bannerlord Beta Dependencies" />
-  <Version value="v0.3.4" />
+  <Version value="v0.9.0" />
   <DefaultModule value="false" />
   <ModuleCategory value="Singleplayer" />
   <ModuleType value="Community" />
@@ -21,17 +21,17 @@
        corresponding <SubModule> entry was removed from this file's
        <SubModules> block below; that load is owned by the real module now. -->
   <DependedModules>
-    <DependedModule Id="Bannerlord.Harmony" />
-    <DependedModule Id="Bannerlord.UIExtenderEx" />
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.14.99.0" />
     <!-- v0.8 step 3: ButterLib promoted to a real module too. Its SubModule
          (ButterLibSubModule) now runs from Modules\Bannerlord.ButterLib\bin\
          BEFORE BetaDeps's MCM tab construction needs ButterLib's DI container. -->
-    <DependedModule Id="Bannerlord.ButterLib" />
+    <DependedModule Id="Bannerlord.ButterLib" DependentVersion="v2.10.99.0" />
     <!-- v0.8 step 4 (final): MBOptionScreen / MCM promoted. Both MCMSubModule
          and MCMUISubModule now run from Modules\Bannerlord.MBOptionScreen\bin\.
          BetaDeps's OptionsVMMixin runs after MCM has registered, picking up
          every Settings instance from the same SettingsRegistry. -->
-    <DependedModule Id="Bannerlord.MBOptionScreen" />
+    <DependedModule Id="Bannerlord.MBOptionScreen" DependentVersion="v5.11.99.0" />
   </DependedModules>
 
   <!-- BetaDeps must load before:
@@ -86,7 +86,12 @@
     <Module Id="Crest" />
   </ModulesToLoadAfterThis>
 
-  <DependedModuleMetadatas />
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
+    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.10.99.0" />
+    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" version="v5.11.99.0" />
+  </DependedModuleMetadatas>
 
   <SubModules>
     <SubModule>

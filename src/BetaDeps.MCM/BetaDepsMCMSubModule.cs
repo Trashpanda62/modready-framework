@@ -131,6 +131,10 @@ public class MCMSubModule : MBSubModuleBase
         // otherwise, so it's safe to run every frame.
         try { ModConfigCapture.OnTick(dt); }
         catch (Exception ex) { DiagLog.LogCaught(Tag, "OnApplicationTick/ModConfigCapture", ex); }
+
+        // v0.9.0 Slice 3: narrow the vanilla right description panel while our tab is active.
+        try { ModConfigCapture.MaintainRightPanel(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "OnApplicationTick/MaintainRightPanel", ex); }
     }
 
     private const string RunSelfTestFlagName = "betadeps-run-selftest.flag";

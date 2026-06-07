@@ -133,6 +133,54 @@ internal static class ModConfigCapture
         }
     }
 
+    // ---- v0.9.0 Slice 3: narrow the right description panel on our tab ----
+    // The shared vanilla DescriptionsRightPanel is a fixed 650px; our hover hint
+    // only needs ~360px. While the Mod Configuration tab is active we shrink it
+    // so (a) the settings area widens and long slider values stop clipping at the
+    // scrollbar, and (b) the description's left edge moves in toward its text
+    // (no big empty gap). Restored to the cached vanilla width on every other
+    // tab so Video/Audio descriptions + preview images are untouched. Driven
+    // ~every 8th frame from MCMSubModule.OnApplicationTick; all best-effort.
+    private static int _rpFrames;
+    private static float _rpOrigWidth = -1f;
+    private const float ModConfigPanelWidth = 380f;
+
+    private static bool TopScreenIsOptions()
+    {
+        try
+        {
+            var smType = ReflectionUtils.ResolveTypeByFullName("TaleWorlds.ScreenSystem.ScreenManager");
+            var top = smType?.GetProperty("TopScreen", AnyStatic)?.GetValue(null)
+                   ?? smType?.GetMethod("get_TopScreen", AnyStatic)?.Invoke(null, null);
+            return top != null && (top.GetType().FullName?.IndexOf("Options", StringComparison.OrdinalIgnoreCase) ?? -1) >= 0;
+        }
+        catch { return false; }
+    }
+
+    internal static void MaintainRightPanel()
+    {
+        try
+        {
+            if (((_rpFrames++) & 7) != 0) return;          // throttle: ~7-8 checks/sec
+            if (!TopScreenIsOptions()) return;             // cheap guard; skip map/menu/etc.
+            var root = GetTopScreenRootWidget();
+            if (root == null) return;
+            var panel = FindWidgetById(root, "DescriptionsRightPanel", 0);
+            if (panel == null) return;                     // not the Options screen tree
+            if (_rpOrigWidth < 0f)                          // cache the vanilla width once
+            {
+                _rpOrigWidth = (GetMember(panel, "SuggestedWidth") as float?) ?? 650f;
+                if (_rpOrigWidth < 400f) _rpOrigWidth = 650f; // sanity floor
+            }
+            var page = FindWidgetById(root, "BetaDepsModConfigPage", 0);
+            bool ourTab = page != null && (GetMember(page, "IsVisible") as bool? ?? false);
+            float target = ourTab ? ModConfigPanelWidth : _rpOrigWidth;
+            float cur = (GetMember(panel, "SuggestedWidth") as float?) ?? -1f;
+            if (System.Math.Abs(cur - target) > 0.5f) TrySet(panel, "SuggestedWidth", target);
+        }
+        catch { }
+    }
+
     // ---- step 1: open the Options screen via the initial-state-option ----
     private static void OpenOptionsScreen()
     {

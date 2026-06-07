@@ -42,10 +42,12 @@
   <Url value="" />
 
   <DependedModules>
-    <DependedModule Id="Bannerlord.Harmony" />
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
   </DependedModules>
 
-  <DependedModuleMetadatas />
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
+  </DependedModuleMetadatas>
 
   <SubModules>
     <SubModule>

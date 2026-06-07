@@ -67,7 +67,6 @@ internal sealed class MCMDescriptionsRightPanelPatch : PrefabExtensionInsertPatc
         // the panel eat ~600+ px of horizontal screen space.
         "<ListPanel Id=\"BetaDepsHintPanelWrapper\" IsVisible=\"@IsHintVisible\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"360\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Right\" VerticalAlignment=\"Top\" MarginTop=\"50\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "  <Children>\n"
-        + "    <Widget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"2\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"600\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
         + "    <ListPanel WidthSizePolicy=\"Fixed\" SuggestedWidth=\"338\" HeightSizePolicy=\"CoverChildren\" MarginLeft=\"8\" VerticalAlignment=\"Top\" HorizontalAlignment=\"Left\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "      <Children>\n"
         // Post-screenshot fix: text now explicitly left-aligned via
@@ -217,11 +216,11 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
     // settings-heavy mods. Whether/how to reintroduce sliders is a separate
     // decision tracked for after the list is confirmed.
     private const string RowListXml =
-        "    <NavigatableListPanel Id=\"BetaDepsModRowList\" DataSource=\"{RowList}\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Top\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
+        "    <NavigatableListPanel Id=\"BetaDepsModRowList\" DataSource=\"{RowList}\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\"  VerticalAlignment=\"Top\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "      <ItemTemplate>\n"
         // Slice 7: tighter row spacing (50->44 tall, 4->2 top margin) so more
         // settings fit per screen without feeling cramped.
-        + "        <Widget IsVisible=\"@IsVisible\" Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" SuggestedHeight=\"44\" MarginTop=\"2\">\n"
+        + "        <Widget IsVisible=\"@IsVisible\" Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"960\" SuggestedHeight=\"44\" HorizontalAlignment=\"Left\" MarginTop=\"2\">\n"
         + "          <Children>\n"
         // ----- group-header row: centered title + thin divider -----
         + "            <ListPanel IsVisible=\"@IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
@@ -258,7 +257,7 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // Widget and the HintWidget overlay both reported 0 invocations).
         // Slice 8: indent spacer so a nested sub-group's settings line up under it.
         + "                <Widget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"@IndentPixels\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" />\n"
-        + "                <TextWidget Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"500\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Right\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@DisplayName\" />\n"
+        + "                <TextWidget Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"380\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" TextHorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@DisplayName\" />\n"
         // bool checkbox (Phase 2.2). Vanilla SPOptions checkbox: a toggle button
         // with the Empty brush as the box and a Full-brush ToggleIndicator that
         // shows when checked. IsSelected two-way to @BoolValue drives the
@@ -291,7 +290,7 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "                        <ImageWidget Id=\"NumSliderHandle\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"18\" SuggestedHeight=\"42\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Handle\" />\n"
         + "                      </Children>\n"
         + "                    </SliderWidget>\n"
-        + "                    <EditableTextWidget Id=\"NumValueInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"90\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" MarginLeft=\"20\" VerticalAlignment=\"Center\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@EditableValueText\" />\n"
+        + "                    <EditableTextWidget Id=\"NumValueInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"150\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" MarginLeft=\"30\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Value.Text\" Text=\"@EditableValueText\" />\n"
         + "                  </Children>\n"
         + "                </ListPanel>\n"
         // free text
