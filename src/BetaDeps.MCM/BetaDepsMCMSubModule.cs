@@ -64,6 +64,13 @@ public class MCMSubModule : MBSubModuleBase
             DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/Discover", ex);
         }
 
+        // Slice 1 of "every mod on one page" — moved to OptionsVMMixin.RebuildModList
+        // because OnBeforeInitialModuleScreenSetAsRoot only fires once at game-load
+        // (a ~1.6 second window) and the user has to drop the flag file BEFORE
+        // clicking PLAY in BLSE for it to be visible there. RebuildModList fires
+        // every time the user opens Mod Configuration in-game, which is the
+        // natural moment to drop the flag.
+
         // v0.6: Auto-disable detection. Scan launcher_data.xml vs the
         // engine's actually-loaded SubModules and report any mods the
         // user has enabled that didn't construct (Banner Kings on a
@@ -114,6 +121,16 @@ public class MCMSubModule : MBSubModuleBase
         {
             DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot/AutoRunSelfTest", ex);
         }
+    }
+
+    protected override void OnApplicationTick(float dt)
+    {
+        base.OnApplicationTick(dt);
+        // Headless visual verification: if a capture flag is present, this drives
+        // Options -> Mod Config -> screenshot -> quit. No-op (cheap flag check)
+        // otherwise, so it's safe to run every frame.
+        try { ModConfigCapture.OnTick(dt); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "OnApplicationTick/ModConfigCapture", ex); }
     }
 
     private const string RunSelfTestFlagName = "betadeps-run-selftest.flag";

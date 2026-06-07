@@ -43,6 +43,7 @@ using BetaDeps.Foundation;
 using MCM.Abstractions;
 using MCM.Abstractions.Attributes;
 using MCM.Abstractions.Attributes.v2;
+using MCM.UI.GUI.ViewModels;   // SettingsVM / SettingsPropertyVM -- UI-layer test path
 
 namespace MCM.Internal;
 
@@ -64,6 +65,9 @@ internal static class McmSelfTest
         public string ModDisplayName = string.Empty;
         public bool DonePassed;
         public bool CancelPassed;
+        public bool UiLayerPassed = true;   // Phase 1.2: VM-setter -> disk -> VM round-trip
+        public bool PresetPassed = true;    // Phase 1.2: save preset -> mutate -> apply -> assert
+        public bool IsPerSave;              // tested inside a loaded campaign (per-campaign settings)
         public List<PropertyResult> Properties = new();
         public string? FatalError;
     }
@@ -118,6 +122,11 @@ internal static class McmSelfTest
         public int FailedDone => NonQuirkMods.Count(m => !m.DonePassed);
         public int PassedCancel => NonQuirkMods.Count(m => m.CancelPassed);
         public int FailedCancel => NonQuirkMods.Count(m => !m.CancelPassed);
+        public int PassedUiLayer => NonQuirkMods.Count(m => m.UiLayerPassed);
+        public int FailedUiLayer => NonQuirkMods.Count(m => !m.UiLayerPassed);
+        public int PassedPreset => NonQuirkMods.Count(m => m.PresetPassed);
+        public int FailedPreset => NonQuirkMods.Count(m => !m.PresetPassed);
+        public int PerSaveMods => NonQuirkMods.Count(m => m.IsPerSave);
         public int TestedMods => NonQuirkMods.Count();
         public int QuirkMods => Mods.Count - TestedMods;
 
@@ -360,6 +369,7 @@ internal static class McmSelfTest
     {
         var instance = entry.Instance;
         var type = instance.GetType();
+        modResult.IsPerSave = IsPerSaveInstance(instance);
         var testableProps = EnumerateTestableProperties(type).ToList();
 
         // 1. Snapshot original values so we can restore them between sub-tests.
@@ -473,9 +483,250 @@ internal static class McmSelfTest
         // 4. Cancel semantics: mutate everything, then Load (revert), verify in-memory == original.
         modResult.CancelPassed = TestCancelSemantics(entry, testableProps, originals);
 
+        RestoreValues(instance, originals);
+        try { SettingsStorage.Save(instance, entry.Id); } catch { }
+
+        // 5. UI-layer round-trip: drive values through SettingsVM / SettingsPropertyVM
+        //    setters (the widget write path) -> Save -> Load -> fresh VM -> assert.
+        //    Catches "the widget didn't write the property" and reaches fluent
+        //    settings (which expose no [SettingProperty] PropertyInfos).
+        modResult.UiLayerPassed = TestUiLayerSemantics(entry);
+
+        RestoreValues(instance, originals);
+        try { SettingsStorage.Save(instance, entry.Id); } catch { }
+
+        // 6. Preset round-trip: save current as a preset, mutate live, apply the
+        //    preset, assert live reverted to the snapshot, delete the preset.
+        modResult.PresetPassed = TestPresetSemantics(entry, testableProps, originals);
+
         // Final restore.
         RestoreValues(instance, originals);
         try { SettingsStorage.Save(instance, entry.Id); } catch { }
+    }
+
+    /// <summary>
+    /// Phase 1.2: exercise the UI binding path. Builds a SettingsVM, mutates each
+    /// non-header/non-button row through its VM setter (BoolValue/IntValue/
+    /// FloatValue/TextValue/CycleDropdown -- exactly what a checkbox/slider/
+    /// dropdown widget calls), persists, reloads, rebuilds a fresh VM, and asserts
+    /// every value survived the VM -> disk -> VM round-trip. Works for both
+    /// attribute and fluent settings because the VM abstracts the backing store.
+    /// </summary>
+    private static bool TestUiLayerSemantics(RegisteredSettings entry)
+    {
+        var instance = entry.Instance;
+        SettingsVM vm1;
+        try { vm1 = new SettingsVM(instance); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"UiLayer/build({entry.Id})", ex); return false; }
+
+        var rows = vm1.SettingPropertyGroups
+            .SelectMany(g => g.SettingProperties)
+            .Where(p => !p.IsHeader && p.TypeKind != "button")
+            .ToList();
+        if (rows.Count == 0) return true; // nothing to drive (e.g. button-only mod)
+
+        var originals = new Dictionary<string, object?>(StringComparer.Ordinal);
+        var expected  = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        foreach (var p in rows)
+        {
+            try
+            {
+                switch (p.TypeKind)
+                {
+                    case "bool":
+                        originals[p.Name] = p.BoolValue;
+                        p.BoolValue = !p.BoolValue;
+                        expected[p.Name] = p.BoolValue;
+                        break;
+                    case "int":
+                    {
+                        originals[p.Name] = p.IntValue;
+                        int min = (int)Math.Round(p.MinValue), max = (int)Math.Round(p.MaxValue);
+                        int cur = p.IntValue;
+                        int next = cur < max ? cur + 1 : (cur > min ? cur - 1 : cur);
+                        p.IntValue = next;
+                        expected[p.Name] = p.IntValue; // re-read: the setter may clamp
+                        break;
+                    }
+                    case "float":
+                    {
+                        originals[p.Name] = p.FloatValue;
+                        float min = (float)p.MinValue, max = (float)p.MaxValue;
+                        float cur = p.FloatValue;
+                        float step = (max > min) ? (max - min) * 0.1f : 1f;
+                        float next = (cur + step <= max) ? cur + step : (cur - step >= min ? cur - step : cur);
+                        p.FloatValue = next;
+                        expected[p.Name] = p.FloatValue;
+                        break;
+                    }
+                    case "text":
+                        originals[p.Name] = p.TextValue;
+                        p.TextValue = (p.TextValue ?? string.Empty) + "_uitest";
+                        expected[p.Name] = p.TextValue;
+                        break;
+                    case "dropdown":
+                        originals[p.Name] = p.DropdownDisplayText;
+                        p.CycleDropdownNext();
+                        expected[p.Name] = p.DropdownDisplayText;
+                        break;
+                }
+            }
+            catch (Exception ex) { DiagLog.LogCaught(Tag, $"UiLayer/mutate({entry.Id}.{p.Name})", ex); }
+        }
+
+        bool ok = true;
+        try
+        {
+            SettingsStorage.Save(instance, entry.Id);   // WriteBack already updated the backing store
+            SettingsStorage.Load(instance, entry.Id);
+            var vm2 = new SettingsVM(instance);
+            var rows2 = vm2.SettingPropertyGroups
+                .SelectMany(g => g.SettingProperties)
+                .Where(p => !p.IsHeader && p.TypeKind != "button")
+                .GroupBy(p => p.Name, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+            foreach (var kv in expected)
+            {
+                if (!rows2.TryGetValue(kv.Key, out var p2)) continue;
+                object? actual = p2.TypeKind switch
+                {
+                    "bool"     => p2.BoolValue,
+                    "int"      => p2.IntValue,
+                    "float"    => p2.FloatValue,
+                    "text"     => p2.TextValue,
+                    "dropdown" => p2.DropdownDisplayText,
+                    _          => null
+                };
+                if (!UiValueEqual(p2.TypeKind, actual, kv.Value))
+                {
+                    ok = false;
+                    DiagLog.Log(Tag, $"UI-layer fail on {entry.Id}.{kv.Key}: expected {Repr(kv.Value)}, got {Repr(actual)}");
+                }
+            }
+
+            // Restore originals through the VM path (covers fluent too).
+            foreach (var p in rows2.Values)
+            {
+                if (!originals.TryGetValue(p.Name, out var orig)) continue;
+                try
+                {
+                    switch (p.TypeKind)
+                    {
+                        case "bool":  p.BoolValue  = orig is bool b && b; break;
+                        case "int":   if (orig is int iv) p.IntValue = iv; break;
+                        case "float": if (orig is float fv) p.FloatValue = fv; break;
+                        case "text":  p.TextValue = orig as string ?? string.Empty; break;
+                        case "dropdown":
+                            // best-effort: cycle until the display text matches the
+                            // original (bounded so a missing match can't spin forever).
+                            for (int i = 0; i < 64 && !string.Equals(p.DropdownDisplayText, orig as string, StringComparison.Ordinal); i++)
+                                p.CycleDropdownNext();
+                            break;
+                    }
+                }
+                catch { }
+            }
+            SettingsStorage.Save(instance, entry.Id);
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"UiLayer/verify({entry.Id})", ex); ok = false; }
+        return ok;
+    }
+
+    /// <summary>True if the settings instance is a per-campaign (per-save)
+    /// settings object (derives from BasePerSaveSettings / PerSaveSettings&lt;T&gt;).
+    /// These only register inside a loaded campaign; the in-campaign "Run
+    /// Self-Test" button is what exercises them.</summary>
+    private static bool IsPerSaveInstance(object instance)
+    {
+        for (var t = instance.GetType(); t != null && t != typeof(object); t = t.BaseType)
+            if (t.Name.IndexOf("PerSaveSettings", StringComparison.Ordinal) >= 0)
+                return true;
+        return false;
+    }
+
+    private static bool UiValueEqual(string typeKind, object? a, object? b)
+    {
+        if (typeKind == "float")
+        {
+            float fa = a is float x ? x : 0f, fb = b is float y ? y : 0f;
+            return Math.Abs(fa - fb) <= 0.001f;
+        }
+        return object.Equals(a, b);
+    }
+
+    /// <summary>
+    /// Phase 1.2: save the current live values as a preset, mutate live values +
+    /// save (so disk differs from the preset), apply the preset, and assert live
+    /// reverted to the snapshot. Value assertions use the raw [SettingProperty]
+    /// props (non-empty for attribute mods); for fluent mods the preset file
+    /// copy is still exercised even though there are no PropertyInfos to assert.
+    /// </summary>
+    private static bool TestPresetSemantics(RegisteredSettings entry, List<PropertyInfo> props, Dictionary<string, object?> originals)
+    {
+        var instance = entry.Instance;
+        const string presetName = "__BetaDepsSelfTest__";
+        try
+        {
+            // Live disk currently == originals (caller restored+saved before this).
+            if (!SettingsStorage.SavePreset(entry.Id, presetName))
+            {
+                DiagLog.Log(Tag, $"Preset test: SavePreset failed for {entry.Id}");
+                return false;
+            }
+
+            // Mutate live + persist so the live file diverges from the preset.
+            foreach (var p in props)
+            {
+                try
+                {
+                    var m = MutateValue(p, p.GetValue(instance));
+                    if (m != null && p.CanWrite) p.SetValue(instance, m);
+                }
+                catch { }
+            }
+            SettingsStorage.Save(instance, entry.Id);
+
+            // Apply the preset. LoadPresetIntoLiveFile only copies the preset
+            // file over the live file; the UI's ExecutePresetApply reloads the
+            // instance from disk afterward (then re-binds the grid). Mirror that
+            // exact sequence so the in-memory instance reflects the applied preset.
+            if (!SettingsStorage.LoadPresetIntoLiveFile(entry.Id, presetName))
+            {
+                DiagLog.Log(Tag, $"Preset test: apply failed for {entry.Id}");
+                return false;
+            }
+            SettingsStorage.Load(instance, entry.Id);
+
+            bool ok = true;
+            foreach (var p in props)
+            {
+                if (!originals.TryGetValue(p.Name, out var expected)) continue;
+                try
+                {
+                    var actual = p.GetValue(instance);
+                    if (!ValuesEqual(p, actual, expected))
+                    {
+                        ok = false;
+                        DiagLog.Log(Tag, $"Preset apply mismatch on {entry.Id}.{p.Name}: expected {Repr(expected)}, got {Repr(actual)}");
+                    }
+                }
+                catch (Exception ex) { DiagLog.LogCaught(Tag, $"PresetVerify({entry.Id}.{p.Name})", ex); ok = false; }
+            }
+            return ok;
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"Preset({entry.Id})", ex);
+            return false;
+        }
+        finally
+        {
+            try { SettingsStorage.DeletePreset(entry.Id, presetName); } catch { }
+            RestoreValues(instance, originals);
+            try { SettingsStorage.Save(instance, entry.Id); } catch { }
+        }
     }
 
     private static bool TestDoneSemantics(RegisteredSettings entry, List<PropertyInfo> props, Dictionary<string, object?> originals)
@@ -1125,6 +1376,9 @@ internal static class McmSelfTest
         sb.AppendLine($"Properties: {report.PassedProperties}/{report.TotalProperties} passed round-trip");
         sb.AppendLine($"Done:     {report.PassedDone}/{report.TestedMods} mods passed Done semantics");
         sb.AppendLine($"Cancel:   {report.PassedCancel}/{report.TestedMods} mods passed Cancel semantics");
+        sb.AppendLine($"UI-layer: {report.PassedUiLayer}/{report.TestedMods} mods passed VM->disk->VM round-trip");
+        sb.AppendLine($"Presets:  {report.PassedPreset}/{report.TestedMods} mods passed preset save/apply round-trip");
+        sb.AppendLine($"Per-save: {report.PerSaveMods} mod(s) tested as per-campaign settings");
         sb.AppendLine($"Visibility: {report.VisibilityMissing} enabled-with-code mod folder(s) NOT in registry");
         sb.AppendLine($"Duplicate DLLs: {report.DuplicateGroups} watched library(ies) shipped in 2+ mods");
         sb.AppendLine();
@@ -1152,7 +1406,9 @@ internal static class McmSelfTest
                 bool isPass = m.FatalError == null
                            && m.Properties.All(p => p.RoundTripPassed)
                            && m.DonePassed
-                           && m.CancelPassed;
+                           && m.CancelPassed
+                           && m.UiLayerPassed
+                           && m.PresetPassed;
                 string status = m.FatalError != null
                     ? "FATAL"
                     : (report.IsQuirk(m) ? "QUIRK" : (isPass ? "PASS" : "FAIL"));
@@ -1170,15 +1426,19 @@ internal static class McmSelfTest
             bool isPass = m.FatalError == null
                        && m.Properties.All(p => p.RoundTripPassed)
                        && m.DonePassed
-                       && m.CancelPassed;
+                       && m.CancelPassed
+                       && m.UiLayerPassed
+                       && m.PresetPassed;
             if (errorsOnly && isPass) continue;
             anyModFail |= !isPass;
 
             string status = m.FatalError != null ? $"FATAL: {m.FatalError}" : (isPass ? "PASS" : "FAIL");
-            sb.AppendLine($"[{status}] {m.ModId} ({m.ModDisplayName})");
-            sb.AppendLine($"    props: {m.Properties.Count(p => p.RoundTripPassed)}/{m.Properties.Count} passed");
-            sb.AppendLine($"    done:  {(m.DonePassed ? "PASS" : "FAIL")}");
-            sb.AppendLine($"    cancel:{(m.CancelPassed ? "PASS" : "FAIL")}");
+            sb.AppendLine($"[{status}] {m.ModId} ({m.ModDisplayName}){(m.IsPerSave ? "  [per-save]" : "")}");
+            sb.AppendLine($"    props:  {m.Properties.Count(p => p.RoundTripPassed)}/{m.Properties.Count} passed");
+            sb.AppendLine($"    done:   {(m.DonePassed ? "PASS" : "FAIL")}");
+            sb.AppendLine($"    cancel: {(m.CancelPassed ? "PASS" : "FAIL")}");
+            sb.AppendLine($"    ui:     {(m.UiLayerPassed ? "PASS" : "FAIL")}");
+            sb.AppendLine($"    preset: {(m.PresetPassed ? "PASS" : "FAIL")}");
             foreach (var p in m.Properties.Where(p => !p.RoundTripPassed))
             {
                 sb.AppendLine($"      - {p.Kind} {p.PropertyName}: {p.FailureReason}");

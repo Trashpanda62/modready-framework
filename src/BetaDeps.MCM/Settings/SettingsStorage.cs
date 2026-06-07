@@ -36,60 +36,61 @@ internal static class SettingsStorage
     // which triggered another Load, which triggered another Save, looping
     // indefinitely until the campaign-load step CTD'd.
     //
-    // Defense: every Save and Load remembers when it last ran for a given
-    // settingsId; if a follow-up call arrives within RecursionWindow of the
-    // last call (same id, same operation), we skip it and log once.
-    //
-    // 100ms is well above the cost of a normal save (~1ms) but far below
-    // the cadence of user-initiated changes (humans don't change a setting
-    // 10 times/second), so legitimate work isn't throttled.
+    // That loop is SYNCHRONOUS -- Save -> PropertyChanged -> Load -> Save all on
+    // one call stack -- so a re-entrancy guard breaks it precisely: the inner
+    // Save is skipped because the outer Save for the same id is still on the
+    // stack. The earlier defense was a 100ms time-throttle, which ALSO blocked
+    // legitimate back-to-back sequential calls (notably the Cancel reload right
+    // after a Done save) and silently dropped them. The in-progress-set guard
+    // below keeps the loop protection without the false positives.
     private static readonly object _recurseLock = new object();
-    private static readonly Dictionary<string, DateTime> _lastSaveAt = new(StringComparer.Ordinal);
-    private static readonly Dictionary<string, DateTime> _lastLoadAt = new(StringComparer.Ordinal);
+    // Phase 1.1 fix: the old guard was a 100ms time-throttle on repeated Save/
+    // Load per id. It also suppressed LEGITIMATE rapid sequential reloads -- the
+    // Cancel reload right after a Done save, and the self-test's Save->Load round
+    // trips -- so Cancel silently kept edits (selftest.log: "expected 2000, got
+    // 2001"). Replaced with a re-entrancy guard: skip a Save/Load only while the
+    // SAME id's Save/Load is already on the call stack (the real feedback-loop
+    // shape), which still breaks loops but allows back-to-back sequential calls.
+    private static readonly HashSet<string> _saveInProgress = new(StringComparer.Ordinal);
+    private static readonly HashSet<string> _loadInProgress = new(StringComparer.Ordinal);
     private static readonly HashSet<string> _loopWarned = new(StringComparer.Ordinal);
-    private static readonly TimeSpan RecursionWindow = TimeSpan.FromMilliseconds(100);
 
     /// <summary>
-    /// Returns true if the (op, settingsId) just fired within RecursionWindow
-    /// of its previous fire. Caller should skip and (the first time per id)
-    /// log a warning. Always updates the timestamp on entry so the throttle
-    /// window slides forward.
+    /// Marks a Save in progress for this id. Returns false if a Save for the
+    /// SAME id is already on the stack (a re-entrant feedback loop) so the caller
+    /// must skip; true to proceed. Every true MUST be paired with EndSave in a
+    /// finally block.
     /// </summary>
-    private static bool IsRecursingSave(string settingsId)
+    private static bool BeginSave(string settingsId)
     {
         lock (_recurseLock)
         {
-            var now = DateTime.UtcNow;
-            if (_lastSaveAt.TryGetValue(settingsId, out var last) && (now - last) < RecursionWindow)
+            if (!_saveInProgress.Add(settingsId))
             {
                 if (_loopWarned.Add("save:" + settingsId))
-                {
-                    try { DiagLog.Log(Tag, $"GUARD: Save('{settingsId}') called {((int)(now - last).TotalMilliseconds)}ms after previous Save -- skipping to break feedback loop. (warning logged once per id)"); } catch { }
-                }
-                return true;
+                    try { DiagLog.Log(Tag, $"GUARD: re-entrant Save('{settingsId}') skipped to break feedback loop. (logged once per id)"); } catch { }
+                return false;
             }
-            _lastSaveAt[settingsId] = now;
-            return false;
+            return true;
         }
     }
+    private static void EndSave(string settingsId) { lock (_recurseLock) { _saveInProgress.Remove(settingsId); } }
 
-    private static bool IsRecursingLoad(string settingsId)
+    /// <summary>Re-entrancy guard for Load. See BeginSave. Pair with EndLoad.</summary>
+    private static bool BeginLoad(string settingsId)
     {
         lock (_recurseLock)
         {
-            var now = DateTime.UtcNow;
-            if (_lastLoadAt.TryGetValue(settingsId, out var last) && (now - last) < RecursionWindow)
+            if (!_loadInProgress.Add(settingsId))
             {
                 if (_loopWarned.Add("load:" + settingsId))
-                {
-                    try { DiagLog.Log(Tag, $"GUARD: Load('{settingsId}') called {((int)(now - last).TotalMilliseconds)}ms after previous Load -- skipping to break feedback loop. (warning logged once per id)"); } catch { }
-                }
-                return true;
+                    try { DiagLog.Log(Tag, $"GUARD: re-entrant Load('{settingsId}') skipped to break feedback loop. (logged once per id)"); } catch { }
+                return false;
             }
-            _lastLoadAt[settingsId] = now;
-            return false;
+            return true;
         }
     }
+    private static void EndLoad(string settingsId) { lock (_recurseLock) { _loadInProgress.Remove(settingsId); } }
 
     private static JsonSerializer MakeSerializer()
     {
@@ -258,8 +259,9 @@ internal static class SettingsStorage
 
     public static void Load(object instance, string settingsId)
     {
-        // v0.7.5: feedback-loop guard. See IsRecursingLoad doc.
-        if (IsRecursingLoad(settingsId ?? string.Empty)) return;
+        // Re-entrancy guard. See BeginLoad.
+        var __id = settingsId ?? string.Empty;
+        if (!BeginLoad(__id)) return;
         try
         {
             var path = ResolvePath(settingsId);
@@ -355,12 +357,14 @@ internal static class SettingsStorage
         {
             DiagLog.LogCaught(Tag, $"Load({settingsId})", ex);
         }
+        finally { EndLoad(__id); }
     }
 
     public static void Save(object instance, string settingsId)
     {
-        // v0.7.5: feedback-loop guard. See IsRecursingSave doc.
-        if (IsRecursingSave(settingsId ?? string.Empty)) return;
+        // Re-entrancy guard. See BeginSave.
+        var __id = settingsId ?? string.Empty;
+        if (!BeginSave(__id)) return;
         try
         {
             var path = ResolvePath(settingsId);
@@ -400,6 +404,7 @@ internal static class SettingsStorage
         {
             DiagLog.LogCaught(Tag, $"Save({settingsId})", ex);
         }
+        finally { EndSave(__id); }
     }
 
     /// <summary>Serialize a FluentGlobalSettings instance by walking its

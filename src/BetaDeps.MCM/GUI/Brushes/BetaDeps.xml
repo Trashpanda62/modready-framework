@@ -1,0 +1,43 @@
+<Brushes>
+
+  <!-- Slice 3: native collapse chevrons. Two simple single-sprite brushes that
+       point at Bannerlord's own collapser indicator sprites (the ones vanilla's
+       GameKeys option groups use). We render them as plain visibility-toggled
+       BrushWidgets in the Mod Config group header instead of the text ">" / "v",
+       so the chevrons match the game's look exactly. -->
+
+  <Brush Name="BetaDeps.Chevron.Closed">
+    <Layers>
+      <BrushLayer Name="Default" Sprite="SPGeneral\SPOptions\collapser_indicator_closed" />
+    </Layers>
+  </Brush>
+
+  <Brush Name="BetaDeps.Chevron.Open">
+    <Layers>
+      <BrushLayer Name="Default" Sprite="SPGeneral\SPOptions\collapser_indicator_open" />
+    </Layers>
+  </Brush>
+
+  <!-- Slice 4: mod-row hover highlight. Transparent by default; a faint white
+       wash when the row's button is hovered (state propagated via the button's
+       UpdateChildrenStates). -->
+  <Brush Name="BetaDeps.RowHover">
+    <Layers>
+      <BrushLayer Name="Default" Sprite="BlankWhiteSquare_9" />
+    </Layers>
+    <Styles>
+      <Style Name="Default"><BrushLayer Name="Default" Color="#FFFFFF00" /></Style>
+      <Style Name="Hovered"><BrushLayer Name="Default" Color="#FFFFFF1A" /></Style>
+    </Styles>
+  </Brush>
+
+  <!-- Slice 5: contained-panel backing. The globally-loaded 9-slice BlankWhiteSquare_9
+       tinted to semi-transparent black, sat behind the settings column to lift the
+       text off the busy parallax background and read as a contained panel. -->
+  <Brush Name="BetaDeps.Panel.Background">
+    <Layers>
+      <BrushLayer Name="Default" Sprite="BlankWhiteSquare_9" Color="#00000099" />
+    </Layers>
+  </Brush>
+
+</Brushes>

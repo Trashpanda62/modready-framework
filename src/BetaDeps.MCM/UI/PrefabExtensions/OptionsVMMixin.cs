@@ -44,6 +44,14 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     private string _modSearchText = string.Empty;
     private int _currentModIndex;
 
+    // Multiple settings registered by the SAME mod (assembly) are consolidated to
+    // one sidebar entry; the non-primary ones are stashed here keyed by the primary
+    // and merged into its presentation on select (e.g. AIInfluence's "BUG-FIX-0").
+    private readonly System.Collections.Generic.Dictionary<RegisteredSettings, System.Collections.Generic.List<RegisteredSettings>> _extraSettings = new();
+    // Settings whose DisplayName got the "<Assembly> — " prefix (their own name did
+    // NOT already reference the mod) -- used to pick the primary per assembly.
+    private readonly System.Collections.Generic.HashSet<RegisteredSettings> _prefixedSettings = new();
+
     // ----- Preset cycle-row state (v0.8.2 Suberfudge feature) -----
     // _presetCycle is a synthetic walk over: index 0 = "(Current settings)" sentinel,
     // 1..N = saved preset names for the current mod, last = "(Save current as new...)"
@@ -73,6 +81,24 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     // entries. Built in SelectMod -> RebuildPresentationList. Each entry is
     // either ("header text", null) or (string.Empty, SettingsPropertyVM).
     private List<(string header, SettingsPropertyVM? prop)> _presentation = new();
+
+    // v0.8.2 slice 4b: dynamic row list for the infinite-scroll ItemTemplate.
+    // Parallel to the legacy fixed-slot fan (_slots[0..19]); the new prefab in
+    // slice 4c binds to @RowList instead of @Slot0..@Slot19. Built in SelectMod
+    // from the same _presentation source the slot fan uses, so both stay in
+    // sync until slice 4d deletes the slot fan.
+    private MBBindingList<PresentationRowVM> _rowList = new();
+    [DataSourceProperty]
+    public MBBindingList<PresentationRowVM> RowList => _rowList;
+
+    // Phase 2.1: left "Mods" sidebar. One ModRowVM per entry in the current
+    // filtered mod list; IsSelected marks the active mod. Rebuilt by
+    // RebuildModListRows() on filter changes; SelectMod() flips the IsSelected
+    // flags. Replaces the Prev/Next mod cycler. Bound via {ModList} + an
+    // ItemTemplate, the same mixin-MBBindingList path RowList uses.
+    private MBBindingList<ModRowVM> _modList = new();
+    [DataSourceProperty]
+    public MBBindingList<ModRowVM> ModList => _modList;
 
     private string _selectedModName = "(no mod)";
     private string _selectedModSummary = string.Empty;
@@ -1415,13 +1441,52 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         SelectMod(0);
     }
 
+    // True if the settings object is per-save/per-campaign (its type or any base
+    // type is named *PerSaveSettings*). Name-based so it needs no extra refs.
+    private static bool IsPerSaveSettings(object? s)
+    {
+        for (var t = s?.GetType(); t != null && t != typeof(object); t = t.BaseType)
+            if (t.Name.IndexOf("PerSaveSettings", System.StringComparison.Ordinal) >= 0) return true;
+        return false;
+    }
+
+    // True if a campaign is currently loaded (TaleWorlds.CampaignSystem.Campaign.Current
+    // != null), via reflection so the MCM project needs no CampaignSystem reference.
+    private static bool IsCampaignLoaded()
+    {
+        try
+        {
+            var t = BetaDeps.Foundation.ReflectionUtils.ResolveTypeByFullName("TaleWorlds.CampaignSystem.Campaign");
+            var cur = t?.GetProperty("Current", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null);
+            return cur != null;
+        }
+        catch { return false; }
+    }
+
     private void RebuildModList()
     {
         try
         {
+            // Per-save (per-campaign) settings can only be edited inside a loaded
+            // save, so at the main menu they appear as a redundant second entry next
+            // to the mod's global settings (e.g. "Detailed Character Creation" +
+            // "... (Per-Save)"). Hide them unless a campaign is loaded -- matches
+            // upstream MCM and leaves one entry per mod on the main-menu screen.
+            bool inCampaign = IsCampaignLoaded();
             _registered = SettingsRegistry.All
+                .Where(r => inCampaign || !IsPerSaveSettings(r.Instance))
                 .OrderBy(r => r.DisplayName, System.StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+
+            // v0.8.2 slice 1: fire the presentation-row survey here (gated on
+            // the Modules\BetaDeps\presentation-survey.flag file). RebuildModList
+            // runs every time the user opens the Mod Configuration tab, which
+            // is a much more usable trigger than OnBeforeInitialModuleScreenSetAsRoot
+            // -- the user can drop the flag any time, then open Mod Config to
+            // trigger the survey. RunIfRequested is _ran-guarded internally so
+            // it only writes the output file once per session.
+            try { MCM.Internal.PresentationRowSurvey.RunIfRequested(); }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, "PresentationRowSurvey.RunIfRequested", ex); }
 
             // v0.5.6 polish: annotate cryptic DisplayName strings with their
             // source folder. AIInfluence ships a secondary settings class with
@@ -1432,6 +1497,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             // BUG-FIX-0". Skipped when the DisplayName is empty (no useful
             // string to prefix) or when the assembly name is generic / matches
             // already.
+            _prefixedSettings.Clear();
             try
             {
                 foreach (var r in _registered)
@@ -1447,6 +1513,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                     if (dnSquished.IndexOf(asmSquished, System.StringComparison.OrdinalIgnoreCase) >= 0) continue;
                     if (asmSquished.IndexOf(dnSquished, System.StringComparison.OrdinalIgnoreCase) >= 0) continue;
                     r.DisplayName = asm + " — " + dn;
+                    _prefixedSettings.Add(r);
                 }
             }
             catch (System.Exception fex) { DiagLog.LogCaught(Tag, "RebuildModList/prefix", fex); }
@@ -1477,6 +1544,32 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 }
             }
             catch (System.Exception dex) { DiagLog.LogCaught(Tag, "RebuildModList/disambiguate", dex); }
+
+            // Consolidate multiple settings registered by the SAME mod (assembly)
+            // under ONE sidebar entry. e.g. AIInfluence registers "AIInfluence
+            // Settings" + a secondary "BUG-FIX-0"; both are AIInfluence and should
+            // be one entry. Keep one primary per assembly; stash the rest in
+            // _extraSettings to merge into the primary's presentation on select.
+            _extraSettings.Clear();
+            try
+            {
+                var primaries = new List<RegisteredSettings>();
+                foreach (var grp in _registered.GroupBy(r => r.SourceAssemblyName ?? string.Empty, System.StringComparer.OrdinalIgnoreCase))
+                {
+                    var list = grp.ToList();
+                    if (string.IsNullOrEmpty(grp.Key) || list.Count == 1) { primaries.AddRange(list); continue; }
+                    // Primary = the settings whose own name already referenced the mod
+                    // (so it was NOT assembly-prefixed); fall back to the first.
+                    var primary = list.FirstOrDefault(r => !_prefixedSettings.Contains(r)) ?? list[0];
+                    primaries.Add(primary);
+                    var extras = list.Where(r => !ReferenceEquals(r, primary)).ToList();
+                    if (extras.Count > 0) _extraSettings[primary] = extras;
+                }
+                _registered = primaries
+                    .OrderBy(r => r.DisplayName, System.StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            }
+            catch (System.Exception cex) { DiagLog.LogCaught(Tag, "RebuildModList/consolidate", cex); }
 
             // Polish (post-v0.8): the subtitle was "N mod(s) registered. Use
             // the search field or Prev/Next buttons to cycle." That duplicated
@@ -1522,12 +1615,163 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             // Jump to first match so the user sees a real mod immediately after filtering.
             _currentModIndex = 0;
             SelectMod(0);
+            // Rebuild the sidebar rows for the (possibly) new filtered set.
+            RebuildModListRows();
         }
         catch (System.Exception ex)
         {
             DiagLog.LogCaught(Tag, "ApplyFilter", ex);
         }
     }
+
+    /// <summary>Phase 2.1: rebuild the left-sidebar ModList from the current
+    /// filtered mod set. Each row selects its filtered index on click; the row
+    /// at _currentModIndex is marked selected.</summary>
+    private void RebuildModListRows()
+    {
+        try
+        {
+            _modList.Clear();
+            var filtered = _filteredRegistered ?? System.Array.Empty<RegisteredSettings>();
+            for (int i = 0; i < filtered.Length; i++)
+            {
+                var name = MCM.Internal.TextHelper.StripLocalizationKeys(filtered[i].DisplayName ?? string.Empty);
+                _modList.Add(new ModRowVM(i, name, i == _currentModIndex, OnModRowSelected));
+            }
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "RebuildModListRows", ex); }
+    }
+
+    /// <summary>Flip the IsSelected flag on each sidebar row without rebuilding,
+    /// so the highlight follows the active mod and the list/scroll stay stable.</summary>
+    private void UpdateModListSelection()
+    {
+        try
+        {
+            for (int i = 0; i < _modList.Count; i++)
+                _modList[i].IsSelected = (i == _currentModIndex);
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "UpdateModListSelection", ex); }
+    }
+
+    /// <summary>Click callback from a ModRowVM in the sidebar.</summary>
+    private void OnModRowSelected(int filteredIndex) => SelectMod(filteredIndex);
+
+    // Phase 2.3: collapsed group state, keyed "<modId><group>" so the same
+    // group name in two mods collapses independently. Persists for the life of
+    // the Options screen (the mixin instance).
+    // Phase 2.3 / refinement: track EXPANDED groups. Default (not in set) =
+    // COLLAPSED, so a mod opens showing just its group headers; the user expands
+    // the ones they want. Per-mod independent; persists for the screen's life.
+    private readonly System.Collections.Generic.HashSet<string> _expandedGroups =
+        new(System.StringComparer.Ordinal);
+    private string _currentModId = string.Empty;
+
+    private static string GroupKey(string modId, string group) => (modId ?? string.Empty) + "" + (group ?? string.Empty);
+
+    private static void SplitGroup(string full, out string parent, out string leaf)
+    {
+        var s = full ?? string.Empty;
+        int i = s.IndexOf('/');
+        if (i < 0) { parent = string.Empty; leaf = s; }
+        else { parent = s.Substring(0, i).Trim(); leaf = s.Substring(i + 1).Trim(); }
+    }
+
+    /// <summary>Build _rowList from _presentation. "Parent/Child" groups are
+    /// bucketed under a single parent header with their children indented; the
+    /// rest stay top-level. Collapsed groups skip their property rows.</summary>
+    private void RebuildRowList()
+    {
+        _rowList.Clear();
+
+        // 1. Parse the flat presentation into ordered (group -> props) buckets.
+        var groups = new List<(string full, List<SettingsPropertyVM> props)>();
+        foreach (var (header, prop) in _presentation)
+        {
+            if (prop == null) groups.Add((header, new List<SettingsPropertyVM>()));
+            else if (groups.Count > 0) groups[groups.Count - 1].props.Add(prop);
+        }
+
+        // 2. Identify which parent prefixes have nested "X/Y" children. A plain
+        // group whose name equals one of these prefixes (e.g. a "Disease System"
+        // group that also has "Disease System/Seasonal" sub-groups) is folded into
+        // that single parent rather than rendered as a second same-named header.
+        var parentsWithChildren = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var g in groups)
+        {
+            SplitGroup(g.full, out var pp, out _);
+            if (!string.IsNullOrEmpty(pp)) parentsWithChildren.Add(pp);
+        }
+
+        // 3. Emit rows, grouping "Parent/Child" entries under one parent header.
+        var emittedParents = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+        for (int gi = 0; gi < groups.Count; gi++)
+        {
+            SplitGroup(groups[gi].full, out var parent, out var leaf);
+
+            if (string.IsNullOrEmpty(parent))
+            {
+                // A plain group that is also the prefix of nested sub-groups is the
+                // merged parent's OWN settings; skip it here -- it's emitted under
+                // the unified parent header below.
+                if (parentsWithChildren.Contains(groups[gi].full)) continue;
+
+                // top-level group (no "/") -- default collapsed, indent 0
+                var key = GroupKey(_currentModId, groups[gi].full);
+                bool expanded = _expandedGroups.Contains(key);
+                var ck = key;
+                _rowList.Add(new PresentationRowVM(groups[gi].full, expanded, () => ToggleGroupCollapse(ck), 0));
+                if (expanded) foreach (var p in groups[gi].props) _rowList.Add(new PresentationRowVM(p, 0));
+                continue;
+            }
+
+            if (emittedParents.Contains(parent)) continue; // children already emitted with the parent
+            emittedParents.Add(parent);
+
+            // parent header -- default COLLAPSED (same as top-level), indent 0, so
+            // opening a mod shows only the top-level headers; expanding a parent
+            // reveals its child sub-groups (themselves collapsed).
+            var pkey = GroupKey(_currentModId, "§P§" + parent);
+            bool parentExpanded = _expandedGroups.Contains(pkey);
+            var cpkey = pkey;
+            _rowList.Add(new PresentationRowVM(parent, parentExpanded, () => ToggleGroupCollapse(cpkey), 0));
+            if (!parentExpanded) continue;
+
+            // 3a. The merged parent's OWN settings: a plain group whose name equals
+            // the parent prefix. Its properties sit directly under the parent header
+            // (indent 1), ahead of the sub-section headers.
+            foreach (var g in groups)
+            {
+                if (!string.Equals(g.full, parent, System.StringComparison.Ordinal)) continue;
+                foreach (var p in g.props) _rowList.Add(new PresentationRowVM(p, 1));
+                break;
+            }
+
+            // 3b. Child sub-groups "parent/leaf", in original order, indented one level.
+            for (int gj = gi; gj < groups.Count; gj++)
+            {
+                SplitGroup(groups[gj].full, out var p2, out var l2);
+                if (string.IsNullOrEmpty(p2) || !string.Equals(p2, parent, System.StringComparison.Ordinal)) continue;
+                var key = GroupKey(_currentModId, groups[gj].full);
+                bool childExpanded = _expandedGroups.Contains(key);
+                var ck = key;
+                _rowList.Add(new PresentationRowVM(l2, childExpanded, () => ToggleGroupCollapse(ck), 1));
+                if (childExpanded) foreach (var p in groups[gj].props) _rowList.Add(new PresentationRowVM(p, 1));
+            }
+        }
+    }
+
+    /// <summary>Flip a (child/top-level) group's collapsed state and rebuild.</summary>
+    private void ToggleGroupCollapse(string key)
+    {
+        try
+        {
+            if (!_expandedGroups.Remove(key)) _expandedGroups.Add(key);
+            RebuildRowList();
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, "ToggleGroupCollapse", ex); }
+    }
+
 
     // v0.5.6: helper used by disambiguation. Strip the common prefix/suffix
     // from a settings Id so what remains usefully distinguishes between two
@@ -1573,6 +1817,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             if (newIndex < 0) newIndex = _filteredRegistered.Length - 1;
             if (newIndex >= _filteredRegistered.Length) newIndex = 0;
             _currentModIndex = newIndex;
+            UpdateModListSelection(); // keep the sidebar highlight in sync
 
             var entry = _filteredRegistered[_currentModIndex];
             try { _currentSettingsVM = new SettingsVM(entry.Instance); }
@@ -1612,6 +1857,33 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 }
                 catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"SelectMod/flatten {entry.Id}", ex); }
             }
+
+            // Merge any same-mod extra settings (e.g. AIInfluence's "BUG-FIX-0")
+            // into this mod's presentation so they sit under the single entry.
+            if (_extraSettings.TryGetValue(entry, out var extraList))
+            {
+                foreach (var ex in extraList)
+                {
+                    SettingsVM exVM;
+                    try { exVM = new SettingsVM(ex.Instance); }
+                    catch (System.Exception vex) { DiagLog.LogCaught(Tag, $"SelectMod/extraVM {ex.Id}", vex); continue; }
+                    string lastG = null!;
+                    foreach (var g in exVM.SettingPropertyGroups)
+                    {
+                        var gn = MCM.Internal.TextHelper.StripLocalizationKeys(g.GroupName ?? string.Empty);
+                        if (!string.IsNullOrEmpty(gn) && !string.Equals(gn, lastG, System.StringComparison.Ordinal))
+                        { _presentation.Add((gn, null)); lastG = gn; }
+                        foreach (var p in g.SettingProperties) { _currentFlatProps.Add(p); _presentation.Add((string.Empty, p)); }
+                    }
+                }
+            }
+
+            // Build _rowList from _presentation, honoring collapsed groups
+            // (Phase 2.3). Factored out so a group-collapse toggle can rebuild
+            // without re-running the whole SelectMod.
+            _currentModId = entry.Id;
+            try { RebuildRowList(); }
+            catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"SelectMod/rowList {entry.Id}", ex); }
 
             _selectedModName = MCM.Internal.TextHelper.StripLocalizationKeys(entry.DisplayName);
             // v1.0: show the position within the filtered view, plus a
@@ -2178,6 +2450,56 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     [DataSourceProperty]
     public bool PresetCycleVisible => _presetCycle != null && _presetCycle.Length > 0;
 
+    // Phase 2.4: preset "Custom" dropdown. PresetOptions is the popup list,
+    // PresetButtonText is the closed-button label, PresetDropdownOpen toggles the
+    // popup. Built alongside _presetCycle in RebuildPresetCycle.
+    private MBBindingList<PresetOptionVM> _presetOptions = new();
+    [DataSourceProperty] public MBBindingList<PresetOptionVM> PresetOptions => _presetOptions;
+
+    private string _presetButtonText = PRESET_SENTINEL_CURRENT;
+    [DataSourceProperty] public string PresetButtonText => _presetButtonText;
+
+    private bool _presetDropdownOpen;
+    [DataSourceProperty]
+    public bool PresetDropdownOpen
+    {
+        get => _presetDropdownOpen;
+        set { if (_presetDropdownOpen == value) return; _presetDropdownOpen = value; ViewModel.NotifyPropertyChanged(nameof(PresetDropdownOpen)); }
+    }
+
+    [DataSourceMethod]
+    public void ExecuteTogglePresetDropdown() => PresetDropdownOpen = !PresetDropdownOpen;
+
+    /// <summary>Apply a chosen preset option (or sentinel), update the button
+    /// label, and close the popup. Mirrors ExecutePresetApply's switch.</summary>
+    private void OnPresetOptionSelected(string pick)
+    {
+        try
+        {
+            PresetDropdownOpen = false;
+            if (_filteredRegistered == null || _filteredRegistered.Length == 0) return;
+            var entry = _filteredRegistered[_currentModIndex];
+            var settingsId = entry?.Id ?? string.Empty;
+            if (string.IsNullOrEmpty(settingsId)) return;
+
+            if (pick == PRESET_SENTINEL_CURRENT)
+            {
+                _presetButtonText = PRESET_SENTINEL_CURRENT;
+                ViewModel.NotifyPropertyChanged(nameof(PresetButtonText));
+                return;
+            }
+            if (pick == PRESET_SENTINEL_SAVE)
+            {
+                PromptSavePresetName(entry!, settingsId);
+                return;
+            }
+            ApplyPresetLoad(entry!, settingsId, pick);
+            _presetButtonText = pick;
+            ViewModel.NotifyPropertyChanged(nameof(PresetButtonText));
+        }
+        catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"OnPresetOptionSelected({pick})", ex); }
+    }
+
     [DataSourceMethod] public void ExecutePresetCycleNext() => CyclePreset(+1);
     [DataSourceMethod] public void ExecutePresetCyclePrev() => CyclePreset(-1);
 
@@ -2245,6 +2567,14 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             _presetCycleIndex = 0;
             ViewModel.NotifyPropertyChanged(nameof(PresetCycleText));
             ViewModel.NotifyPropertyChanged(nameof(PresetCycleVisible));
+
+            // Phase 2.4: mirror the same entries into the dropdown popup list.
+            _presetOptions.Clear();
+            foreach (var name in list) _presetOptions.Add(new PresetOptionVM(name, OnPresetOptionSelected));
+            _presetButtonText = PRESET_SENTINEL_CURRENT;
+            _presetDropdownOpen = false;
+            ViewModel.NotifyPropertyChanged(nameof(PresetButtonText));
+            ViewModel.NotifyPropertyChanged(nameof(PresetDropdownOpen));
         }
         catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"RebuildPresetCycle({settingsId})", ex); }
     }

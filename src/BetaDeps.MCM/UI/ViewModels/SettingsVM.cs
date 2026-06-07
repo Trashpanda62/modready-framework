@@ -62,6 +62,12 @@ public class SettingsVM : ViewModel
 
         var grouped = new Dictionary<string, List<SettingsPropertyVM>>(StringComparer.Ordinal);
         var groupOrders = new Dictionary<string, int>(StringComparer.Ordinal);
+        // Tie-break groups with equal GroupOrder by FIRST-SEEN (declaration)
+        // order, NOT alphabetically -- MCM preserves the order the author
+        // declared groups in, so e.g. "Community & Support" stays at the bottom
+        // instead of sorting above "Disease System".
+        var groupFirstSeen = new Dictionary<string, int>(StringComparer.Ordinal);
+        int seenIndex = 0;
 
         foreach (var p in Settings.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
         {
@@ -78,11 +84,12 @@ public class SettingsVM : ViewModel
             {
                 grouped[groupName] = new List<SettingsPropertyVM>();
                 groupOrders[groupName] = groupAttr?.GroupOrder ?? 0;
+                groupFirstSeen[groupName] = seenIndex++;
             }
             grouped[groupName].Add(SettingsPropertyVM.Create(Settings, p, spa));
         }
 
-        foreach (var kv in grouped.OrderBy(kv => groupOrders[kv.Key]).ThenBy(kv => kv.Key))
+        foreach (var kv in grouped.OrderBy(kv => groupOrders[kv.Key]).ThenBy(kv => groupFirstSeen[kv.Key]))
         {
             var gvm = new SettingsPropertyGroupVM(kv.Key, kv.Value.OrderBy(v => v.Order).ToList());
             _groups.Add(gvm);
