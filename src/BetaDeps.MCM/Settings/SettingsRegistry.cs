@@ -585,6 +585,8 @@ public static class SettingsRegistry
         "Bannerlord.MBOptionScreen",   // some older mods reference the BUTR module-id name
         "MCM",                          // future-proofing for major-version bumps
         "MCM.UI",
+        "MCM.Abstractions",            // v5 NuGet package assembly, referenced by many modern mods
+        "Bannerlord.MCM",              // alternate module-id casing some mods use
         "Bannerlord.ButterLib",        // ButterLib-using mods often also use MCM
     };
 

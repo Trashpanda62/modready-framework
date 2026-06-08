@@ -80,7 +80,11 @@ internal static class PrefabPatcher
         }
 
         // Distinguish the patch family by base class.
-        if (typeof(PrefabExtensionSetAttributePatch).IsAssignableFrom(reg.PatchType))
+        // Accept both v2 (Prefabs2.PrefabExtensionSetAttributePatch) and v1
+        // (Prefabs.PrefabExtensionSetAttributePatch) so mods compiled against
+        // either API are handled.
+        if (typeof(PrefabExtensionSetAttributePatch).IsAssignableFrom(reg.PatchType) ||
+            typeof(Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionSetAttributePatch).IsAssignableFrom(reg.PatchType))
         {
             return ApplySetAttribute(target, reg);
         }
@@ -95,21 +99,44 @@ internal static class PrefabPatcher
 
     private static bool ApplySetAttribute(XmlNode target, PrefabRegistration reg)
     {
-        var instance = Activator.CreateInstance(reg.PatchType);
-        var attrProp = reg.PatchType.GetProperty("Attribute", BindingFlags.Public | BindingFlags.Instance);
-        var valProp  = reg.PatchType.GetProperty("Value",     BindingFlags.Public | BindingFlags.Instance);
-        var name  = attrProp?.GetValue(instance) as string;
-        var value = valProp?.GetValue(instance) as string;
-        if (string.IsNullOrEmpty(name))
+        var instance  = Activator.CreateInstance(reg.PatchType);
+        // GetProperty throws AmbiguousMatchException when both base and override
+        // declare Attributes (covariant return or explicit hide). Walk the chain
+        // with DeclaredOnly so the most-derived declaration wins.
+        PropertyInfo? attrsProp = null;
+        for (var t = reg.PatchType; t != null; t = t.BaseType)
         {
-            DiagLog.Log(Tag, $"{reg.PatchType.FullName}: SetAttribute patch has empty Attribute name; skipped");
+            attrsProp = t.GetProperty("Attributes", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            if (attrsProp != null) break;
+        }
+        var attrsList = attrsProp?.GetValue(instance) as System.Collections.IEnumerable;
+        if (attrsList == null)
+        {
+            DiagLog.Log(Tag, $"{reg.PatchType.FullName}: SetAttribute patch has no Attributes collection; skipped");
             return false;
         }
         if (target.Attributes == null) return false;
-        var attr = target.OwnerDocument!.CreateAttribute(name!);
-        attr.Value = value ?? string.Empty;
-        target.Attributes.SetNamedItem(attr);
-        return true;
+
+        int applied = 0;
+        foreach (var item in attrsList)
+        {
+            var itemType = item.GetType();
+            // v2 nested Attribute class exposes Name + Value.
+            // v1 KeyValuePair<string,string> exposes Key + Value.
+            var nameProp  = itemType.GetProperty("Name") ?? itemType.GetProperty("Key");
+            var valueProp = itemType.GetProperty("Value");
+            var name  = nameProp?.GetValue(item)  as string;
+            var value = valueProp?.GetValue(item) as string;
+            if (string.IsNullOrEmpty(name)) continue;
+            var attr = target.OwnerDocument!.CreateAttribute(name!);
+            attr.Value = value ?? string.Empty;
+            target.Attributes.SetNamedItem(attr);
+            applied++;
+        }
+
+        if (applied == 0)
+            DiagLog.Log(Tag, $"{reg.PatchType.FullName}: SetAttribute iterated 0 attributes (empty list?)");
+        return applied > 0;
     }
 
     private static bool ApplyInsert(XmlDocument doc, XmlNode target, PrefabRegistration reg)
@@ -163,8 +190,9 @@ internal static class PrefabPatcher
 
             case InsertType.Prepend:
                 {
-                    var first = target.FirstChild;
-                    foreach (var n in imported) target.InsertBefore(n, first);
+                    var parent = target.ParentNode;
+                    if (parent == null) return false;
+                    foreach (var n in imported) parent.InsertBefore(n, target);
                     return true;
                 }
 

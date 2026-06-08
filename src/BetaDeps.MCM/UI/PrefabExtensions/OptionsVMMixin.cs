@@ -1614,6 +1614,9 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                              || (r.Id ?? string.Empty).IndexOf(q, System.StringComparison.OrdinalIgnoreCase) >= 0
                              || (r.SourceAssemblyName ?? string.Empty).IndexOf(q, System.StringComparison.OrdinalIgnoreCase) >= 0)
                     .ToArray();
+                DiagLog.Log(Tag, $"ApplyFilter: query='{q}' total={_registered.Length} matched={_filteredRegistered.Length}");
+                if (_filteredRegistered.Length == 0 && _registered.Length > 0)
+                    DiagLog.Log(Tag, $"  registered names: {string.Join(", ", _registered.Select(r => r.DisplayName ?? "(null)"))}");
             }
             // Jump to first match so the user sees a real mod immediately after filtering.
             _currentModIndex = 0;
@@ -1807,6 +1810,8 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 _currentModIndex = 0;
                 _currentSettingsVM = null;
                 _currentFlatProps = new List<SettingsPropertyVM>();
+                _presentation = new List<(string, SettingsPropertyVM?)>();
+                RebuildRowList();
                 _selectedModName = string.IsNullOrEmpty(_modSearchText) ? "(no mods)" : "(no matches)";
                 _selectedModSummary = string.IsNullOrEmpty(_modSearchText)
                     ? "0 of 0"

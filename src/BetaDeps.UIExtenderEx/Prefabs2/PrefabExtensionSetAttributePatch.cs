@@ -15,7 +15,7 @@ public abstract class PrefabExtensionSetAttributePatch
     protected PrefabExtensionSetAttributePatch(IReadOnlyList<Attribute> attributes)
     { Attributes = attributes ?? Array.Empty<Attribute>(); }
 
-    public sealed class Attribute
+    public readonly struct Attribute
     {
         public string Name { get; }
         public string Value { get; }

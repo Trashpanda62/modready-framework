@@ -15,13 +15,30 @@ instead of through the bundled BUTR-impersonation aliases
   hooks, `SafeBind`, `DiagLog`) that the alias surface intentionally
   doesn't expose.
 
-**Status as of v0.7.3:** the BUTR-impersonation surface and the
+**Status as of v0.9.0:** the BUTR-impersonation surface and the
 BetaDeps-native surface co-exist. v1.0 keeps both. v2.0 deprecates the
-aliases for new mods (existing mods keep working forever). v0.7.3 added
-SaveShield as the second defensive layer alongside PatchShield, with
-public APIs for mod authors who want to query diagnostic state from
-their own code (see [SaveShield](#saveshield-engine-entry-defensive-layer)
-below).
+aliases for new mods (existing mods keep working forever). The public
+API surfaces documented here are unchanged since v0.7.3; two structural
+changes since then are worth knowing:
+
+- **v0.8 — the four aliases are now real standalone modules.**
+  `Bannerlord.Harmony`, `Bannerlord.UIExtenderEx`, `Bannerlord.ButterLib`,
+  and `Bannerlord.MBOptionScreen` each ship in their own module folder and
+  load (in dependency order) before `BetaDeps`. They're also available as
+  individual optional downloads. This doesn't change how you reference
+  BetaDeps — a consumer mod still lists `BetaDeps` (or any of the four) as
+  a `DependedModule` and binds by name — but it's why those folders exist
+  separately in a fresh install.
+- **v0.9.0 — the Mod Configuration screen was rebuilt** as a single
+  scrollable list with a searchable mod sidebar, collapsible groups,
+  per-row sliders/checkboxes, and presets. This is purely the in-game UI;
+  the settings-builder API (Global / PerCampaign / PerSave + fluent
+  builder) you target is unchanged.
+
+v0.7.3 added SaveShield as the second defensive layer alongside
+PatchShield, with public APIs for mod authors who want to query
+diagnostic state from their own code (see
+[SaveShield](#saveshield-engine-entry-defensive-layer) below).
 
 ---
 
