@@ -227,26 +227,29 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // is the ONLY hover signal that fires reliably across the whole row (the
         // event-accepting controls swallow Command.HoverBegin on the container).
         + "            <BrushWidget IsVisible=\"@IsHovered\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" Brush=\"BetaDeps.RowHover.Solid\" />\n"
-        // Gold title-bar background for PARENT section headers only — the primary
-        // parent/child differentiator. Child sub-sections get NO background, so
-        // parents read as shaded title bars and children as plain indented rows.
-        + "            <BrushWidget IsVisible=\"@IsParentHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" Brush=\"BetaDeps.ParentHeaderBg\" />\n"
+        // No full-width header background: native SPOptions group headers are
+        // plain title text + a separator, with no box behind them. The parent
+        // tier still reads clearly via the larger chevron and the divider below
+        // (parent-only); child tier via the indent + a bold chevron. The old
+        // BetaDeps.ParentHeaderBg gold wash was non-native and read as a heavy box.
         // ----- group-header row: centered title + thin divider -----
         + "            <ListPanel IsVisible=\"@IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "              <Children>\n"
         // Slice 1: the WHOLE header row is a flat clickable button that toggles
         // collapse (chevron + title inside, DoNotPassEventsToChildren so the
         // button gets the click). Left-aligned to read like a list section.
-        + "                <ButtonWidget Command.Click=\"ExecuteToggleCollapse\" DoNotPassEventsToChildren=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" UpdateChildrenStates=\"true\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
+        // v0.9.2: header rows now drive the same @IsHovered overlay as property
+        // rows via Command.HoverBegin/End on the button, so the subtle hover wash
+        // applies to headers too.
+        + "                <ButtonWidget Command.Click=\"ExecuteToggleCollapse\" Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" DoNotPassEventsToChildren=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" UpdateChildrenStates=\"true\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "                  <Children>\n"
         // Slice 8: indent spacer (width = nesting level x 28) so child sub-groups
         // sit visually under their parent header.
         + "                    <Widget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"@IndentPixels\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" />\n"
-        // v0.9.2: bright gold vertical accent bar at the indented left edge of
-        // child sub-section headers only. The single most obvious "this is nested"
-        // cue -- far stronger than text color. Collapses out of the horizontal
-        // layout for parent headers (IsVisible false => zero width reserved).
-        + "                    <BrushWidget IsVisible=\"@IsChildHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"7\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"34\" VerticalAlignment=\"Center\" MarginRight=\"12\" Brush=\"BetaDeps.ChildAccent\" />\n"
+        // v0.9.2: the gold vertical accent bar that used to mark child sub-section
+        // headers is gone — the nesting cue is now the indent spacer above plus a
+        // BOLD chevron (same size as the parent's), which reads cleaner than a
+        // colored line at the left edge.
         // Slice 3: native collapse chevron sprites (closed when collapsed, open
         // when expanded), toggled by visibility. Replaces the text ">" / "v".
         // Hidden widgets collapse out of the HorizontalLeftToRight layout so only
@@ -254,21 +257,21 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // Parent chevrons: LARGE (27px) so top-level sections read boldly.
         + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"27\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"27\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsParentCollapsed\" />\n"
         + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"27\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"27\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsParentExpanded\" />\n"
-        // Child chevrons: SMALL (16px) so sub-sections read as subordinate.
-        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"16\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"16\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsChildCollapsed\" />\n"
-        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"16\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"16\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsChildExpanded\" />\n"
-        // Text-size polish: header brush defaults to FontSize 36 (blocky); override
-        // to 28 so headers read cleaner. Brush.FontSize is a standard per-widget
-        // override (used in ~97 vanilla prefabs).
-        // v0.9.2: parent vs child header styling. Parent = gold section-title
-        // brush. Child sub-section = lighter OptionName brush so it reads as a
-        // secondary level even at the same font size; combined with the indent
-        // spacer above and the parent-only divider below, the hierarchy is clear.
-        // Parent title uses the actual main-menu button font (InitialMenuButtonBrush,
-        // from InitialScreen.xml) so top-level sections read like the game's front
-        // menu. TextWidget (not RichText) so the Brush.FontColor override reliably
-        // applies — the brush's intrinsic color is cream, forced to LIGHT GOLD here.
-        + "                    <TextWidget IsVisible=\"@IsParentHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"4\" Brush=\"InitialMenuButtonBrush\" Brush.FontSize=\"30\" Brush.FontColor=\"#C9A24AFF\" Text=\"@GroupHeader\" />\n"
+        // Child chevrons: now BOLD (24px) — the primary nesting cue in place of the
+        // removed left accent bar. Slightly smaller than the parent's 27px so the
+        // tier is still legible, but clearly a real chevron, not a thin line.
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"24\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"24\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsChildCollapsed\" />\n"
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"24\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"24\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsChildExpanded\" />\n"
+        // Parent section title uses the NATIVE option-group title brush — the same
+        // static brush vanilla's SPOptions group headers use — so top-level sections
+        // match the game's other settings screens. The old InitialMenuButtonBrush
+        // (the main-menu button brush) carried idle/hover animation layers that ran
+        // every frame for every parent header in this non-virtualized list, which
+        // both looked off-screen and cost real frame time. FontSize 30 keeps the
+        // native default (36) from reading blocky. v0.9.2: FontColor forced to the
+        // accent orange used by the checkbox/slider fills so parent sections read
+        // as the warm accent tier (TextWidget, not RichText, so the override applies).
+        + "                    <TextWidget IsVisible=\"@IsParentHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"4\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Brush.FontSize=\"30\" Brush.FontColor=\"#D9772BFF\" Text=\"@GroupHeader\" />\n"
         // Child header text. Brush.ColorFactor does NOT dim text (it multiplies
         // sprite-layer color, not the font channel); Brush.FontColor is what
         // recolors glyphs. Use a muted tan that's clearly subordinate to the
