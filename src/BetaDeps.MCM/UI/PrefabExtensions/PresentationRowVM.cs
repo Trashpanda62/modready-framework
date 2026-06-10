@@ -45,6 +45,7 @@ public sealed class PresentationRowVM : ViewModel
     private readonly bool _isExpanded = true;       // header rows: collapse state
     private readonly Action? _onToggleCollapse;     // header rows: toggle callback
     private readonly int  _indent;                  // Slice 8: nesting depth (0=top/parent, 1=child sub-group)
+    private bool _isHovered;                         // v0.9.2: row hover highlight (set from HintWidget hover)
 
     /// <summary>Build a real property row.</summary>
     public PresentationRowVM(SettingsPropertyVM prop, int indent = 0)
@@ -93,6 +94,17 @@ public sealed class PresentationRowVM : ViewModel
     [DataSourceProperty] public bool   IsHeader    => _prop == null && !string.IsNullOrEmpty(_headerText);
     [DataSourceProperty] public bool   IsProperty  => _prop != null;
     [DataSourceProperty] public string GroupHeader => _headerText;
+    // v0.9.2: header-level split so the template can style parent vs child
+    // sub-section headers differently (gold + underline vs lighter + indented).
+    [DataSourceProperty] public bool   IsParentHeader => IsHeader && _indent == 0;
+    [DataSourceProperty] public bool   IsChildHeader  => IsHeader && _indent >  0;
+    // v0.9.2: parent/child × collapse-state composites so the template can render
+    // a LARGER chevron for parent sections and a small one for child sub-sections.
+    // (Gauntlet IsVisible binds a single bool, so the AND must be precomputed.)
+    [DataSourceProperty] public bool   IsParentCollapsed => IsParentHeader && !_isExpanded;
+    [DataSourceProperty] public bool   IsParentExpanded  => IsParentHeader &&  _isExpanded;
+    [DataSourceProperty] public bool   IsChildCollapsed  => IsChildHeader  && !_isExpanded;
+    [DataSourceProperty] public bool   IsChildExpanded   => IsChildHeader  &&  _isExpanded;
 
     // ---------- Property surface forwards ----------
 
@@ -270,11 +282,19 @@ public sealed class PresentationRowVM : ViewModel
     // HintVisible). Firing them with our inner prop reuses that exact wiring --
     // no mixin reference or new plumbing needed. Header rows have no _prop, so
     // hovering a divider simply clears the hint.
+    [DataSourceProperty]
+    public bool IsHovered
+    {
+        get => _isHovered;
+        private set { if (_isHovered == value) return; _isHovered = value; OnPropertyChanged(nameof(IsHovered)); }
+    }
+
     [DataSourceMethod]
     public void ExecuteHoverBegin()
     {
         try
         {
+            IsHovered = true;
             if (_prop == null) { SettingsPropertyVM.HoverEndCallback?.Invoke(); return; }
             SettingsPropertyVM.HoverCallback?.Invoke(_prop);
         }
@@ -284,7 +304,11 @@ public sealed class PresentationRowVM : ViewModel
     [DataSourceMethod]
     public void ExecuteHoverEnd()
     {
-        try { SettingsPropertyVM.HoverEndCallback?.Invoke(); }
+        try
+        {
+            IsHovered = false;
+            SettingsPropertyVM.HoverEndCallback?.Invoke();
+        }
         catch (Exception ex) { DiagLog.LogCaught(Tag, "ExecuteHoverEnd", ex); }
     }
 

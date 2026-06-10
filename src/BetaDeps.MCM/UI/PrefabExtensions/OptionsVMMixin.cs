@@ -1671,6 +1671,13 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     // the ones they want. Per-mod independent; persists for the screen's life.
     private readonly System.Collections.Generic.HashSet<string> _expandedGroups =
         new(System.StringComparer.Ordinal);
+    // v0.9.2: mods whose indent-0 headers have already been seeded as expanded.
+    // The first time a mod's list builds, every top-level / parent header is
+    // opened so the user sees the section structure on entry (child sub-groups
+    // stay collapsed). After seeding, normal toggle state in _expandedGroups
+    // takes over, so a user collapse sticks across rebuilds.
+    private readonly System.Collections.Generic.HashSet<string> _seededMods =
+        new(System.StringComparer.Ordinal);
     private string _currentModId = string.Empty;
 
     private static string GroupKey(string modId, string group) => (modId ?? string.Empty) + "" + (group ?? string.Empty);
@@ -1710,6 +1717,10 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
 
         // 3. Emit rows, grouping "Parent/Child" entries under one parent header.
+        // v0.9.2: on the first build for this mod, default every indent-0 header
+        // (top-level groups + parents-with-children) to EXPANDED so the section
+        // structure is visible on entry. Child sub-groups stay collapsed.
+        bool seed = !string.IsNullOrEmpty(_currentModId) && !_seededMods.Contains(_currentModId);
         var emittedParents = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
         for (int gi = 0; gi < groups.Count; gi++)
         {
@@ -1722,8 +1733,9 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 // the unified parent header below.
                 if (parentsWithChildren.Contains(groups[gi].full)) continue;
 
-                // top-level group (no "/") -- default collapsed, indent 0
+                // top-level group (no "/") -- expanded on first build, indent 0
                 var key = GroupKey(_currentModId, groups[gi].full);
+                if (seed) _expandedGroups.Add(key);
                 bool expanded = _expandedGroups.Contains(key);
                 var ck = key;
                 _rowList.Add(new PresentationRowVM(groups[gi].full, expanded, () => ToggleGroupCollapse(ck), 0));
@@ -1738,6 +1750,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             // opening a mod shows only the top-level headers; expanding a parent
             // reveals its child sub-groups (themselves collapsed).
             var pkey = GroupKey(_currentModId, "§P§" + parent);
+            if (seed) _expandedGroups.Add(pkey);
             bool parentExpanded = _expandedGroups.Contains(pkey);
             var cpkey = pkey;
             _rowList.Add(new PresentationRowVM(parent, parentExpanded, () => ToggleGroupCollapse(cpkey), 0));
@@ -1765,6 +1778,10 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                 if (childExpanded) foreach (var p in groups[gj].props) _rowList.Add(new PresentationRowVM(p, 1));
             }
         }
+
+        // Mark this mod seeded so subsequent rebuilds honor user toggle state
+        // (a user-collapsed header stays collapsed) instead of re-expanding.
+        if (seed) _seededMods.Add(_currentModId);
     }
 
     /// <summary>Flip a (child/top-level) group's collapsed state and rebuild.</summary>

@@ -220,8 +220,17 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "      <ItemTemplate>\n"
         // Slice 7: tighter row spacing (50->44 tall, 4->2 top margin) so more
         // settings fit per screen without feeling cramped.
-        + "        <Widget IsVisible=\"@IsVisible\" Command.HoverBegin=\"ExecuteHoverBegin\" Command.HoverEnd=\"ExecuteHoverEnd\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"960\" SuggestedHeight=\"44\" HorizontalAlignment=\"Left\" MarginTop=\"2\">\n"
+        + "        <Widget IsVisible=\"@IsVisible\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"960\" SuggestedHeight=\"44\" HorizontalAlignment=\"Left\" MarginTop=\"2\">\n"
         + "          <Children>\n"
+        // Hover highlight overlay — solid amber, shown only while @IsHovered. The
+        // flag is set by the HintWidget's HoverBegin/End at the row's end, which
+        // is the ONLY hover signal that fires reliably across the whole row (the
+        // event-accepting controls swallow Command.HoverBegin on the container).
+        + "            <BrushWidget IsVisible=\"@IsHovered\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" Brush=\"BetaDeps.RowHover.Solid\" />\n"
+        // Gold title-bar background for PARENT section headers only — the primary
+        // parent/child differentiator. Child sub-sections get NO background, so
+        // parents read as shaded title bars and children as plain indented rows.
+        + "            <BrushWidget IsVisible=\"@IsParentHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" Brush=\"BetaDeps.ParentHeaderBg\" />\n"
         // ----- group-header row: centered title + thin divider -----
         + "            <ListPanel IsVisible=\"@IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "              <Children>\n"
@@ -233,19 +242,43 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         // Slice 8: indent spacer (width = nesting level x 28) so child sub-groups
         // sit visually under their parent header.
         + "                    <Widget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"@IndentPixels\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" />\n"
+        // v0.9.2: bright gold vertical accent bar at the indented left edge of
+        // child sub-section headers only. The single most obvious "this is nested"
+        // cue -- far stronger than text color. Collapses out of the horizontal
+        // layout for parent headers (IsVisible false => zero width reserved).
+        + "                    <BrushWidget IsVisible=\"@IsChildHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"7\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"34\" VerticalAlignment=\"Center\" MarginRight=\"12\" Brush=\"BetaDeps.ChildAccent\" />\n"
         // Slice 3: native collapse chevron sprites (closed when collapsed, open
         // when expanded), toggled by visibility. Replaces the text ">" / "v".
         // Hidden widgets collapse out of the HorizontalLeftToRight layout so only
         // the active chevron reserves space before the title.
-        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"19\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"19\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsCollapsed\" />\n"
-        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"19\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"19\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsExpanded\" />\n"
+        // Parent chevrons: LARGE (27px) so top-level sections read boldly.
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"27\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"27\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsParentCollapsed\" />\n"
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"27\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"27\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"9\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsParentExpanded\" />\n"
+        // Child chevrons: SMALL (16px) so sub-sections read as subordinate.
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"16\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"16\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Closed\" IsVisible=\"@IsChildCollapsed\" />\n"
+        + "                    <BrushWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"16\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"16\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" MarginRight=\"7\" Brush=\"BetaDeps.Chevron.Open\" IsVisible=\"@IsChildExpanded\" />\n"
         // Text-size polish: header brush defaults to FontSize 36 (blocky); override
         // to 28 so headers read cleaner. Brush.FontSize is a standard per-widget
         // override (used in ~97 vanilla prefabs).
-        + "                    <RichTextWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"4\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Brush.FontSize=\"28\" Text=\"@GroupHeader\" />\n"
+        // v0.9.2: parent vs child header styling. Parent = gold section-title
+        // brush. Child sub-section = lighter OptionName brush so it reads as a
+        // secondary level even at the same font size; combined with the indent
+        // spacer above and the parent-only divider below, the hierarchy is clear.
+        // Parent title uses the actual main-menu button font (InitialMenuButtonBrush,
+        // from InitialScreen.xml) so top-level sections read like the game's front
+        // menu. TextWidget (not RichText) so the Brush.FontColor override reliably
+        // applies — the brush's intrinsic color is cream, forced to LIGHT GOLD here.
+        + "                    <TextWidget IsVisible=\"@IsParentHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"4\" Brush=\"InitialMenuButtonBrush\" Brush.FontSize=\"30\" Brush.FontColor=\"#C9A24AFF\" Text=\"@GroupHeader\" />\n"
+        // Child header text. Brush.ColorFactor does NOT dim text (it multiplies
+        // sprite-layer color, not the font channel); Brush.FontColor is what
+        // recolors glyphs. Use a muted tan that's clearly subordinate to the
+        // parent's bright gold. (Structural cues above — accent bar + no title
+        // bar — are the primary differentiator; this is reinforcement.)
+        + "                    <TextWidget IsVisible=\"@IsChildHeader\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" VerticalAlignment=\"Center\" MarginLeft=\"4\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Brush.FontSize=\"26\" Brush.FontColor=\"#9C742AFF\" Text=\"@GroupHeader\" />\n"
         + "                  </Children>\n"
         + "                </ButtonWidget>\n"
-        + "                <Widget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" HorizontalAlignment=\"Left\" MarginTop=\"3\" MarginRight=\"40\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
+        // Divider line only under PARENT headers; child sub-sections have none.
+        + "                <Widget IsVisible=\"@IsParentHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" HorizontalAlignment=\"Left\" MarginTop=\"3\" MarginRight=\"40\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
         + "              </Children>\n"
         + "            </ListPanel>\n"
         // ----- property row: name on the left, variant control on the right -----
@@ -293,8 +326,14 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "                    <EditableTextWidget Id=\"NumValueInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"150\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" MarginLeft=\"30\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Value.Text\" Text=\"@EditableValueText\" />\n"
         + "                  </Children>\n"
         + "                </ListPanel>\n"
-        // free text
-        + "                <RichTextWidget IsVisible=\"@IsText\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@TextValue\" />\n"
+        // free text -- v0.9.2: was a read-only RichTextWidget, which made every
+        // string setting (API keys, model names, etc.) impossible to edit even
+        // though the TextValue VM setter was already write-through. Same
+        // click-to-edit pattern as NumValueInput above; brush matches the
+        // sidebar search box so the field visibly affords typing.
+        // TabSwitchGuardPatch already suppresses Q/E tab-switching while any
+        // EditableTextWidget has focus, so no extra guard is needed here.
+        + "                <EditableTextWidget Id=\"TextValueInput\" IsVisible=\"@IsText\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"360\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@TextValue\" />\n"
         // dropdown: [<] value [>]
         + "                <ListPanel IsVisible=\"@IsDropdown\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "                  <Children>\n"
@@ -665,7 +704,10 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
             + "                  <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@Slot" + s + "_ButtonText\" /></Children>\n"
             + "                </ButtonWidget>\n"
             + numericDisplay
-            + "                <RichTextWidget IsVisible=\"@Slot" + s + "_IsText\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@Slot" + s + "_TextValue\" />\n"
+            // v0.9.2: editable text field (was a read-only RichTextWidget --
+            // string settings could never be typed into). Mirrors the RowList
+            // ItemTemplate fix; Slot{n}_TextValue setter is already write-through.
+            + "                <EditableTextWidget Id=\"Slot" + s + "TextValueInput\" IsVisible=\"@Slot" + s + "_IsText\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"360\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@Slot" + s + "_TextValue\" />\n"
             + "                <RichTextWidget IsVisible=\"@Slot" + s + "_IsDropdown\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@Slot" + s + "_DropdownText\" />\n"
             + "              </Children>\n"
             + "            </ListPanel>\n"

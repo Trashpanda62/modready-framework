@@ -4,39 +4,45 @@ Hour estimates are rough — each item assumes a focused-attention session, not 
 
 ---
 
-## Where we are now (2026-05-22, v0.5.6 shipped)
+## Where we are now (2026-06-08, v0.9.1 shipped)
 
-Tonight's session arc:
-- **v0.5.0** initial Nexus release (text-only numerics; sliders deferred)
-- **v0.5.1** polish round — 10 audit fixes (ProxyRef LogCaught, Interlocked install gates, FNV-1a hash, allocation-free hot paths, consolidated reflection helper, dead-code removal)
-- **v0.5.3** sliders RESTORED for integer settings — completed the 6-week bisect, pinned the regression to a 6-per-page Gauntlet construction ceiling
-- **v0.5.4** LoaderException diagnostic + `--no-incremental` build hardening
-- **v0.5.5** float sliders via unified Slot{n}_FloatValue dispatcher (ints + floats share one slider per slot)
-- **v0.5.6** Mod Config polish — action buttons render, duplicate names disambiguated, source-folder annotation for cryptic DisplayNames, page-summary cleanup
+The compatibility layer is **done and shipped**. BetaDeps is a working dependency framework on Nexus (mod 11274): additive Harmony/UIExtenderEx/ButterLib/MCM stack, Mod Config screen with int+float sliders, PatchShield/SaveShield safety, IncompatibleModDetector, MO2 support. The v0.5 → v0.9 arc closed out every original Phase-1 compatibility item — search/filter, tooltips, wide-fleet testing, docs, GitHub repo, the lot. **Realm of Thrones is dropped** (no longer our concern), which retires the last open consumer-mod incompatibility.
 
-All compatibility-layer functionality is in place. ROT (Realm of Thrones) is the one outstanding consumer-mod incompatibility (two model classes missing v1.4.5 abstract methods).
+With the framework solid, **v1.0 pivots from "polish the compatibility layer" to a headline player-facing feature**: the non-destructive music picker. The old Phase-1 compatibility punch-list is retired/maintenance; the remaining unshipped items move to "ongoing maintenance" below.
 
 ---
 
-## Phase 1 — v1.0 production-ready compatibility (30–50 h)
+## Phase 1 — v1.0 Non-Destructive Music Picker (headline) (~46–71 h)
 
-Polish, document, and harden what BetaDeps already does.
+The flagship feature that makes BetaDeps worth installing for its own sake: choose your own music per game context (campaign, battle, siege, settlement, naval) **without overwriting any vanilla audio file**. Both core primitives are spike-proven (PSAI redirect + Engine.Music loose-file, 2026-06-08). **Full plan: [`docs/V1.0-MUSIC-PICKER-PLAN.md`](docs/V1.0-MUSIC-PICKER-PLAN.md).**
 
 | Item | Hours | Notes |
 |---|---|---|
-| Mod-list **search/filter** in Mod Config | 2–3 | Text box, filters the prev/next-cycler by substring; high QoL with 24+ mods. **Picked as next session's starter.** |
-| Hover **tooltips** / hint panel display | 1–2 | Mixin already collects HintText; just need to render it below the row list |
-| **ROT shim** attempt #3 (proper subclass with ref assemblies) | 4–6 | Needs TaleWorlds reference-assembly access; subclass DefaultArmyManagementCalculationModel + DefaultCombatSimulationModel, override the missing methods, register at GameStarter.AddModel time |
-| **6-slider ceiling** root cause investigation | 3–5 | Diff v0.4.12 (worked at 10) vs v0.4.19 (broke at 10). Could unlock slots 6-9 too. Could also be a dead-end. |
-| **BetterExceptionWindow MCMv5 adapter** compat shim | 2–3 | The MCM.UI.Adapter.MCMv5 assembly has 3 types missing methods on our MCMv5; provide shim implementations |
-| **Immersive Battlefields MCM_IB_Addon** error suppression | 1 | Throws "Sequence contains no matching element" on discovery; catch it cleaner, move it to QUIRK status |
-| **README.md** — full project overview, install instructions, contribute guide | 2–3 | |
-| **API reference** — XML doc comments on every public type/member, generate docs site | 2–3 | |
-| **GitHub repo** setup + issue templates + CI workflow | 1–2 | |
-| **Build your first BetaDeps mod** walkthrough — start to MCM-visible setting | 3–4 | |
-| **Wide-fleet testing** (run with 50+ mods enabled) | 3–5 | Real-world load-order stress test |
-| **v1.0 release polish** — final pass on Nexus description, version-bump, changelog | 2 | |
-| **TOTAL** | **30–50 h** | |
+| **Spike #3** — runtime soundtrack gen + `StartTheme` redirect holds w/ cycling tracks | 3–5 | Biggest remaining risk; de-risks the whole PSAI path. **Next session's starter.** |
+| **Spike #4** — settlement playback loop + bard suppression + slider + clean release | 4–6 | De-risks the Engine.Music settlement path |
+| `MusicConfig` + folder-convention loader + context/pool model | 3–4 | BYO folder tree IS the data model |
+| `PsaiRedirectManager` — soundtrack gen + `StartTheme` patch + theme map | 6–9 | Covers menu/campaign/battle/siege/victory/defeat/naval |
+| `SettlementMusicManager` — channel mgmt + advance loop + bard suppression | 6–9 | Covers town/village/tavern (FMOD path) |
+| `NavalGate` — War Sails DLC detection + conditional Naval context | 1–2 | Gate naval row on NavalDLC presence |
+| **UI-A** — MCM groups (enable/mode/volume/track-count per context) | 4–6 | Fast path; makes the engine usable on infra we already have |
+| **UI-B** — dedicated two-pane Music screen + Preview | 10–16 | The headline-worthy picker; marketing centerpiece |
+| Persistence + per-save vs global decision + defaults | 2–3 | Runtime-only state; no save-format impact |
+| Optional **royalty-free sample pack** (separate download) | 3–5 | One-click "hear it working" for newcomers |
+| Spike teardown + docs + Nexus description + changelog + release | 4–6 | See plan §14 teardown checklist |
+| **TOTAL** | **~46–71 h** | Engine-usable subtotal (through UI-A): ~29–44 h |
+
+---
+
+## v1.0 ongoing maintenance (unshipped compat items, low priority)
+
+Carried over from the original Phase-1 list; none block the v1.0 music release.
+
+| Item | Hours | Notes |
+|---|---|---|
+| **BetterExceptionWindow MCMv5 adapter** compat shim | 2–3 | The MCM.UI.Adapter.MCMv5 assembly has 3 types missing methods on our MCMv5 |
+| **Immersive Battlefields MCM_IB_Addon** error suppression | 1 | "Sequence contains no matching element" on discovery; move to QUIRK status |
+| **6-slider ceiling** root cause investigation | 3–5 | Diff v0.4.12 (worked at 10) vs v0.4.19 (broke at 10); could unlock slots 6-9 |
+| **API reference** — XML doc comments + generated docs site | 2–3 | |
 
 ---
 
@@ -94,4 +100,4 @@ Authoring brand-new gameplay still needs C# and an IDE.
 
 ## Phase 1 next-up
 
-**Mod-list search/filter** — 2–3 hour starter task for the next session.
+**Spike #3** — prove the `MBMusicManager.StartTheme` redirect *holds* at the menu with 2 tracks cycling from a runtime-generated `soundtrack.xml`. 3–5 hours; single biggest remaining risk on the v1.0 music-picker critical path. See [`docs/V1.0-MUSIC-PICKER-PLAN.md`](docs/V1.0-MUSIC-PICKER-PLAN.md) §3 + §8.

@@ -25,9 +25,12 @@
          UIExtenderEx) always reference a known-stable version. Without this,
          the SDK defaults to 1.0.0.0 but incremental builds can keep stale
          v0.3.0.0 references, causing CLR binding failures at game launch. -->
+    <!-- AssemblyVersion intentionally pinned stable (see comment above) — do NOT
+         bump per-release; dependents bind against it. FileVersion/Informational
+         track the human release version. -->
     <AssemblyVersion>0.9.0.0</AssemblyVersion>
-    <FileVersion>0.9.0.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.9.0</InformationalVersion>
+    <FileVersion>0.9.2.0</FileVersion>
+    <InformationalVersion>BetaDeps 0.9.2</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

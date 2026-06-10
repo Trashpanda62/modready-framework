@@ -3,11 +3,11 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="BetaDeps" />
   <Name value="Bannerlord Beta Dependencies" />
-  <Version value="v0.9.0" />
+  <Version value="v0.9.2" />
   <DefaultModule value="false" />
   <ModuleCategory value="Singleplayer" />
   <ModuleType value="Community" />
-  <Url value="" />
+  <Url value="3741426797" />
 
   <!-- v0.8 step 1: depend on Bannerlord.Harmony (now a real module, not an
        alias stub) so the Harmony binary fan loads into the AppDomain BEFORE
