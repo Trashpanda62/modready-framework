@@ -7,7 +7,7 @@
   <DefaultModule value="false" />
   <ModuleCategory value="Singleplayer" />
   <ModuleType value="Community" />
-  <Url value="3741426797" />
+  <Url value="" />
 
   <!-- v0.8 step 1: depend on Bannerlord.Harmony (now a real module, not an
        alias stub) so the Harmony binary fan loads into the AppDomain BEFORE
