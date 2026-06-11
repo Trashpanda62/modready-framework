@@ -45,6 +45,14 @@ merged-*.xml
 tools/shield-fixture/bin/
 shieldfixture-path.flag
 
+# Repo-root module staging folders (pre-dist workflow remnant, deleted Phase 4;
+# the canonical pipeline is src -> dist\Modules -> deploy/zip/installer) -------
+/BetaDeps/
+/Bannerlord.Harmony/
+/Bannerlord.UIExtenderEx/
+/Bannerlord.ButterLib/
+/Bannerlord.MBOptionScreen/
+
 # NuGet -----------------------------------------------------------------------
 *.nupkg
 *.snupkg
