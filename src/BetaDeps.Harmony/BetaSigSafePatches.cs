@@ -122,20 +122,58 @@ internal static class BetaSigSafePatches
         return SafeBind.TryPatch(harmony, target, finalizer: finalizer);
     }
 
+    // M8 (Phase 3, 2026-06-11): the swallow is now targeted and throttled.
+    // These finalizers exist for parallel-tick RACE faults; only the race
+    // exception classes are eaten. Everything else propagates -- eating
+    // every exception type from Mission.TickAgentsAndTeamsImp masked real
+    // engine faults. Per-method counter: after MaxSwallowsPerMethod the
+    // finalizer rethrows from then on (a fault that fires hundreds of
+    // times per second is not a transient race), and logging is capped at
+    // the 1st hit + every 100th so the per-tick disk writes stop.
+    private const int MaxSwallowsPerMethod = 200;
+    private const int RelogEvery = 100;
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, long> _swallowCounts
+        = new(StringComparer.Ordinal);
+
+    private static bool IsRaceExceptionClass(Exception ex)
+        => ex is NullReferenceException
+        || ex is ArgumentOutOfRangeException
+        || ex is IndexOutOfRangeException
+        || ex is InvalidOperationException; // "collection was modified" -- the classic parallel-tick race
+
     /// <summary>
-    /// Shared Harmony finalizer that eats any exception, logs once,
-    /// and returns null (= "swallow it, do not propagate"). Harmony
-    /// passes the in-flight exception via the __exception parameter;
-    /// returning null clears it.
+    /// Shared Harmony finalizer for the race-prone engine methods above.
+    /// Swallows only race-class exceptions, with a per-method cap; returns
+    /// the exception (= propagate) for anything else or once the cap trips.
     /// </summary>
     public static Exception? SwallowEngineException(MethodBase __originalMethod, Exception? __exception)
     {
         if (__exception == null) return null;
         try
         {
-            DiagLog.Log(Tag,
-                $"swallowed engine exception in {__originalMethod?.DeclaringType?.FullName}::{__originalMethod?.Name}: " +
-                $"{__exception.GetType().Name} -- {__exception.Message}");
+            var methodSig = $"{__originalMethod?.DeclaringType?.FullName}::{__originalMethod?.Name}";
+
+            if (!IsRaceExceptionClass(__exception))
+            {
+                DiagLog.Log(Tag,
+                    $"NOT swallowing {__exception.GetType().Name} in {methodSig} (not a race-class exception): {__exception.Message}");
+                return __exception;
+            }
+
+            var count = _swallowCounts.AddOrUpdate(methodSig, 1, (_, c) => c + 1);
+            if (count > MaxSwallowsPerMethod)
+            {
+                if (count == MaxSwallowsPerMethod + 1)
+                    DiagLog.Log(Tag,
+                        $"{methodSig} exceeded {MaxSwallowsPerMethod} swallowed exception(s) this session -- this is not a transient race; rethrowing from now on");
+                return __exception;
+            }
+
+            if (count == 1 || count % RelogEvery == 0)
+                DiagLog.Log(Tag,
+                    $"swallowed engine exception in {methodSig}: " +
+                    $"{__exception.GetType().Name} -- {__exception.Message}" +
+                    (count > 1 ? $" (seen {count} times)" : string.Empty));
         }
         catch { }
         return null;

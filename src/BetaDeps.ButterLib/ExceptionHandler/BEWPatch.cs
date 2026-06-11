@@ -94,13 +94,18 @@ public static class BEWPatch
     /// Harmony finalizer body. Receives the in-flight exception via
     /// __exception, logs it, and returns null to swallow.
     /// </summary>
-    // v0.7.5 (post-ship-prep): once-per-(method,exception) log dedup so a
-    // tight engine-tick swallow doesn't fill the log with the same line
-    // 60 times/second. Key is "{Method}|{ExceptionTypeName}|{first 200 chars
+    // v0.7.5 (post-ship-prep): per-(method,exception) log dedup so a tight
+    // engine-tick swallow doesn't fill the log with the same line 60
+    // times/second. Key is "{Method}|{ExceptionTypeName}|{first 200 chars
     // of message}" so distinct LoaderExceptions still surface independently.
-    private static readonly System.Collections.Generic.HashSet<string> _loggedSwallowKeys
-        = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+    // M8 (Phase 3, 2026-06-11): once-only became invisible for persistent
+    // faults -- a swallow that keeps firing now re-logs every 500th hit
+    // with its running count, so "still happening, 10000 times by now"
+    // is visible in runtime.log instead of one line from 40 minutes ago.
+    private static readonly System.Collections.Generic.Dictionary<string, long> _swallowCounts
+        = new System.Collections.Generic.Dictionary<string, long>(System.StringComparer.Ordinal);
     private static readonly object _swallowLogLock = new object();
+    private const int SwallowRelogEvery = 500;
 
     /// <summary>
     /// Harmony finalizer body. Receives the in-flight exception via
@@ -123,13 +128,19 @@ public static class BEWPatch
             var msgHead = __exception.Message ?? string.Empty;
             if (msgHead.Length > 200) msgHead = msgHead.Substring(0, 200);
             var key = $"{methodSig}|{__exception.GetType().Name}|{msgHead}";
-            bool isFirstSeen;
-            lock (_swallowLogLock) { isFirstSeen = _loggedSwallowKeys.Add(key); }
-            if (!isFirstSeen) return null;  // already logged this exact failure; don't spam
+            long count;
+            lock (_swallowLogLock)
+            {
+                _swallowCounts.TryGetValue(key, out count);
+                count++;
+                _swallowCounts[key] = count;
+            }
+            if (count != 1 && count % SwallowRelogEvery != 0) return null; // throttled; don't spam
 
             DiagLog.Log(Tag,
                 $"swallowed engine exception in {methodSig}: " +
-                $"{__exception.GetType().Name} -- {__exception.Message}");
+                $"{__exception.GetType().Name} -- {__exception.Message}" +
+                (count > 1 ? $" (seen {count} times this session)" : string.Empty));
 
             // Unwrap ReflectionTypeLoadException: its LoaderExceptions
             // property carries the actual culprit exceptions. Log up to

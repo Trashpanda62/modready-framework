@@ -12,13 +12,21 @@
 // late lifecycle point so we catch patches that consumer mods defer past
 // OnSubModuleLoad.
 //
-// When we catch one of the swallowable exceptions we:
-//   1. Log it.
-//   2. Synthesize a sensible default __result via Activator.CreateInstance
-//      so downstream callers don't NRE on a null we returned.
-//   3. Unpatch the offending consumer prefix from the original method's
-//      Harmony patch chain so subsequent calls don't replay the broken
-//      patch hundreds of times per second.
+// When we catch one of the swallowable exceptions we (reworked Phase 3 /
+// H1 + H4, 2026-06-11):
+//   1. Attribute the failure to a culprit assembly via the exception's
+//      stack (shared CulpritFinder core). No non-engine culprit frame =
+//      the failure is TaleWorlds' own -- we DON'T swallow those.
+//   2. Log it (throttled: first hit + every 500th, so a per-frame method
+//      can't flood runtime.log).
+//   3. Unpatch ONLY the culprit owner's patches (all patch types) from the
+//      original method, leaving innocent mods' patches on the same method
+//      intact. Keyed by full method signature; one retry allowed so a
+//      second, different culprit on the same method can still be removed.
+//   4. For value-type returns, default-initialize __result. Reference-type
+//      returns stay null -- fabricating instances via non-public ctors ran
+//      arbitrary ctor side effects on engine types and handed callers
+//      half-initialized objects (H4).
 
 using System;
 using System.Collections.Generic;
@@ -35,8 +43,29 @@ public static class PatchShield
     private const string HarmonyId = "BetaDeps.Foundation.PatchShield";
 
     private static readonly HashSet<MethodBase> _shielded = new();
+    // Methods (full signature) where at least one culprit owner was unpatched.
     private static readonly HashSet<string> _unpatched = new();
+    // Unpatch passes per method signature. Capped at 2 (initial + one retry)
+    // so a second, different culprit on the same method still gets removed,
+    // but a method that keeps failing can't churn unpatch passes forever.
+    private static readonly Dictionary<string, int> _unpatchAttempts = new(StringComparer.Ordinal);
+    private const int MaxUnpatchAttemptsPerMethod = 2;
     private static readonly object _lock = new();
+
+    // Swallow-log throttle: identical (method, exception-type) swallows log
+    // on the 1st hit and every 500th after that. A stale patch on a
+    // per-frame method used to write one log line per call (H1).
+    // Lock-free: the finalizer runs on the engine's tick threads.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, long> _swallowLogCounts
+        = new(StringComparer.Ordinal);
+    private const int SwallowRelogEvery = 500;
+
+    // Per-(method, exception-type) swallow/rethrow verdict cache. The
+    // culprit walk allocates a StackTrace; doing it once per distinct
+    // failure instead of once per call keeps a still-throwing patch on a
+    // 60 Hz method from allocating every frame until the unpatch lands.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> _verdictCache
+        = new(StringComparer.Ordinal);
 
     // v4 #6: aggregate Harmony owner IDs we've had to unpatch this session,
     // with a count of how many methods each owner contributed. Selftest
@@ -73,7 +102,7 @@ public static class PatchShield
     /// <summary>Total methods PatchShield has finalizer-wrapped this session.</summary>
     public static int ShieldedCount { get { lock (_lock) return _shielded.Count; } }
 
-    /// <summary>Total prefixes PatchShield has UNPATCHED after they threw.</summary>
+    /// <summary>Total methods PatchShield has unpatched a culprit owner from after a throw.</summary>
     public static int UnpatchedCount { get { lock (_lock) return _unpatched.Count; } }
 
     /// <summary>Exceptions PatchShield has swallowed since the AppDomain started.</summary>
@@ -105,7 +134,7 @@ public static class PatchShield
             }
             DiagLog.Log(Tag,
                 $"SESSION SUMMARY: shielded {ShieldedCount} method(s), " +
-                $"unpatched {UnpatchedCount} prefix(es), " +
+                $"unpatched culprits on {UnpatchedCount} method(s), " +
                 $"swallowed {SwallowedTotal} exception(s) " +
                 $"(MissingMethod {SwallowedMissingMethod}, MissingField {SwallowedMissingField}, " +
                 $"TypeLoad {SwallowedTypeLoad}, other {SwallowedOther}). " +
@@ -253,78 +282,158 @@ public static class PatchShield
             || ex is MissingFieldException
             || ex is TypeLoadException)
         {
-            // v0.7.2 selftest hook: per-kind counter so the selftest can
-            // report "PatchShield swallowed N missing-method exceptions
-            // this session". Useful signal for users + maintainers.
-            if (ex is MissingMethodException) System.Threading.Interlocked.Increment(ref _swallowedMissingMethod);
-            else if (ex is MissingFieldException) System.Threading.Interlocked.Increment(ref _swallowedMissingField);
-            else System.Threading.Interlocked.Increment(ref _swallowedTypeLoad);
+            var sigKey = FullSignature(__originalMethod);
+            var verdictKey = sigKey + "|" + ex.GetType().Name;
 
-            try
+            // Repeat of an already-judged failure: reuse the verdict without
+            // re-walking the stack (the culprit walk allocates a StackTrace;
+            // this path can run per-frame until the unpatch lands).
+            if (_verdictCache.TryGetValue(verdictKey, out var cachedSwallow))
             {
-                var ownerType = __originalMethod?.DeclaringType?.FullName ?? "?";
-                var ownerName = __originalMethod?.Name ?? "?";
-                DiagLog.Log(Tag,
-                    $"swallowed {ex.GetType().Name} from a patch on {ownerType}.{ownerName}: {ex.Message}");
+                if (!cachedSwallow) return false;
+                CountSwallow(ex);
+                LogThrottled("swallow|" + verdictKey,
+                    $"swallowed {ex.GetType().Name} from a patch on {sigKey}: {ex.Message}");
+                return true;
             }
-            catch { /* logging shouldn't poison the shield */ }
 
-            TryUnpatchOffendingPatches(__originalMethod, ex);
+            // H4: only swallow when a NON-engine frame threw. These exception
+            // types from pure engine/framework frames mean TaleWorlds' own
+            // code path is broken -- masking that corrupts state invisibly.
+            var culprit = CulpritFinder.FindCulpritFrame(ex);
+            if (!culprit.HasCulprit)
+            {
+                _verdictCache.TryAdd(verdictKey, false);
+                LogThrottled("rethrow|" + verdictKey,
+                    $"NOT swallowing {ex.GetType().Name} on {sigKey}: no non-engine culprit frame (failure is engine/framework-internal): {ex.Message}");
+                return false;
+            }
+            _verdictCache.TryAdd(verdictKey, true);
+
+            CountSwallow(ex);
+            LogThrottled("swallow|" + verdictKey,
+                $"swallowed {ex.GetType().Name} from a patch on {sigKey} (culprit: {culprit.AssemblyName}): {ex.Message}");
+
+            TryUnpatchOffendingPatches(__originalMethod, culprit);
             return true;
         }
         return false;
     }
 
-    // v5: brute-force unpatch ALL non-BetaDeps prefixes on the original
-    // method when we catch a swallowable exception. Targeted unpatch by
-    // ex.TargetSite didn't fire reliably (MethodInfo identity mismatch),
-    // so we walk Harmony.GetPatchInfo and remove by owner Harmony ID.
-    private static void TryUnpatchOffendingPatches(MethodBase originalMethod, Exception ex)
+    /// <summary>v0.7.2 selftest hook: per-kind counters so the selftest can
+    /// report "PatchShield swallowed N missing-method exceptions this
+    /// session". Only the three swallowable types reach here, so the else
+    /// branch is exactly TypeLoadException (and subclasses).</summary>
+    private static void CountSwallow(Exception ex)
+    {
+        if (ex is MissingMethodException) System.Threading.Interlocked.Increment(ref _swallowedMissingMethod);
+        else if (ex is MissingFieldException) System.Threading.Interlocked.Increment(ref _swallowedMissingField);
+        else System.Threading.Interlocked.Increment(ref _swallowedTypeLoad);
+    }
+
+    /// <summary>Full signature key including parameter types, so overloads
+    /// don't collapse onto one retry-limit slot (H1).</summary>
+    private static string FullSignature(MethodBase? m)
+    {
+        if (m == null) return "?";
+        try
+        {
+            var ps = string.Join(",", m.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name));
+            return $"{m.DeclaringType?.FullName ?? "?"}::{m.Name}({ps})";
+        }
+        catch
+        {
+            return $"{m.DeclaringType?.FullName ?? "?"}::{m.Name}";
+        }
+    }
+
+    /// <summary>Log the first occurrence of a repeating shield event and
+    /// every 500th after, with the running count. Lock-free counter.</summary>
+    private static void LogThrottled(string key, string message)
+    {
+        try
+        {
+            var count = _swallowLogCounts.AddOrUpdate(key, 1, (_, c) => c + 1);
+            if (count == 1)
+                DiagLog.Log(Tag, message);
+            else if (count % SwallowRelogEvery == 0)
+                DiagLog.Log(Tag, $"{message} (seen {count} times this session)");
+        }
+        catch { /* logging shouldn't poison the shield */ }
+    }
+
+    // Phase 3 / H1 rework: unpatch ONLY the culprit assembly's patches.
+    // The v5 behavior stripped every non-BetaDeps prefix on the method, so
+    // one broken mod's exception removed innocent mods' patches -- and
+    // postfix/transpiler/finalizer culprits were never removed at all.
+    private static void TryUnpatchOffendingPatches(MethodBase originalMethod, CulpritFinder.CulpritInfo culprit)
     {
         if (originalMethod == null) return;
 
-        string originalKey;
-        try
-        {
-            originalKey = (originalMethod.DeclaringType?.FullName ?? "?") + "::" + originalMethod.Name;
-        }
-        catch { return; }
+        var sigKey = FullSignature(originalMethod);
 
+        // One lock across gate + scan + unpatch + bookkeeping: unpatching is
+        // rare, and holding the lock end-to-end (a) makes the 2-attempt cap
+        // a real invariant under the engine's parallel tick threads, and
+        // (b) serializes our Harmony.Unpatch calls.
         lock (_lock)
         {
-            if (_unpatched.Contains(originalKey)) return;
-            _unpatched.Add(originalKey);
-        }
+            _unpatchAttempts.TryGetValue(sigKey, out var attempts);
+            if (attempts >= MaxUnpatchAttemptsPerMethod) return;
+            _unpatchAttempts[sigKey] = attempts + 1;
 
+            TryUnpatchOffendingPatchesLocked(originalMethod, culprit, sigKey);
+        }
+    }
+
+    private static void TryUnpatchOffendingPatchesLocked(MethodBase originalMethod, CulpritFinder.CulpritInfo culprit, string sigKey)
+    {
         try
         {
             var info = Harmony.GetPatchInfo(originalMethod);
             if (info == null) return;
 
-            var harmony = new Harmony(HarmonyId);
-
-            // Collect distinct non-BetaDeps owner IDs from all patch
-            // categories on this method.
-            var owners = new HashSet<string>();
-            foreach (var p in info.Prefixes)  if (p != null) owners.Add(p.owner ?? string.Empty);
-            foreach (var p in info.Postfixes) if (p != null) owners.Add(p.owner ?? string.Empty);
-            foreach (var p in info.Transpilers) if (p != null) owners.Add(p.owner ?? string.Empty);
-            foreach (var p in info.Finalizers) if (p != null) owners.Add(p.owner ?? string.Empty);
-
-            foreach (var owner in owners)
+            // Owners whose patch methods live in the culprit assembly.
+            var culpritOwners = new HashSet<string>(StringComparer.Ordinal);
+            void ScanPatches(System.Collections.Generic.IEnumerable<Patch> patches)
             {
-                if (string.IsNullOrEmpty(owner)) continue;
+                foreach (var p in patches)
+                {
+                    if (p?.PatchMethod == null) continue;
+                    var asmName = p.PatchMethod.DeclaringType?.Assembly?.GetName()?.Name;
+                    if (string.Equals(asmName, culprit.AssemblyName, StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrEmpty(p.owner))
+                    {
+                        culpritOwners.Add(p.owner);
+                    }
+                }
+            }
+            ScanPatches(info.Prefixes);
+            ScanPatches(info.Postfixes);
+            ScanPatches(info.Transpilers);
+            ScanPatches(info.Finalizers);
+
+            if (culpritOwners.Count == 0)
+            {
+                DiagLog.Log(Tag, $"culprit '{culprit.AssemblyName}' has no patch on {sigKey}; leaving all patches in place (no innocent unpatching)");
+                return;
+            }
+
+            var harmony = new Harmony(HarmonyId);
+            foreach (var owner in culpritOwners)
+            {
                 if (owner == HarmonyId) continue;
                 if (owner.StartsWith("BetaDeps", StringComparison.OrdinalIgnoreCase))
                 {
-                    DiagLog.Log(Tag, $"refusing to unpatch BetaDeps owner '{owner}' on {originalKey}");
+                    DiagLog.Log(Tag, $"refusing to unpatch BetaDeps owner '{owner}' on {sigKey}");
                     continue;
                 }
 
                 try
                 {
-                    harmony.Unpatch(originalMethod, HarmonyPatchType.Prefix, owner);
-                    DiagLog.Log(Tag, $"unpatched prefixes from owner '{owner}' on {originalKey}");
+                    harmony.Unpatch(originalMethod, HarmonyPatchType.All, owner);
+                    DiagLog.Log(Tag, $"unpatched ALL patch types from culprit owner '{owner}' ({culprit.AssemblyName}) on {sigKey}");
+                    _unpatched.Add(sigKey); // caller holds _lock
                     lock (_ownerLock)
                     {
                         _ownerCounts.TryGetValue(owner, out var c);
@@ -333,13 +442,13 @@ public static class PatchShield
                 }
                 catch (Exception unpatchEx)
                 {
-                    DiagLog.LogCaught(Tag, $"Unpatch({owner} on {originalKey})", unpatchEx);
+                    DiagLog.LogCaught(Tag, $"Unpatch({owner} on {sigKey})", unpatchEx);
                 }
             }
         }
         catch (Exception outerEx)
         {
-            DiagLog.LogCaught(Tag, $"TryUnpatchOffendingPatches({originalKey})", outerEx);
+            DiagLog.LogCaught(Tag, $"TryUnpatchOffendingPatches({sigKey})", outerEx);
         }
     }
 
@@ -352,26 +461,18 @@ public static class PatchShield
 
         try
         {
+            // H4: only default-initialize value-type returns (the finalizer
+            // must hand back SOMETHING for a struct slot). Reference types
+            // stay null -- the old Activator.CreateInstance(rt, nonPublic:
+            // true) path ran arbitrary non-public ctor side effects on
+            // engine types and returned half-initialized objects, which is
+            // worse than a null the caller can at least null-check.
             if (__result == null && __originalMethod is MethodInfo mi)
             {
                 var rt = mi.ReturnType;
-                if (rt != typeof(void))
+                if (rt != typeof(void) && rt.IsValueType)
                 {
-                    if (rt.IsValueType)
-                    {
-                        __result = Activator.CreateInstance(rt);
-                    }
-                    else if (!rt.IsAbstract
-                             && !rt.IsInterface
-                             && rt != typeof(string)
-                             && rt.GetConstructor(
-                                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                                 binder: null,
-                                 types: Type.EmptyTypes,
-                                 modifiers: null) != null)
-                    {
-                        __result = Activator.CreateInstance(rt, nonPublic: true);
-                    }
+                    __result = Activator.CreateInstance(rt);
                 }
             }
         }

@@ -287,14 +287,8 @@ public static class SaveShield
     // Assembly-name prefixes that are part of the engine or our own
     // infrastructure; the culprit walker skips frames in these to find
     // the first MOD-OWNED frame in the stack.
-    private static readonly string[] _enginePrefixes =
-    {
-        "TaleWorlds.", "SandBox", "StoryMode", "CustomBattle",
-        "BetaDeps", "Bannerlord.Harmony", "Bannerlord.UIExtenderEx",
-        "Bannerlord.ButterLib", "MCMv5", "0Harmony", "HarmonyLib",
-        "Mono.Cecil", "MonoMod", "System.", "Microsoft.", "mscorlib",
-        "Newtonsoft.Json", "Serilog",
-    };
+    // Engine/infrastructure prefix list and culprit-frame attribution live
+    // in the shared CulpritFinder (Phase 3.1) -- PatchShield uses the same core.
 
     public static void Install()
     {
@@ -419,10 +413,7 @@ public static class SaveShield
             while (ex is TargetInvocationException && ex.InnerException != null)
                 ex = ex.InnerException;
 
-            bool isDupKey =
-                ex is ArgumentException &&
-                ex.Message != null &&
-                (ex.Message.Contains("same key") || ex.Message.Contains("already been added"));
+            bool isDupKey = IsDuplicateKeyException(ex);
 
             if (isDupKey) Interlocked.Increment(ref _duplicateKeyHits);
             else Interlocked.Increment(ref _otherFailureHits);
@@ -833,85 +824,50 @@ public static class SaveShield
         return "FAILURE";
     }
 
-    public readonly struct CulpritInfo
-    {
-        public CulpritInfo(string assemblyName, string frameDescription, string assemblyLocation)
-        {
-            AssemblyName = assemblyName;
-            FrameDescription = frameDescription;
-            AssemblyLocation = assemblyLocation;
-        }
-        public string AssemblyName { get; }
-        public string FrameDescription { get; }
-        /// <summary>Absolute path to the culprit assembly's DLL on disk (or "" if not resolvable).</summary>
-        public string AssemblyLocation { get; }
-    }
+    /// <summary>Retained alias: SaveShield's attribution now delegates to the
+    /// shared CulpritFinder core (Phase 3.1).</summary>
+    private static CulpritFinder.CulpritInfo FindCulpritFrame(Exception ex)
+        => CulpritFinder.FindCulpritFrame(ex);
 
     /// <summary>
-    /// Walk the exception's stack frames (both the parsed System.Diagnostics
-    /// .StackTrace form and the raw string form as fallback) and return the
-    /// deepest frame whose declaring type is NOT in one of the engine /
-    /// infrastructure prefixes. That's the most likely consumer-mod culprit.
+    /// Locale-proof duplicate-key detection (M2). The old check matched the
+    /// English exception text ("same key" / "already been added"), which
+    /// silently misclassified on non-English .NET language packs. Structure
+    /// check instead: a Dictionary duplicate-add is an ArgumentException
+    /// (exactly -- the Null/OutOfRange subclasses are different failures)
+    /// thrown from System.ThrowHelper / Dictionary`2 insert frames. The
+    /// English text check stays as a fast path.
     /// </summary>
-    private static CulpritInfo FindCulpritFrame(Exception ex)
+    private static bool IsDuplicateKeyException(Exception ex)
     {
-        if (ex == null) return new CulpritInfo(string.Empty, string.Empty, string.Empty);
+        if (ex is not ArgumentException || ex is ArgumentNullException || ex is ArgumentOutOfRangeException)
+            return false;
 
-        // First try the parsed StackTrace -- gives us assembly info even when
-        // some frames had their string form trimmed.
+        var msg = ex.Message ?? string.Empty;
+        if (msg.Contains("same key") || msg.Contains("already been added"))
+            return true;
+
         try
         {
-            var st = new System.Diagnostics.StackTrace(ex, fNeedFileInfo: false);
-            var frames = st.GetFrames();
-            if (frames != null)
-            {
-                foreach (var f in frames)
-                {
-                    var m = f.GetMethod();
-                    if (m == null) continue;
-                    var declType = m.DeclaringType;
-                    if (declType == null) continue;
-                    var asm = declType.Assembly;
-                    var asmName = asm?.GetName()?.Name ?? string.Empty;
-                    if (IsEngineFrame(asmName, declType.FullName)) continue;
-                    var loc = asm?.Location ?? string.Empty;
-                    return new CulpritInfo(
-                        asmName,
-                        $"{declType.FullName}.{m.Name} -- frame from {(string.IsNullOrEmpty(loc) ? "<unknown>" : loc)}",
-                        loc);
-                }
-            }
-        }
-        catch { /* fall through to string parse */ }
+            var site = ex.TargetSite;
+            var siteType = site?.DeclaringType?.FullName ?? string.Empty;
+            var siteName = site?.Name ?? string.Empty;
+            bool thrownByDictionaryMachinery =
+                siteName == "ThrowAddingDuplicateWithKeyArgumentException" ||
+                siteType == "System.ThrowHelper" ||
+                siteType.StartsWith("System.Collections.Generic.Dictionary", StringComparison.Ordinal);
+            if (!thrownByDictionaryMachinery) return false;
 
-        // Fallback: text-grep the raw StackTrace lines looking for an
-        // "at <Type>.<Method>" pattern whose Type FullName doesn't start
-        // with an engine prefix.
-        try
+            var stack = ex.StackTrace ?? string.Empty;
+            return stack.Contains("Dictionary`2.Insert")
+                || stack.Contains("Dictionary`2.Add")
+                || stack.Contains("Dictionary`2.set_Item")
+                || siteName == "ThrowAddingDuplicateWithKeyArgumentException";
+        }
+        catch
         {
-            var raw = ex.StackTrace ?? string.Empty;
-            foreach (var rawLine in raw.Split('\n'))
-            {
-                var line = rawLine.TrimStart().TrimEnd();
-                if (!line.StartsWith("at ")) continue;
-                var rest = line.Substring(3); // strip "at "
-                // Find the last '.' before the first '(' -- splits type from method.
-                int paren = rest.IndexOf('(');
-                if (paren < 0) continue;
-                var sig = rest.Substring(0, paren);
-                int lastDot = sig.LastIndexOf('.');
-                if (lastDot <= 0) continue;
-                var typeName = sig.Substring(0, lastDot);
-                if (IsEngineFrame(asmName: null, typeFullName: typeName)) continue;
-                // Best-effort assembly inference: take the first dotted segment.
-                int firstDot = typeName.IndexOf('.');
-                var likelyAsm = firstDot > 0 ? typeName.Substring(0, firstDot) : typeName;
-                return new CulpritInfo(likelyAsm, $"{rest} -- frame parsed from stack-trace text", string.Empty);
-            }
+            return false;
         }
-        catch { /* swallow */ }
-
-        return new CulpritInfo(string.Empty, string.Empty, string.Empty);
     }
 
     // v4 forwarders into SaveShieldProbes (split out for readability).
@@ -924,17 +880,4 @@ public static class SaveShield
     private static List<string> ScanImportsForMissing(string dllPath, Exception ex) =>
         SaveShieldProbes.ScanImportsForMissing(dllPath, ex);
 
-    private static bool IsEngineFrame(string? asmName, string? typeFullName)
-    {
-        foreach (var prefix in _enginePrefixes)
-        {
-            if (!string.IsNullOrEmpty(asmName) &&
-                asmName!.StartsWith(prefix, StringComparison.Ordinal))
-                return true;
-            if (!string.IsNullOrEmpty(typeFullName) &&
-                typeFullName!.StartsWith(prefix, StringComparison.Ordinal))
-                return true;
-        }
-        return false;
-    }
 }
