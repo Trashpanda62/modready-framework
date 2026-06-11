@@ -87,14 +87,6 @@ internal sealed class MCMDescriptionsRightPanelPatch : PrefabExtensionInsertPatc
 internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
 {
     public override InsertType Type => InsertType.Child;
-    // v1.0 (task #12): bumped 10 → 100 alongside the OptionsVMMixin
-    // SlotCount bump, so the unpaginated scrollable mod page can show every
-    // property at once. Slot rows 0-9 use the per-mixin-property template
-    // (with sliders for slots 0-5 thanks to the 6-slider ceiling); rows
-    // 10-99 use the VM-context template in BuildVmSlotRow (text-only for
-    // numerics, no slider). Mods with >100 settings overflow silently; bump
-    // higher here AND in the mixin if needed.
-    private const int SlotCount = 20;
 
     // v0.5.0 perf: XML is identical between Options-open events (slot bindings
     // make it data-driven; the XML template never changes per-session). Build
@@ -134,11 +126,10 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
 
             var sb = new StringBuilder(65536);
             sb.Append(HeaderXml);
-            // slice 4d: the {RowList} single-page scrollable list is now the
-            // unconditional Mod Configuration UI. The old fixed 20-slot fan and
-            // its pagination are retired. (Dead slot-builder methods + the
-            // RowListProbeEnabled flag check remain in this file pending the
-            // step-2 cleanup deletion, but are no longer invoked.)
+            // slice 4d: the {RowList} single-page scrollable list is the
+            // unconditional Mod Configuration UI. The old fixed 20-slot fan, its
+            // pagination, and all the dead slot-builder methods were removed in
+            // Phase 5 (M13).
             sb.Append(RowListXml);
             sb.Append(FooterCloseXml);
             sb.Append(FooterXml);
@@ -172,23 +163,6 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         }
     }
 
-    /// <summary>
-    /// slice 4c proof gate. True when Modules\BetaDeps\rowlist-probe.flag exists
-    /// (same directory as runtime.log). Lets us A/B the {RowList} ItemTemplate
-    /// list against the working slot rows on a single Quick-Test without shipping
-    /// it. Drop the flag, launch, open Mod Configuration. Delete the flag to hide.
-    /// </summary>
-    private static bool RowListProbeEnabled()
-    {
-        try
-        {
-            var rtPath = BetaDeps.Foundation.RuntimeLog.Path;
-            var dir = System.IO.Path.GetDirectoryName(rtPath);
-            if (string.IsNullOrEmpty(dir)) return false;
-            return System.IO.File.Exists(System.IO.Path.Combine(dir, "rowlist-probe.flag"));
-        }
-        catch { return false; }
-    }
 
     /// <summary>
     /// Minimal ItemTemplate list bound to the mixin RowList. One RichTextWidget
@@ -548,22 +522,6 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         "      </Children>\n"
         + "    </ListPanel>\n";
 
-    // Slot-mode soft pagination (Page X of Y + Prev/Next Page), emitted ONLY in
-    // slot mode. The {RowList} list is a single continuous scroll with no pages,
-    // so list mode omits this block entirely (it was showing a vestigial
-    // "Page 1 of 2" driven by the still-running RefreshSlots page math).
-    private const string FooterPaginationXml =
-        "    <RichTextWidget IsVisible=\"@PaginationVisible\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"15\" Brush=\"SPOptions.Group.Title.Text\" Text=\"@SelectedPageSummary\" />\n"
-        + "    <ListPanel IsVisible=\"@PaginationVisible\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" MarginTop=\"10\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
-        + "      <Children>\n"
-        + "        <ButtonWidget Command.Click=\"ExecutePrevPage\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"160\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"48\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"&lt; Prev Page\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        + "        <ButtonWidget Command.Click=\"ExecuteNextPage\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"160\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"48\" MarginLeft=\"20\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
-        + "          <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"Next Page &gt;\" /></Children>\n"
-        + "        </ButtonWidget>\n"
-        + "      </Children>\n"
-        + "    </ListPanel>\n";
 
     private const string FooterXml =
         // Footer hint text (Q/E + slider tip) removed per user request.
@@ -612,210 +570,4 @@ internal sealed class MCMTabContentPatch : PrefabExtensionInsertPatch
         + "  </Children>\n"
         + "</ListPanel>";
 
-    // v0.6 RC8: extend vanilla slider+nav-siblings to all 10 slots after RC7
-    // confirmed slot 0 didn't crash the page. The KEY pattern (vs RC2-RC6) is
-    // the NavigationTargetSwitcher + NavigationAutoScrollWidget pair as the
-    // FIRST two children of the slider's ListPanel -- a piece vanilla
-    // OptionItem.xml has and that every prior bisect was missing.
-    private static string BuildSlotRow(int n)
-    {
-        // v1.0 (task #12): two `DataSource="{Slot{n}_VM}"` experiments both
-        // failed — Gauntlet's DataSource scope only propagates to children
-        // through ItemTemplate iteration, and dot-notation `@Slot10_VM.X`
-        // didn't resolve either. So every slot 0-249 uses the same per-mixin-
-        // property template; the Slot{n}_X accessors for slots 10-249 are
-        // generated as a partial class in OptionsVMMixin.SlotProperties.g.cs.
-
-        var s = n.ToString();
-        // Numeric display: slot 0 -> slider with vanilla nav-siblings pattern,
-        //                 slots 1-9 -> read-only RichTextWidget (current behavior).
-        // v0.6 RC13: RC12 confirmed all 3 slider bindings work in isolation.
-        // RC13 tests the IsVisible="@Slot0_IsInteger" binding on the wrapping
-        // ListPanel — that was the OTHER big difference between working RC12
-        // and crashing RC8. In RC8 every slot wrapped its slider in
-        // <ListPanel IsVisible="@Slot{n}_IsInteger">; if that binding causes
-        // a construction-time crash (because the binding system tries to
-        // resolve it before the data source is ready), then the IsVisible
-        // approach is poisoned and we have to find another way to hide
-        // sliders for non-numeric slots.
-        // Slot 0 will usually land on a group header, so Slot0_IsInteger=false
-        // and the slider will be hidden. The question is: does the BINDING
-        // resolution itself crash, regardless of the value?
-        // v0.6 RC17: RC15 (5) worked, RC16 (7) crashed. Try 6 sliders.
-        // Slots 1-5 use BuildSliderBlock (5 sliders) + slot 0 hardcoded (1) = 6.
-        // If RC17 works: threshold is 6 exactly; 7 is too many.
-        // If RC17 crashes: threshold is 5 exactly; 6 is too many.
-        // v0.5.5 unified-binding ship: ONE slider per slot covers BOTH int
-        // and float settings. Slot{n}_FloatValue dispatches internally on
-        // IsInteger vs IsFloating, and Slot{n}_IsNumeric (new) controls
-        // visibility. Net result: 6 sliders per page (within the safe
-        // ceiling), but those 6 sliders now cover both int AND float
-        // numerics, not just int. Slots 6-9 still text-only.
-        // v1.0 (task #7 + #13 perf): the 6-slider crash ceiling is lifted
-        // (UpdateValueContinuously was the missing attribute) but each
-        // SliderWidget is still a heavy widget — 5 sprite layers, native
-        // handle allocation, per-frame layout. With 50 slot rows and a
-        // slider per row, scrolling stutters because Gauntlet relays out
-        // every slider on every scroll tick. Gate slider rendering to the
-        // first 20 numeric slots (sliders for the most-likely-edited
-        // settings, text fallback for the tail). 20 is empirical — feels
-        // smooth in testing and covers >95% of consumer-mod use cases.
-        string numericDisplay = (n < 20)
-            ? BuildUnifiedSliderBlock(s)
-            : "                <RichTextWidget IsVisible=\"@Slot" + s + "_IsNumeric\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@Slot" + s + "_ValueText\" />\n";
-
-        // v1.0 (task #5): Command.HoverBegin / Command.HoverEnd on each slot
-        // row's outer Widget invoke ExecuteSlot{n}Hover / ExecuteSlot{n}HoverEnd
-        // on the mixin, which populate HoveredOptionName + HoveredHintText.
-        // Those bindings drive the hint panel in FooterXml (gated on
-        // IsHintVisible). Wired per-slot because Gauntlet can't dynamically
-        // dispatch one handler with the slot index as an argument.
-        return
-            "        <Widget IsVisible=\"@Slot" + s + "_IsVisible\" Command.HoverBegin=\"ExecuteSlot" + s + "Hover\" Command.HoverEnd=\"ExecuteSlot" + s + "HoverEnd\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" SuggestedHeight=\"50\" MarginTop=\"4\">\n"
-            + "          <Children>\n"
-            // Polish #8: when this slot is a group-header row, render the
-            // header text AND a thin divider line beneath it. The divider
-            // visually separates the group from the slot rows that follow,
-            // matching vanilla SP-options' Video/Audio/Gameplay section
-            // dividers. ListPanel container stacks the two children
-            // vertically; both are gated on the same Slot{n}_IsHeader flag.
-            + "            <ListPanel IsVisible=\"@Slot" + s + "_IsHeader\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
-            + "              <Children>\n"
-            + "                <RichTextWidget WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" Brush=\"SPOptions.GameKeysGroup.Title.Text\" Text=\"@Slot" + s + "_GroupHeader\" />\n"
-            + "                <Widget WidthSizePolicy=\"Fixed\" SuggestedWidth=\"600\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"1\" HorizontalAlignment=\"Center\" MarginTop=\"3\" Brush=\"SPOptions.Group.Title.Separator\" />\n"
-            + "              </Children>\n"
-            + "            </ListPanel>\n"
-            + "            <ListPanel IsVisible=\"@Slot" + s + "_IsProperty\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
-            + "              <Children>\n"
-            + "                <TextWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"500\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Right\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@Slot" + s + "_DisplayName\" />\n"
-            // v1.0 (task #5): Command.HoverBegin/HoverEnd added to interactive
-            // child widgets too — ButtonWidget consumes hover events for its
-            // own brush state changes and doesn't bubble them to the outer
-            // Widget, so the hint panel never fired when the user hovered the
-            // toggle/button directly. Wiring it on the button itself routes
-            // the same ExecuteSlot{n}Hover call.
-            + "                <ButtonWidget IsVisible=\"@Slot" + s + "_IsBool\" Command.Click=\"ExecuteSlot" + s + "ToggleBool\" Command.HoverBegin=\"ExecuteSlot" + s + "Hover\" Command.HoverEnd=\"ExecuteSlot" + s + "HoverEnd\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"120\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"40\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"Popup.Cancel.Button\" UpdateChildrenStates=\"true\">\n"
-            + "                  <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@Slot" + s + "_BoolText\" /></Children>\n"
-            + "                </ButtonWidget>\n"
-            // v0.5.6: action-button widget for IsButton settings (Discord
-            // links, etc.). Bound to ExecuteSlot{n}ActionButton, hidden for
-            // non-button slots via Slot{n}_IsButton visibility binding.
-            // v1.0 (BEW shim): button text reads from Slot{n}_ButtonText so
-            // fluent buttons added via AddButton(...) show their proper
-            // `content` label (e.g. "Reset") instead of a generic "Run".
-            + "                <ButtonWidget IsVisible=\"@Slot" + s + "_IsButton\" Command.Click=\"ExecuteSlot" + s + "ActionButton\" Command.HoverBegin=\"ExecuteSlot" + s + "Hover\" Command.HoverEnd=\"ExecuteSlot" + s + "HoverEnd\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"240\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"40\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"Popup.Done.Button.NineGrid\" UpdateChildrenStates=\"true\">\n"
-            + "                  <Children><TextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" DoNotAcceptEvents=\"true\" Brush=\"Popup.Button.Text\" Text=\"@Slot" + s + "_ButtonText\" /></Children>\n"
-            + "                </ButtonWidget>\n"
-            + numericDisplay
-            // v0.9.2: editable text field (was a read-only RichTextWidget --
-            // string settings could never be typed into). Mirrors the RowList
-            // ItemTemplate fix; Slot{n}_TextValue setter is already write-through.
-            + "                <EditableTextWidget Id=\"Slot" + s + "TextValueInput\" IsVisible=\"@Slot" + s + "_IsText\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"360\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@Slot" + s + "_TextValue\" />\n"
-            + "                <RichTextWidget IsVisible=\"@Slot" + s + "_IsDropdown\" WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" Brush=\"SPOptions.Dropdown.Center.Text\" Text=\"@Slot" + s + "_DropdownText\" />\n"
-            + "              </Children>\n"
-            + "            </ListPanel>\n"
-            + "          </Children>\n"
-            + "        </Widget>\n";
-    }
-
-    /// <summary>
-    /// v1.0 (task #12): VM-context slot template used for slots 10-99 in the
-    /// unpaginated scrollable mod page. Outer Widget keeps mixin context so
-    /// Command.HoverBegin/HoverEnd hit the mixin's ExecuteSlot{n}Hover handlers
-    /// (which feed the HoveredOptionName/HintText panel below the list); the
-    /// inner Widget switches DataSource to Slot{n}_VM so every binding inside
-    /// (IsHeader, IsProperty, DisplayName, IsBool, BoolValue, IsButton,
-    /// ButtonContentText, IsNumeric, ValueText, IsText, TextValue, IsDropdown,
-    /// DropdownText) reads from the SettingsPropertyVM directly. No slider —
-    /// numeric properties in slots 10-99 fall back to text-only (lifted when
-    /// task #7 raises the 6-slider ceiling).
-    /// </summary>
-    private static string BuildVmSlotRow(int n)
-    {
-        var s = n.ToString();
-        // v1.0 (task #12 debug): minimal template — just display the
-        // DisplayName and a one-character type-kind indicator so we can see
-        // whether the DataSource scope is actually propagating bindings to
-        // VM context. If `@DisplayName` renders correctly we know the scope
-        // works and the broken rendering was something else; if it shows
-        // blank we know the scope itself doesn't propagate and we need a
-        // different approach.
-        // Diagnostic 2: try dot-notation path binding `Slot{n}_VM.DisplayName`
-        // without a DataSource attribute. If Gauntlet supports nested-property
-        // syntax, we can route every binding through the VM by name without
-        // needing the scope to "stick" to child elements (which it apparently
-        // doesn't outside of ItemTemplate).
-        return
-            "        <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" SuggestedHeight=\"40\" MarginTop=\"4\">\n"
-            + "          <Children>\n"
-            + "            <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"StretchToParent\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@Slot" + s + "_VM.DisplayName\" />\n"
-            + "          </Children>\n"
-            + "        </Widget>\n";
-    }
-
-    // v1.0 (task #12): touched to force the harness to flush its cached
-    // copy of this file back to disk — bash-side Python writes were getting
-    // truncated by the remote-mount layer on the way out.
-    //
-    // v0.6 RC7: vanilla OptionItem.xml NumericOption block, slot-prefixed for
-    // unique widget IDs. The KEY difference vs all previous attempts is the
-    // NavigationTargetSwitcher + NavigationAutoScrollWidget pair as the FIRST
-    // two children of the ListPanel, before SliderWidget. This pattern was
-    // missing from every prior bisect.
-    // v0.5.5 unified slider block. One slider per slot covering int and float.
-    // - Bound to Slot{n}_FloatValue (the mixin getter dispatches int vs float)
-    // - IsDiscrete bound to Slot{n}_IsInteger (true snaps to whole numbers, false continuous)
-    // - DiscreteIncrementInterval is a literal "1" — works for ints; floats ignore it when IsDiscrete=false
-    // - IsVisible bound to Slot{n}_IsNumeric (IsInteger || IsFloating)
-    private static string BuildUnifiedSliderBlock(string s)
-    {
-        string sliderId = "Slot" + s + "NumSlider";
-        string fillerId = "Slot" + s + "NumFiller";
-        string handleId = "Slot" + s + "NumSliderHandle";
-        return
-            "                <ListPanel IsVisible=\"@Slot" + s + "_IsNumeric\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" MarginLeft=\"20\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
-            + "                  <Children>\n"
-            + "                    <NavigationTargetSwitcher FromTarget=\"..\\.\" ToTarget=\"..\\" + sliderId + "\\" + handleId + "\" />\n"
-            + "                    <NavigationAutoScrollWidget TrackedWidget=\"..\\" + sliderId + "\\" + handleId + "\" AutoScrollTopOffset=\"90\" AutoScrollBottomOffset=\"90\" />\n"
-            // v1.0 (task #7): added UpdateValueContinuously="@SliderUpdateFalse"
-            // — vanilla OptionItem.xml binds this attribute (we missed it
-            // entirely), and the SliderWidget construction path may treat its
-            // absence as an uninitialized native handle that runs out of room
-            // past 6 instances per page. Bound to a static `false` mixin
-            // property so the slider only fires its ValueFloat change after
-            // the user releases the handle (matching vanilla behavior for
-            // game-options sliders). DiscreteIncrementInterval also now a
-            // binding — vanilla binds it, we had a literal "1" which the
-            // construction may dislike when widgets compete for whatever
-            // shared resource the 6-slider ceiling implies.
-            + "                    <SliderWidget Id=\"" + sliderId + "\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"338\" SuggestedHeight=\"42\" VerticalAlignment=\"Center\" DoNotUpdateHandleSize=\"true\" Filler=\"" + fillerId + "\" Handle=\"" + handleId + "\" IsDiscrete=\"@Slot" + s + "_IsInteger\" DiscreteIncrementInterval=\"@SliderIncrementOne\" MaxValueFloat=\"@Slot" + s + "_MaxValue\" MinValueFloat=\"@Slot" + s + "_MinValue\" ValueFloat=\"@Slot" + s + "_FloatValue\" UpdateValueContinuously=\"@SliderUpdateFalse\">\n"
-            + "                      <Children>\n"
-            + "                        <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"362\" SuggestedHeight=\"38\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Sprite=\"SPGeneral\\SPOptions\\standart_slider_canvas\" DoNotAcceptEvents=\"true\" />\n"
-            + "                        <Widget Id=\"" + fillerId + "\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"345\" SuggestedHeight=\"35\" VerticalAlignment=\"Center\" Sprite=\"SPGeneral\\SPOptions\\standart_slider_fill\" ClipContents=\"true\">\n"
-            + "                          <Children>\n"
-            + "                            <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"345\" SuggestedHeight=\"35\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Sprite=\"SPGeneral\\SPOptions\\standart_slider_fill\" />\n"
-            + "                          </Children>\n"
-            + "                        </Widget>\n"
-            + "                        <Widget WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"400\" SuggestedHeight=\"65\" HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Sprite=\"SPGeneral\\SPOptions\\standart_slider_frame\" DoNotAcceptEvents=\"true\" />\n"
-            // Polish #9: slider handle widened from 14 to 18 px and given a
-            // small vertical bump (38 -> 42) so it sits visually proud of the
-            // track and is easier to click on without sub-pixel precision.
-            // Vanilla SP Options sliders use roughly this footprint; the
-            // pre-polish 14×38 was a hair smaller than the surrounding
-            // controls and looked under-sized next to the click-to-edit
-            // numeric field to the right.
-            + "                        <ImageWidget Id=\"" + handleId + "\" DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" HeightSizePolicy=\"Fixed\" SuggestedWidth=\"18\" SuggestedHeight=\"42\" HorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.Slider.Handle\" />\n"
-            + "                      </Children>\n"
-            + "                    </SliderWidget>\n"
-            // v0.7.6 click-to-edit: replaced read-only RichTextWidget with an
-            // EditableTextWidget bound two-way to Slot{n}_EditableValueText.
-            // User can click the number, type a new value, and the setter
-            // parses+clamps+writes IntValue/FloatValue. Slider drag still
-            // updates this text via the FloatValue setter notifying
-            // EditableValueText. Brush matches the search box so the field
-            // visibly affords typing.
-            + "                    <EditableTextWidget Id=\"Slot" + s + "ValueInput\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"90\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"38\" MarginLeft=\"20\" VerticalAlignment=\"Center\" Brush=\"CustomBattle.Search.TextBox\" Text=\"@Slot" + s + "_EditableValueText\" />\n"
-            + "                  </Children>\n"
-            + "                </ListPanel>\n";
-    }
 }

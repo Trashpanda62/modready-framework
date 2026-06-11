@@ -44,6 +44,16 @@ internal static class TabSwitchGuardPatch
     /// </summary>
     internal static bool AnyTextFieldFocused => Volatile.Read(ref _focusedCount) > 0;
 
+    /// <summary>
+    /// Zero the focused-field refcount. Called when the Options screen opens. An
+    /// EditableTextWidget torn down while still focused (screen closed mid-edit,
+    /// or the widget removed without an OnLoseFocus) leaks a +1 that never comes
+    /// back down; because the count is per-process, AnyTextFieldFocused then
+    /// stays true forever and Q/E tab navigation is silently dead on EVERY later
+    /// Options visit. Resetting on each open bounds the damage to one screen.
+    /// </summary>
+    internal static void ResetFocusCount() => Volatile.Write(ref _focusedCount, 0);
+
     public static void Install()
     {
         if (Interlocked.CompareExchange(ref _installed, 1, 0) != 0) return;

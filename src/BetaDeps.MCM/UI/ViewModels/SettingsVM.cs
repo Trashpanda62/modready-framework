@@ -168,24 +168,31 @@ public class SettingsVM : ViewModel
         }
     }
 
-    /// <summary>Persist the current values to disk.</summary>
+    /// <summary>Persist the current values to disk (every scope: global,
+    /// per-save, per-campaign, and fluent).</summary>
     public void Apply()
     {
-        if (Settings is MCM.Abstractions.Base.Global.BaseGlobalSettings global)
-        {
-            // SettingsStorage.Save is internal; route via the generic accessor that
-            // AttributeGlobalSettings exposes through reflection.
-            var saveMethod = Settings.GetType().GetMethod("Save", BindingFlags.Public | BindingFlags.Instance);
-            saveMethod?.Invoke(Settings, null);
-        }
+        // M15: the old gate (is BaseGlobalSettings) silently no-opped for
+        // per-save, per-campaign, and fluent settings -- none of which derive
+        // from BaseGlobalSettings -- so their "Done" clicks never persisted.
+        // SettingsStorage.Save is the shared choke-point each scope's own Save()
+        // already routes through; call it directly (same assembly) so one path
+        // covers them all, including fluent settings that expose no Save().
+        MCM.Internal.SettingsStorage.Save(Settings, Settings.Id);
     }
 
     /// <summary>Discard pending property changes; re-read from JSON.</summary>
     public void Revert()
     {
-        // Force the singleton to drop its cached instance + reload from disk.
-        var resetMethod = Settings.GetType().GetMethod("Reset", BindingFlags.Public | BindingFlags.Static);
-        resetMethod?.Invoke(null, null);
+        // M15: reload THIS instance's values from disk and rebuild the bound
+        // rows. The old static-Reset reflection no-opped for fluent/per-save
+        // (no GlobalSettings<TSelf>.Reset to find) and, even for attribute
+        // settings, only nulled the singleton -- the panel stayed bound to the
+        // instance still holding its unsaved edits. Load is scope-aware and
+        // handles both fluent and attribute settings, writing disk values back
+        // over the in-memory edits = a real revert.
+        MCM.Internal.SettingsStorage.Load(Settings, Settings.Id);
+        BuildGroups();
     }
 
     /// <summary>Reset every property to its CLR default value.</summary>

@@ -30,21 +30,14 @@ public class MCMSubModule : MBSubModuleBase
             // v1.0: install the Q/E tab-switch guard so typing letters in the
             // inline Mod Config search field doesn't rotate away from our tab.
             TabSwitchGuardPatch.Install();
-            // v0.5.5 REVERTED (second attempt): ROTSafeMode.Apply() — even the
-            // metadata-only list-mutation approach crashed the game in testing.
-            // The Module.CurrentModule property getter or the SubModules
-            // reflection apparently has side effects at the point BetaDeps.MCM
-            // runs. Two failed approaches teach us this needs a static analysis
-            // of TaleWorlds.MountAndBlade.Module structure (which requires
-            // reference-assembly access we don't have right now). The
-            // ROTSafeMode.cs source is kept for the v0.6 attempt.
-            //
-            // For v0.5.4: ROT remains marked incompatible in the Nexus
-            // description. Useful data point from testing: ROT *does* load
-            // successfully in some sessions (the 01:41 archive shows a full
-            // run with all 24 mods including RealmOfThrones_v1 saving
-            // settings) — so the crash is intermittent / load-order dependent,
-            // not deterministic.
+            // ROTSafeMode (two reverted attempts to neutralize the Realm of
+            // Thrones type-load crash by mutating the module list) was removed
+            // in Phase 5 (M13): both approaches crashed the game in testing, and
+            // a real fix needs static analysis of TaleWorlds.MountAndBlade.Module
+            // internals we can't reach from reference assemblies. ROT stays
+            // marked incompatible in the Nexus description; the crash is
+            // intermittent / load-order dependent (some sessions load all mods
+            // including RealmOfThrones_v1 fine), not deterministic.
         }
         catch (Exception ex)
         {

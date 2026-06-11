@@ -465,7 +465,12 @@ public static class PsaiRedirectManager
             if (getThemeById == null) { DiagLog.Log(Tag, $"probe[{when}]: getThemeById not found"); return; }
 
             var sb = new System.Text.StringBuilder($"probe[{when}]:");
-            foreach (var id in new[] { 1, 90001, 90002, 90006 })
+            // Vanilla sentinel (1) plus every theme we actually generate, so the
+            // two two-digit ids (Defeat=900010 / Naval=900011) are probed like the
+            // rest instead of being silently skipped by a hardcoded sample.
+            var probeIds = new List<int> { 1 };
+            probeIds.AddRange(MusicThemeMap.CustomThemeIds);
+            foreach (var id in probeIds)
             {
                 var theme = getThemeById.Invoke(soundtrack, new object[] { id });
                 sb.Append($" {id}={(theme != null ? "OK" : "null")}");

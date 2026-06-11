@@ -471,6 +471,12 @@ internal static class SettingsStorage
             }
             WriteAtomic(path, jo.ToString());
             DiagLog.Log(Tag, $"saved '{settingsId}' to {path}");
+            // M15: this is the single choke-point every scope's Save() routes
+            // through (global, per-save, per-campaign, fluent), so raising here
+            // means consumers subscribed to SettingsEvents.SaveTriggered (CREST
+            // syncs crest.json from it) actually get the signal -- it was never
+            // raised before. RaiseSaveTriggered swallows its own exceptions.
+            SettingsEvents.RaiseSaveTriggered(__id);
         }
         catch (Exception ex)
         {

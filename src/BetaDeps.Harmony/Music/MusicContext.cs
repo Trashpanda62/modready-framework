@@ -74,18 +74,26 @@ public static class MusicContextExtensions
         => ctx >= MusicContext.SettlementTown;
 
     /// <summary>
-    /// Local theme id (1-based) for PSAI-path contexts. Combined with the
-    /// module prefix 9000 via int.Parse("9000" + localId) string-concat, this
-    /// produces the effective theme id (Menu -> 90001, CampaignPeace -> 90002,
-    /// ...). Returns -1 for settlement contexts, which have no PSAI theme.
+    /// Local theme id (1-based) for PSAI-path contexts. This is the value written
+    /// to soundtrack.xml as &lt;Id&gt;; PSAI prepends the "9000" ModuleIdPrefix via
+    /// int.Parse("9000" + localId) string-concat at load time to get the effective
+    /// id (see <see cref="CustomThemeId"/>). Returns -1 for settlement contexts,
+    /// which have no PSAI theme.
     /// </summary>
     public static int LocalThemeId(this MusicContext ctx)
         => ctx.IsPsaiPath() ? ((int)ctx + 1) : -1;
 
     /// <summary>
-    /// Effective PSAI theme id (e.g. 90001) for PSAI-path contexts, or -1 for
-    /// settlement contexts. Uses the documented string-concat mangling, NOT
-    /// 9000 * localId.
+    /// Effective PSAI theme id for PSAI-path contexts, or -1 for settlement
+    /// contexts. This MUST mirror PSAI's own load-time mangling exactly:
+    /// int.Parse("9000" + localId) string-concat (decompiled PsaiProject:
+    /// "theme.Id = int.Parse(ModuleIdPrefix + theme.Id)"). Do NOT "simplify" to
+    /// 90000 + localId arithmetic: for two-digit local ids the concat is
+    /// non-contiguous -- Defeat (local 10) -> 900010 and Naval (local 11) -> 900011,
+    /// NOT 90010/90011. Arithmetic would return ids PSAI never registered, so the
+    /// redirect would silently miss those two themes. Because the set is
+    /// non-contiguous, IsCustomThemeId is derived from these values rather than a
+    /// [min,max] range.
     /// </summary>
     public static int CustomThemeId(this MusicContext ctx)
     {

@@ -22,15 +22,34 @@
 //
 // Original work. MIT, copyright 2026 Maxfield Management Group.
 
+using System;
 using System.Collections.Generic;
 
 namespace BetaDeps.Harmony.Music;
 
 public static class MusicThemeMap
 {
-    // Our generated themes occupy 90001..90011 (prefix 9000 + local id 1..11).
-    public const int CustomThemeIdMin = 90001;
-    public const int CustomThemeIdMax = 90099;
+    // The set of effective theme ids we actually generate, computed exactly the
+    // way PSAI does at load time (int.Parse("9000" + localId); see
+    // MusicContext.CustomThemeId and SoundtrackXmlGenerator). NOT a contiguous
+    // [min,max] band: the two two-digit local ids concat to 900010 (Defeat) and
+    // 900011 (Naval), which sit OUTSIDE 90001..90099. A range check
+    // misclassifies exactly those two as "not ours" -- so we recognize the real
+    // set by membership instead. Derived from the enum, so adding a PSAI-path
+    // context updates it automatically.
+    private static readonly HashSet<int> GeneratedThemeIds = BuildGeneratedThemeIds();
+
+    private static HashSet<int> BuildGeneratedThemeIds()
+    {
+        var set = new HashSet<int>();
+        foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
+            if (ctx.IsPsaiPath())
+                set.Add(ctx.CustomThemeId());
+        return set;
+    }
+
+    /// <summary>Every effective theme id we generate (e.g. 90001..90009, 900010, 900011).</summary>
+    public static IReadOnlyCollection<int> CustomThemeIds => GeneratedThemeIds;
 
     // Vanilla MusicTheme enum values (from the decompiled enum).
     private static readonly Dictionary<int, MusicContext> Map = new()
@@ -116,7 +135,8 @@ public static class MusicThemeMap
         return Map.TryGetValue(vanillaThemeId, out context);
     }
 
-    /// <summary>True when the id is one of our generated 9000N themes.</summary>
+    /// <summary>True when the id is one of our generated themes (membership in the
+    /// actual generated set, so the two-digit Defeat/Naval ids are recognized too).</summary>
     public static bool IsCustomThemeId(int themeId)
-        => themeId >= CustomThemeIdMin && themeId <= CustomThemeIdMax;
+        => GeneratedThemeIds.Contains(themeId);
 }
