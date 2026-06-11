@@ -89,8 +89,8 @@ public static class IncompatibleModDetector
     /// v0.7.5: belt-and-suspenders check. Returns true if the module id is
     /// BetaDeps-owned, EITHER because it's in the explicit set above OR
     /// because it starts with "BetaDeps." (catches future expansions like
-    /// BetaDeps.TacticsEditor, BetaDeps.AnythingElse without needing to
-    /// remember to add them to the set).
+    /// BetaDeps.SomethingNew without needing to remember to add them to the
+    /// set).
     /// </summary>
     public static bool IsBetaDepsOwnedId(string? id)
     {

@@ -49,8 +49,8 @@ version (v2.4.99.0).
 
 ## Internal assemblies (BetaDeps.*)
 
-`BetaDeps.Foundation.dll`, `BetaDeps.Harmony.dll`, `BetaDeps.TacticsEditor.dll`
-— our own infrastructure, referenced by the other BetaDeps projects.
+`BetaDeps.Foundation.dll`, `BetaDeps.Harmony.dll` — our own infrastructure,
+referenced by the other BetaDeps projects.
 
 **Rule: AssemblyVersion is pinned at 0.9.0.0 and is NEVER bumped per
 release** — sibling DLLs bind against it, and bumping it would force every

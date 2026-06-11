@@ -27,7 +27,6 @@ There is no `v0.9.1` tag historically — tags start sparse; just go forward.
      - Own-assembly pins — Foundation / Harmony / HarmonyHost `0.9.0.0` — are
        **deliberately stable**; their own csproj comments warn that bumping them
        causes *CLR binding failures at game launch* on incremental builds.
-   - `BetaDeps.TacticsEditor` is a separate, unshipped component — leave it.
 
 ---
 
