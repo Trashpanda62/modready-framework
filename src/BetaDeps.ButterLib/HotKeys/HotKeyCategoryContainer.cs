@@ -68,9 +68,24 @@ internal sealed class HotKeyCategoryContainer : GameKeyContext
         foreach (var key in keys)
         {
             if (key == null || key.DefaultKey == InputKey.Invalid) continue;
-            var variation = categoryId + "_" + key.Uid;
-            nameText.AddVariationWithId(variation, new TextObject(key.DisplayName ?? key.Uid), noTags);
-            descText.AddVariationWithId(variation, new TextObject(key.Description ?? string.Empty), noTags);
+            // GameKeyOptionVM builds its text variation id from the NUMERIC
+            // GameKey id cast to the vanilla GameKeyDefinition enum:
+            //   FindText("str_key_name", GroupId + "_" + ((GameKeyDefinition)Id))
+            // so id 0 looks up "<category>_Up", not "<category>_<uid>".
+            // Register under both forms -- the enum-name one is what the
+            // current game version reads; the uid one guards against a
+            // future version switching to StringId.
+            var name = new TextObject(key.DisplayName ?? key.Uid);
+            var desc = new TextObject(key.Description ?? string.Empty);
+            var enumIdVariation = categoryId + "_" + ((GameKeyDefinition)id).ToString();
+            var uidVariation = categoryId + "_" + key.Uid;
+            nameText.AddVariationWithId(enumIdVariation, name, noTags);
+            descText.AddVariationWithId(enumIdVariation, desc, noTags);
+            if (!string.Equals(uidVariation, enumIdVariation, StringComparison.Ordinal))
+            {
+                nameText.AddVariationWithId(uidVariation, name, noTags);
+                descText.AddVariationWithId(uidVariation, desc, noTags);
+            }
 
             var gameKey = new GameKey(id, key.Uid, categoryId, key.DefaultKey, categoryId);
             RegisterGameKey(gameKey, true);
