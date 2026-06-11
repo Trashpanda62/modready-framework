@@ -243,11 +243,59 @@ public static class WidgetFactoryManager
         return true; // continue to original
     }
 
-    public static bool CreateBuiltinWidgetPrefix(string typeName, ref object? __result)
+    // Names we already logged a successful first construction for, to keep
+    // the log at one line per widget type instead of one per widget instance.
+    private static readonly HashSet<string> _constructedOnce = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Phase 2B (H13 widget facade): actually construct registered custom
+    /// widget types. The game routes a prefab node's Type through
+    /// CreateBuiltinWidget(UIContext, string); for names in our registry we
+    /// build the instance ourselves (Widget subclasses take a UIContext ctor
+    /// arg) and skip the original, which would throw on an unknown name and
+    /// drop the whole subtree. __args is used instead of named parameters so
+    /// the bind survives signature drift across game versions.
+    /// </summary>
+    public static bool CreateBuiltinWidgetPrefix(object[] __args, ref object? __result)
     {
-        // Stub: defer to upstream behavior for built-in widget creation.
-        // Custom-widget creation lives in CreateBuiltinWidget's normal flow.
-        return true;
+        try
+        {
+            if (__args == null) return true;
+            string? typeName = null;
+            object? context = null;
+            foreach (var a in __args)
+            {
+                if (a is string s) typeName ??= s;
+                else if (a != null) context ??= a;
+            }
+            if (typeName == null) return true;
+            var custom = GetCustomType(typeName);
+            if (custom == null) return true; // not ours; let the original run
+
+            try
+            {
+                __result = context != null
+                    ? Activator.CreateInstance(custom, context)
+                    : Activator.CreateInstance(custom);
+                bool firstTime;
+                lock (_gate) { firstTime = _constructedOnce.Add(typeName); }
+                if (firstTime)
+                    DiagLog.Log(Tag, $"constructed custom widget '{typeName}' ({custom.FullName})");
+                return false; // we built it; skip the original
+            }
+            catch (Exception ex)
+            {
+                CompatWarn.Once("UIExtenderEx.Widgets", $"CreateBuiltinWidget({typeName})",
+                    custom.Assembly.GetName().Name,
+                    "registered custom widget could not be constructed; its widget subtree will not render");
+                DiagLog.LogCaught(Tag, $"CreateBuiltinWidgetPrefix({typeName})", ex);
+                return true;
+            }
+        }
+        catch
+        {
+            return true;
+        }
     }
 
     public static void GetWidgetTypesPostfix(ref System.Collections.Generic.IEnumerable<string> __result)
@@ -265,9 +313,18 @@ public static class WidgetFactoryManager
         catch { }
     }
 
+    /// <summary>
+    /// Phase 2B (H13 widget facade): pass through. The game's IsCustomType
+    /// means "is this a prefab-based custom type" and steers prefab-node
+    /// resolution down the WidgetPrefab path; our registered C# widget
+    /// classes are builtin-style and are constructed by
+    /// <see cref="CreateBuiltinWidgetPrefix"/>. The old behavior claimed our
+    /// names here while creation was stubbed, which silently dropped the
+    /// whole widget subtree. The patch stays installed (pass-through) so
+    /// CrestPatchSelfTest's "is this method patched" probe still passes.
+    /// </summary>
     public static bool IsCustomTypePrefix(string typeName, ref bool __result)
     {
-        if (IsCustomType(typeName)) { __result = true; return false; }
         return true;
     }
 

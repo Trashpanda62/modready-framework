@@ -115,9 +115,11 @@ internal static class WidgetPrefabHook
             var movieName = Path.GetFileNameWithoutExtension(originalPath);
 
             // Collect every registered patch from every enabled UIExtender registry
-            // whose Movie matches this prefab name.
+            // whose Movie matches this prefab name. Honors both module-level
+            // Disable() (the Enabled snapshot excludes those registries) and
+            // per-type Disable(Type) (filtered here).
             var matching = UIExtenderEngine.Enabled
-                .SelectMany(r => r.Prefabs)
+                .SelectMany(r => r.Prefabs.Where(p => !r.IsDisabled(p.PatchType)))
                 .Where(p => string.Equals(p.Attribute.Movie, movieName, StringComparison.Ordinal))
                 .ToList();
 

@@ -25,6 +25,7 @@ using System.Linq;
 using System.Reflection;
 
 using Bannerlord.UIExtenderEx.Attributes;
+using Bannerlord.UIExtenderEx.Extensions;
 
 using BetaDeps.Foundation;
 
@@ -193,9 +194,10 @@ internal static class ViewModelBindingPatch
         }
         try
         {
-            // If the VM has the property, let the original handle it.
-            var vmProp = __instance.GetType().GetProperty(name,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            // If the VM has the property, let the original handle it. Hierarchical
+            // walk (M16): plain GetProperty throws AmbiguousMatchException when a
+            // derived VM shadows a base property.
+            var vmProp = __instance.GetType().GetPropertyHierarchical(name);
             if (vmProp != null) return true;
 
             foreach (var mixin in ViewModelMixinHost.GetMixins(__instance))
@@ -246,8 +248,15 @@ internal static class ViewModelBindingPatch
                         mi.GetCustomAttribute<DataSourceMethodAttribute>(inherit: true) != null);
                 if (m != null)
                 {
-                    var args = parameters ?? Array.Empty<object>();
-                    m.Invoke(mixin, args.Length == m.GetParameters().Length ? args : Array.Empty<object>());
+                    // M17: Gauntlet passes command parameters as strings; convert
+                    // each to the declared parameter type instead of invoking
+                    // with raw (or, worse, zero) args, which silently no-ops.
+                    if (!TryConvertCommandArgs(m, parameters, out var converted))
+                    {
+                        DiagLog.Log(Tag, $"ExecuteCommand('{commandName}'): mixin {mixin.GetType().FullName}.{m.Name} expects ({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))}), binding supplied {(parameters?.Length ?? 0)} arg(s) that could not be converted; not invoked");
+                        return true; // VM has no such method either; original no-ops
+                    }
+                    m.Invoke(mixin, converted);
                     return false; // skip original
                 }
             }
@@ -257,6 +266,50 @@ internal static class ViewModelBindingPatch
             DiagLog.LogCaught(Tag, $"ExecuteCommandPrefix({commandName})", ex);
         }
         return true; // not found; let original run (no-op or error path)
+    }
+
+    /// <summary>
+    /// Convert binding-supplied command args to the target method's parameter
+    /// types. Gauntlet hands command parameters over as strings (occasionally
+    /// as the source Widget); a [DataSourceMethod] taking int/float/bool/enum
+    /// needs per-parameter conversion or the Invoke throws. Returns false on
+    /// arity mismatch or an unconvertible argument.
+    /// </summary>
+    private static bool TryConvertCommandArgs(MethodInfo method, object[]? parameters, out object?[] converted)
+    {
+        var ps = method.GetParameters();
+        var args = parameters ?? Array.Empty<object>();
+        converted = new object?[ps.Length];
+        if (args.Length != ps.Length) return false;
+
+        for (int i = 0; i < ps.Length; i++)
+        {
+            var paramType = ps[i].ParameterType;
+            var arg = args[i];
+            if (arg == null)
+            {
+                // null can't fill a non-nullable value-type slot; Invoke would throw.
+                if (paramType.IsValueType && Nullable.GetUnderlyingType(paramType) == null) return false;
+                converted[i] = null;
+                continue;
+            }
+            if (paramType.IsInstanceOfType(arg))
+            {
+                converted[i] = arg;
+                continue;
+            }
+            try
+            {
+                converted[i] = paramType.IsEnum && arg is string enumText
+                    ? Enum.Parse(paramType, enumText, ignoreCase: true)
+                    : Convert.ChangeType(arg, paramType, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// <summary>
@@ -344,9 +397,8 @@ internal static class ViewModelBindingPatch
             // whose name is digits) so we don't mask a legitimate lookup.
         }
 
-        // 1. Native property on the concrete type.
-        var pi = current.GetType().GetProperty(node,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        // 1. Native property on the concrete type (hierarchical walk -- M16).
+        var pi = current.GetType().GetPropertyHierarchical(node);
         if (pi != null)
         {
             var v = pi.GetValue(current);

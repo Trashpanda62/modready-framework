@@ -13,11 +13,10 @@
 // (Runtime.UIExtenderEngine) which then applies prefab patches via the
 // Gauntlet movie hook and attaches mixins on VM construction.
 //
-// In this initial Phase 2 implementation the runtime engine records every
-// registration to the diag log but does not yet rewrite prefabs or attach
-// mixins -- those two pieces are scheduled as Phase 2 tasks #12 and #13.
-// Consumer mods compile and load against this assembly correctly; they
-// just won't see their UI changes applied yet.
+// The runtime engine applies prefab patches as Gauntlet movies load
+// (WidgetPrefabHook -> PrefabPatcher, v1 and v2 patch families) and
+// attaches mixins after each target VM finishes constructing
+// (ViewModelMixinHook -> ViewModelMixinHost, deferred first-touch attach).
 
 using System;
 using System.Collections.Generic;
@@ -186,15 +185,14 @@ public class UIExtender
     }
 
     /// <summary>
-    /// v0.5.8 (Retinues compat): some consumer mods call UIExtender.Disable()
-    /// on submodule unload (e.g. Retinues.SubModule.DisableUIExtender). The
-    /// upstream BUTR UIExtenderEx exposes a Disable() method; we omitted it
-    /// because BetaDeps's runtime tears the patches down naturally at game
-    /// shutdown — no per-mod disable hook is needed. Mods that explicitly
-    /// invoke Disable() crash with MethodNotFoundException without this stub.
-    /// Marking the registry disabled is enough to satisfy callers; the
-    /// engine's Harmony patches stay installed for the rest of the session
-    /// (game is about to shut down anyway).
+    /// v0.5.8 (Retinues compat), made real in Phase 2B: disables this module's
+    /// registrations. The engine's global Harmony patches stay installed (they
+    /// are shared by every module), but the runtime checks the registry's
+    /// Enabled flag at apply time, so a disabled module's prefab patches stop
+    /// applying to newly loaded movies and its mixins stop attaching to newly
+    /// constructed VMs. Already-applied prefab edits and already-attached
+    /// mixins are not rolled back. Enable() after Disable() reactivates the
+    /// same registry without re-registering (no duplicates).
     /// </summary>
     public void Disable()
     {
@@ -208,16 +206,12 @@ public class UIExtender
     }
 
     /// <summary>
-    /// v0.7.2 (BannerCraft v1.3.13 compat): some consumer mods call
-    /// `UIExtender.Disable(typeof(SomeMixin))` to disable a single
-    /// prefab / mixin patch without disabling the whole module. The
-    /// upstream BUTR API takes a System.Type identifying the patch class.
-    /// We don't physically uninstall the patches at runtime — once Harmony
-    /// has applied them they stay until the game closes — but we add the
-    /// type to the registry's DisabledTypes set so the runtime engine
-    /// skips that registration going forward, AND so callers querying the
-    /// registry see consistent state. The main job here is to satisfy the
-    /// MissingMethodException that BannerCraft was hitting.
+    /// v0.7.2 (BannerCraft v1.3.13 compat): disable a single prefab / mixin
+    /// patch without disabling the whole module. The upstream BUTR API takes
+    /// a System.Type identifying the patch class. The runtime engine checks
+    /// the disabled set at apply time, so the type stops being applied to
+    /// newly loaded movies / newly constructed VMs from this call onward;
+    /// already-applied instances are not rolled back.
     /// </summary>
     public void Disable(Type patchType)
     {
@@ -226,14 +220,7 @@ public class UIExtender
             DiagLog.Log(Tag, $"Disable(null) on '{_moduleName}': ignored");
             return;
         }
-        try
-        {
-            _registry.DisabledTypes.Add(patchType);
-        }
-        catch (Exception ex)
-        {
-            DiagLog.LogCaught(Tag, $"Disable(Type={patchType.FullName})", ex);
-        }
+        _registry.SetDisabled(patchType);
         DiagLog.Log(Tag, $"Disable('{_moduleName}', {patchType.FullName}): marked inactive in registry");
     }
 

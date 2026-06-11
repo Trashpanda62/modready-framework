@@ -48,6 +48,23 @@ public static class ReflectionHelpers
         }
     }
 
+    /// <summary>
+    /// Look up an instance property by name, walking the inheritance chain
+    /// with DeclaredOnly so the most-derived declaration wins. A plain
+    /// GetProperty(name) throws AmbiguousMatchException when both a base
+    /// class and an override/new declaration are visible (covariant return
+    /// or explicit hide) -- common in TaleWorlds VM hierarchies.
+    /// </summary>
+    public static PropertyInfo? GetPropertyHierarchical(this Type? t, string name)
+    {
+        for (var cur = t; cur != null; cur = cur.BaseType)
+        {
+            var p = cur.GetProperty(name, AllInstance | BindingFlags.DeclaredOnly);
+            if (p != null) return p;
+        }
+        return null;
+    }
+
     /// <summary>Set a non-public instance field via reflection. Returns true on success.</summary>
     public static bool SetField(object? instance, string fieldName, object? value)
     {

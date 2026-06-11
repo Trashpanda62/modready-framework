@@ -56,9 +56,20 @@ internal sealed class UIExtenderRegistry
     /// Patch / mixin types the consumer mod has explicitly disabled via
     /// UIExtender.Disable(Type). Runtime engine checks this set before
     /// applying a registration. Empty for the typical mod that never
-    /// calls per-type Disable.
+    /// calls per-type Disable. Guarded by its own lock because Disable
+    /// can race the hot-path readers (prefab loads, VM construction).
     /// </summary>
-    public HashSet<Type> DisabledTypes { get; } = new();
+    private readonly HashSet<Type> _disabledTypes = new();
+
+    public bool IsDisabled(Type patchType)
+    {
+        lock (_disabledTypes) { return _disabledTypes.Contains(patchType); }
+    }
+
+    public void SetDisabled(Type patchType)
+    {
+        lock (_disabledTypes) { _disabledTypes.Add(patchType); }
+    }
 
     public UIExtenderRegistry(string moduleName) { ModuleName = moduleName; }
 }

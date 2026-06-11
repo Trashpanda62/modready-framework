@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Xml;
 
 using Bannerlord.UIExtenderEx.Attributes;
+using Bannerlord.UIExtenderEx.Extensions;
 using Bannerlord.UIExtenderEx.Prefabs2;
 
 using BetaDeps.Foundation;
@@ -93,6 +94,29 @@ internal static class PrefabPatcher
             return ApplyInsert(doc, target, reg);
         }
 
+        // v1 patch families (Bannerlord.UIExtenderEx.Prefabs). Older consumer
+        // mods (CDE-class) still ship these; map each onto the same insert
+        // machinery the v2 path uses.
+        if (typeof(Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertPatch).IsAssignableFrom(reg.PatchType))
+        {
+            return ApplyV1Insert(doc, target, reg);
+        }
+        if (typeof(Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertAsSiblingPatch).IsAssignableFrom(reg.PatchType))
+        {
+            return ApplyV1InsertAsSibling(doc, target, reg);
+        }
+        if (typeof(Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionReplacePatch).IsAssignableFrom(reg.PatchType))
+        {
+            return ApplyV1Replace(doc, target, reg);
+        }
+        if (typeof(Bannerlord.UIExtenderEx.Prefabs.CustomPatch).IsAssignableFrom(reg.PatchType))
+        {
+            return ApplyV1Custom(target, reg);
+        }
+
+        CompatWarn.Once("UIExtenderEx.Prefabs", reg.PatchType.BaseType?.FullName ?? "unknown base",
+            reg.PatchType.Assembly.GetName().Name,
+            $"prefab patch {reg.PatchType.FullName} has an unrecognized base class; its UI change will not appear");
         DiagLog.Log(Tag, $"{reg.PatchType.FullName}: unknown patch base; skipped");
         return false;
     }
@@ -100,15 +124,7 @@ internal static class PrefabPatcher
     private static bool ApplySetAttribute(XmlNode target, PrefabRegistration reg)
     {
         var instance  = Activator.CreateInstance(reg.PatchType);
-        // GetProperty throws AmbiguousMatchException when both base and override
-        // declare Attributes (covariant return or explicit hide). Walk the chain
-        // with DeclaredOnly so the most-derived declaration wins.
-        PropertyInfo? attrsProp = null;
-        for (var t = reg.PatchType; t != null; t = t.BaseType)
-        {
-            attrsProp = t.GetProperty("Attributes", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            if (attrsProp != null) break;
-        }
+        var attrsProp = reg.PatchType.GetPropertyHierarchical("Attributes");
         var attrsList = attrsProp?.GetValue(instance) as System.Collections.IEnumerable;
         if (attrsList == null)
         {
@@ -142,8 +158,13 @@ internal static class PrefabPatcher
     private static bool ApplyInsert(XmlDocument doc, XmlNode target, PrefabRegistration reg)
     {
         var instance = Activator.CreateInstance(reg.PatchType);
-        var typeProp = reg.PatchType.GetProperty("Type", BindingFlags.Public | BindingFlags.Instance);
-        var insertType = (InsertType)typeProp!.GetValue(instance);
+        var typeProp = reg.PatchType.GetPropertyHierarchical("Type");
+        if (typeProp == null)
+        {
+            DiagLog.Log(Tag, $"{reg.PatchType.FullName}: insert patch has no Type property; skipped");
+            return false;
+        }
+        var insertType = (InsertType)typeProp.GetValue(instance);
 
         // Locate the content member and produce the fragment(s) to insert.
         if (!TryResolveContent(instance, reg.PatchType, out var fragments, out var removeRootNode, out var contentDescription))
@@ -152,6 +173,18 @@ internal static class PrefabPatcher
             return false;
         }
 
+        return ApplyFragments(doc, target, insertType, fragments, removeRootNode, reg.PatchType.FullName ?? reg.PatchType.Name);
+    }
+
+    /// <summary>
+    /// Shared placement engine: import <paramref name="fragments"/> into
+    /// <paramref name="doc"/> and place them relative to <paramref name="target"/>
+    /// per <paramref name="insertType"/>. Used by both the v2 insert path and
+    /// the v1 patch families (which map their enums onto v2 InsertType).
+    /// </summary>
+    private static bool ApplyFragments(XmlDocument doc, XmlNode target, InsertType insertType,
+        List<XmlNode> fragments, bool removeRootNode, string patchName)
+    {
         // Import fragments into the destination document so they belong to it.
         var imported = fragments.Select(n => doc.ImportNode(n, deep: true)).ToList();
 
@@ -185,7 +218,7 @@ internal static class PrefabPatcher
                     target.ParentNode?.RemoveChild(target);
                     return true;
                 }
-                DiagLog.Log(Tag, $"{reg.PatchType.FullName}: ReplaceKeepChildren needs a single root element; skipped");
+                DiagLog.Log(Tag, $"{patchName}: ReplaceKeepChildren needs a single root element; skipped");
                 return false;
 
             case InsertType.Prepend:
@@ -233,6 +266,77 @@ internal static class PrefabPatcher
                 }
         }
         return false;
+    }
+
+    // ---- v1 patch families (Bannerlord.UIExtenderEx.Prefabs) ----
+
+    /// <summary>Pull the v1 patch's XmlDocument content into a fragment list.
+    /// Returns false (with a log line) when GetPrefabExtension yields nothing.</summary>
+    private static bool TryGetV1Content(object patch, string patchName, out List<XmlNode> fragments)
+    {
+        fragments = new List<XmlNode>();
+        XmlDocument? content = patch switch
+        {
+            Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertPatch p => p.GetPrefabExtension(),
+            Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertAsSiblingPatch p => p.GetPrefabExtension(),
+            Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionReplacePatch p => p.GetPrefabExtension(),
+            _ => null,
+        };
+        if (content?.DocumentElement == null)
+        {
+            DiagLog.Log(Tag, $"{patchName}: v1 GetPrefabExtension() returned no content; skipped");
+            return false;
+        }
+        fragments.Add(content.DocumentElement);
+        return true;
+    }
+
+    private static bool ApplyV1Insert(XmlDocument doc, XmlNode target, PrefabRegistration reg)
+    {
+        var patch = (Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertPatch)Activator.CreateInstance(reg.PatchType)!;
+        var patchName = reg.PatchType.FullName ?? reg.PatchType.Name;
+        if (!TryGetV1Content(patch, patchName, out var fragments)) return false;
+
+        var insertType = patch.Type switch
+        {
+            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Prepend => InsertType.Prepend,
+            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Append  => InsertType.Append,
+            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Replace => InsertType.Replace,
+            _ => InsertType.Child,
+        };
+        return ApplyFragments(doc, target, insertType, fragments, removeRootNode: false, patchName);
+    }
+
+    private static bool ApplyV1InsertAsSibling(XmlDocument doc, XmlNode target, PrefabRegistration reg)
+    {
+        var patch = (Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertAsSiblingPatch)Activator.CreateInstance(reg.PatchType)!;
+        var patchName = reg.PatchType.FullName ?? reg.PatchType.Name;
+        if (!TryGetV1Content(patch, patchName, out var fragments)) return false;
+
+        var insertType = patch.Type switch
+        {
+            Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertAsSiblingPatch.InsertType.Prepend => InsertType.Prepend,
+            Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionInsertAsSiblingPatch.InsertType.Replace => InsertType.Replace,
+            _ => InsertType.Append,
+        };
+        return ApplyFragments(doc, target, insertType, fragments, removeRootNode: false, patchName);
+    }
+
+    private static bool ApplyV1Replace(XmlDocument doc, XmlNode target, PrefabRegistration reg)
+    {
+        var patch = (Bannerlord.UIExtenderEx.Prefabs.PrefabExtensionReplacePatch)Activator.CreateInstance(reg.PatchType)!;
+        var patchName = reg.PatchType.FullName ?? reg.PatchType.Name;
+        if (!TryGetV1Content(patch, patchName, out var fragments)) return false;
+        return ApplyFragments(doc, target, InsertType.Replace, fragments, removeRootNode: false, patchName);
+    }
+
+    private static bool ApplyV1Custom(XmlNode target, PrefabRegistration reg)
+    {
+        // CustomPatch's contract (see Prefabs/CustomPatch.cs): Apply receives
+        // the parent of the XPath-selected node and mutates XML in place.
+        var patch = (Bannerlord.UIExtenderEx.Prefabs.CustomPatch)Activator.CreateInstance(reg.PatchType)!;
+        patch.Apply(target.ParentNode ?? target);
+        return true;
     }
 
     /// <summary>
@@ -334,6 +438,10 @@ internal static class PrefabPatcher
             var withExt = fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ? fileName : fileName + ".xml";
             var candidates = new[]
             {
+                // Upstream UIExtenderEx's standard folder for file-based prefab
+                // content -- the most common v2 layout in the wild, so it goes
+                // first (H11).
+                Path.Combine(moduleDir, "GUI", "PrefabExtensions", withExt),
                 Path.Combine(moduleDir, "GUI", "Prefabs2", withExt),
                 Path.Combine(moduleDir, "GUI", withExt),
                 Path.Combine(moduleDir, withExt),

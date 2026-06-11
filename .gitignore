@@ -39,7 +39,7 @@ desktop.ini
 
 # Generated XML dumps from runtime --------------------------------------------
 PatchedOptions.dump.xml
-merged-Options.xml
+merged-*.xml
 
 # NuGet -----------------------------------------------------------------------
 *.nupkg
