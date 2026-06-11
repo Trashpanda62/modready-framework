@@ -203,8 +203,15 @@ public sealed class PresentationRowVM : ViewModel
             {
                 var fmt = p.ValueFormat;
                 if (string.IsNullOrEmpty(fmt) || fmt.StartsWith("{=")) fmt = p.IsInteger ? "0" : "0.##";
-                if (p.IsInteger) return p.IntValue.ToString(fmt);
-                if (p.IsFloating) return p.FloatValue.ToString(fmt);
+                // Phase 2.1 / finding H9: format with InvariantCulture so the
+                // displayed text round-trips through SetFromEditableText's
+                // invariant parse. Current-culture formatting showed "0,5" on
+                // comma-decimal locales (de/tr/fr), the invariant parse then
+                // rejected the very text we displayed, and typed edits were
+                // silently dropped. Same fix the retired slot path already had
+                // (OptionsVMMixin); the live RowList path never got it.
+                if (p.IsInteger) return p.IntValue.ToString(fmt, CultureInfo.InvariantCulture);
+                if (p.IsFloating) return p.FloatValue.ToString(fmt, CultureInfo.InvariantCulture);
             }
             catch { }
             return string.Empty;
@@ -365,7 +372,11 @@ public sealed class PresentationRowVM : ViewModel
                 int iv;
                 if (!int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out iv))
                 {
-                    if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var fv))
+                    // H9: invariant first (matches our own display format),
+                    // then the user's culture so a German player typing "0,7"
+                    // isn't silently ignored.
+                    if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var fv) ||
+                        float.TryParse(s, NumberStyles.Float, CultureInfo.CurrentCulture, out fv))
                         iv = (int)Math.Round(fv);
                     else
                         return;
@@ -385,8 +396,9 @@ public sealed class PresentationRowVM : ViewModel
             }
             else if (p.IsFloating)
             {
-                if (!float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var fv))
-                    return;
+                if (!float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var fv) &&
+                    !float.TryParse(s, NumberStyles.Float, CultureInfo.CurrentCulture, out fv))
+                    return; // H9: accept invariant or local decimal separator
                 var minF = (float)p.MinValue;
                 var maxF = SafeMaxFloat(p);
                 if (fv < minF) fv = minF;

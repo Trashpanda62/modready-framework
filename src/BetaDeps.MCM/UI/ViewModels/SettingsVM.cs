@@ -54,9 +54,25 @@ public class SettingsVM : ViewModel
         // chains (Diplomacy, ImprovedGarrisons, RTSCamera, BetterSmithing,
         // etc.). The settings object has no [SettingPropertyX]-decorated
         // properties; the property data lives in the internal builder.
-        if (Settings is MCM.Abstractions.Base.Global.FluentGlobalSettings fluent)
+        if (Settings is MCM.Internal.IFluentSettings) // 2.3/H6: any fluent scope
         {
-            BuildGroupsFluent(fluent);
+            BuildGroupsFluent(Settings);
+            return;
+        }
+
+        // Phase 2.5 / finding M12: settings registered from a foreign MCM
+        // assembly arrive wrapped in ForeignSettingsAdapter. Reflecting over
+        // the ADAPTER finds zero [SettingProperty*] members, so the panel
+        // rendered blank while logs claimed success. Rendering a foreign
+        // instance properly needs SettingsPropertyVM to bind a non-BaseSettings
+        // owner (deferred -- rare dual-MCM-assembly case); until then the gap
+        // is REPORTED once per mod instead of silently shipping a blank page.
+        if (Settings is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter foreignAdapter)
+        {
+            BetaDeps.Foundation.CompatWarn.Once(
+                "MCM.ForeignSettings", "SettingsVM.BuildGroups",
+                foreignAdapter.Wrapped?.GetType().Assembly.GetName().Name,
+                $"'{Settings.Id}' registered via a foreign MCM assembly; its settings panel cannot be rendered yet and will appear empty");
             return;
         }
 
@@ -100,7 +116,7 @@ public class SettingsVM : ViewModel
     /// every group and every property declared on it, and build a
     /// SettingsPropertyGroupVM tree mirroring what the attribute path
     /// produces for AttributeGlobalSettings.</summary>
-    private void BuildGroupsFluent(MCM.Abstractions.Base.Global.FluentGlobalSettings fluent)
+    private void BuildGroupsFluent(MCM.Abstractions.BaseSettings fluent) // 2.3/H6: all three fluent scopes (each carries a `_builder` field)
     {
         // _builder is internal; reach via reflection to keep the public API
         // surface stable. SettingsBuilderImpl exposes a _groups list of

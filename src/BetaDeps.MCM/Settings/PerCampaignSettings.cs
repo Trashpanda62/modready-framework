@@ -53,9 +53,11 @@ public abstract class PerCampaignSettings<TSelf> : BasePerCampaignSettings
                 try
                 {
                     _instance = Activator.CreateInstance<TSelf>();
-                    // Phase 2 (H5) gives this a real Campaign\<id>\ scope;
-                    // until then values flow through the global JSON, same
-                    // as the PerSave stub.
+                    // Phase 2.4 / H5: SettingsStorage routes per-campaign
+                    // instances to Configs\ModSettings\PerCampaign\<campaignId>\;
+                    // the tracker resets this singleton on campaign start/end.
+                    MCM.Internal.ScopedSettingsTracker.Register(
+                        $"percampaign:{typeof(TSelf).FullName}", Reset);
                     try { MCM.Internal.SettingsStorage.Load(_instance, _instance.Id); }
                     catch (Exception ex)
                     {

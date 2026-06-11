@@ -63,10 +63,21 @@ public class ModOptionsVM : ViewModel
         try
         {
             _modSettingsList.Clear();
+            var seenIds = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
             foreach (var reg in SettingsRegistry.All.OrderBy(r => r.DisplayName))
+            {
                 _modSettingsList.Add(new SettingsVM(reg.Instance));
+                seenIds.Add(reg.Id);
+            }
+            // 2.3/H6 + M15: SettingsRegistry.DiscoverAll already merges fluent
+            // registrations, so only add fluent instances it didn't pick up
+            // (e.g. ones registered after discovery) -- the old unconditional
+            // second loop double-listed every fluent panel.
             foreach (var fluent in FluentSettingsRegistry.All.OrderBy(f => f.DisplayName))
+            {
+                if (!string.IsNullOrEmpty(fluent.Id) && seenIds.Contains(fluent.Id)) continue;
                 _modSettingsList.Add(new SettingsVM(fluent));
+            }
             SelectedMod = _modSettingsList.FirstOrDefault();
             DiagLog.Log(Tag, $"refreshed: {_modSettingsList.Count} settings panels");
         }

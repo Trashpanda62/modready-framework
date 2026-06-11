@@ -123,6 +123,26 @@ public class MCMSubModule : MBSubModuleBase
         }
     }
 
+    // Phase 2.4 / finding H5 (2026-06-10 review): per-save and per-campaign
+    // settings are scoped by campaign id on disk. These two hooks reset the
+    // scoped singletons (and fluent per-scope instances) at the campaign
+    // boundary so the next access reloads under the NEW campaign's path --
+    // without this, a singleton created in campaign A would keep serving
+    // A's values inside campaign B for the rest of the session.
+    public override void OnGameInitializationFinished(TaleWorlds.Core.Game game)
+    {
+        base.OnGameInitializationFinished(game);
+        try { ScopedSettingsTracker.ResetAll("game initialization finished"); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "OnGameInitializationFinished/ScopedReset", ex); }
+    }
+
+    public override void OnGameEnd(TaleWorlds.Core.Game game)
+    {
+        base.OnGameEnd(game);
+        try { ScopedSettingsTracker.ResetAll("game end"); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "OnGameEnd/ScopedReset", ex); }
+    }
+
     protected override void OnApplicationTick(float dt)
     {
         base.OnApplicationTick(dt);

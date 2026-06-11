@@ -97,14 +97,25 @@ public sealed class DropdownConverter : JsonConverter
                         TryReplaceItems(target, elementType, itemsArr);
                         handledStructured = true;
                     }
-                    if (obj.TryGetValue("SelectedIndex", out var idxTok) && idxTok.Type == JTokenType.Integer)
+                    // Phase 2.1 / finding H7 (2026-06-10 review): restore by
+                    // SelectedVALUE first, SelectedIndex only as fallback.
+                    // The old index-first order silently selected the WRONG
+                    // option whenever a mod's item list reordered or grew
+                    // across sessions (dynamically-built lists: key bindings,
+                    // mod lists, FasterTime/BSC-style options) -- even though
+                    // the correct value string sat right next to the stale
+                    // index in the JSON. McmSelfTest.ValuesEqual documented
+                    // exactly this drift.
+                    bool selectionRestored = false;
+                    if (obj.TryGetValue("SelectedValue", out var selTok) && selTok.Type != JTokenType.Null)
                     {
-                        SetSelectedIndex(target, (int)idxTok);
+                        selectionRestored = TrySetSelectedByValue(target, elementType, selTok);
                         handledStructured = true;
                     }
-                    else if (obj.TryGetValue("SelectedValue", out var selTok) && selTok.Type != JTokenType.Null)
+                    if (!selectionRestored &&
+                        obj.TryGetValue("SelectedIndex", out var idxTok) && idxTok.Type == JTokenType.Integer)
                     {
-                        SetSelectedValue(target, elementType, selTok);
+                        SetSelectedIndex(target, (int)idxTok);
                         handledStructured = true;
                     }
                     if (!handledStructured)
@@ -195,6 +206,34 @@ public sealed class DropdownConverter : JsonConverter
             t = t.BaseType;
         }
         return null;
+    }
+
+    /// <summary>
+    /// Phase 2.1 / H7: value-first restore. Returns true only when an actual
+    /// item match was found and the index was set; false means the caller may
+    /// fall back to the persisted SelectedIndex. ToObject failures on custom
+    /// T types are swallowed here (NOT thrown into ReadJson's catch) so a
+    /// broken value deserialization can't abort the whole restore -- the
+    /// stored repr string still gets a ToString match attempt, mirroring how
+    /// WriteJson persisted it.
+    /// </summary>
+    private static bool TrySetSelectedByValue(object target, Type elementType, JToken token)
+    {
+        object? raw = null;
+        try { raw = token.ToObject(elementType); } catch { /* custom T; fall through to repr match */ }
+        if (raw == null && token.Type == JTokenType.String)
+            raw = token.Value<string>(); // WriteJson stores item.ToString() -- match on repr
+
+        int matchIdx = raw != null ? FindMatchingItemIndex(target, raw) : -1;
+        if (matchIdx < 0 && token is JObject jobj)
+            matchIdx = FindMatchingItemByJsonFields(target, jobj);
+
+        if (matchIdx >= 0)
+        {
+            SetSelectedIndex(target, matchIdx);
+            return true;
+        }
+        return false;
     }
 
     private static void SetSelectedValue(object target, Type elementType, JToken token)

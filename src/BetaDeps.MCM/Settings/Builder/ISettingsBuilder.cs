@@ -121,6 +121,26 @@ public interface ISettingsPropertyGroupBuilder
     // is the text rendered on the button itself. The builder action lets the
     // caller configure HintText / Order / RequireRestart on the button row.
     ISettingsPropertyGroupBuilder AddButton(string id, string displayName, IRef @ref, string content, Action<ISettingsPropertyButtonBuilder>? configure = null);
+
+    // Phase 2.3 / finding H6 (2026-06-10 review): the two members the fluent
+    // group builder was missing vs upstream. Signatures verified against
+    // Aragas/Bannerlord.MBOptionScreen src/MCM.Abstractions/FluentBuilder/
+    // ISettingsPropertyGroupBuilder.cs (2026-06-10). A fluent consumer
+    // calling either used to die with MissingMethodException at JIT-bind --
+    // the same failure class as the v0.7.5 XorberaxLegacy ship-blocker.
+
+    /// <summary>
+    /// Dropdown property. `@ref` wraps the consumer's Dropdown&lt;T&gt; /
+    /// DropdownDefault&lt;T&gt; instance; `selectedIndex` is the initial
+    /// selection applied to it.
+    /// </summary>
+    ISettingsPropertyGroupBuilder AddDropdown(string id, string displayName, int selectedIndex, IRef @ref, Action<ISettingsPropertyDropdownBuilder>? configure = null);
+
+    /// <summary>
+    /// Toggle(bool) property: upstream renders this as the group's on/off
+    /// switch. `@ref` wraps the consumer's bool.
+    /// </summary>
+    ISettingsPropertyGroupBuilder AddToggle(string id, string displayName, IRef @ref, Action<ISettingsPropertyToggleBuilder>? configure = null);
 }
 
 // Generic, self-typed fluent property builder. Newer BUTR MCM revisions
@@ -200,5 +220,13 @@ public interface ISettingsPropertyFloatingIntegerBuilder : MCM.Abstractions.Flue
     MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder AddValueFormat(string valueFormat);
 }
 public interface ISettingsPropertyTextBuilder            : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyTextBuilder> { }
+
+// Phase 2.3 / H6: builder interfaces for the two previously-missing AddX
+// members. Names match upstream's Models files (ISettingsPropertyDropdownBuilder.cs,
+// ISettingsPropertyToggleBuilder.cs in Aragas/Bannerlord.MBOptionScreen);
+// same generic self-typed inheritance pattern as the other typed builders --
+// see the EntryPointNotFoundException warning above before changing it.
+public interface ISettingsPropertyDropdownBuilder        : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyDropdownBuilder> { }
+public interface ISettingsPropertyToggleBuilder          : MCM.Abstractions.FluentBuilder.ISettingsPropertyBuilder<ISettingsPropertyToggleBuilder> { }
 
 }  // namespace MCM.Abstractions.FluentBuilder.Models

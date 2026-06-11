@@ -43,7 +43,7 @@ public class SettingsPropertyVM : ViewModel
     // FluentGlobalSettings + FluentProperty instead of reflection+attribute).
     // When _fluentProp != null, reads/writes go through MCM.Abstractions.
     // Base.Global.FluentGlobalSettings.Get/Set instead of PropertyInfo.
-    private readonly MCM.Abstractions.Base.Global.FluentGlobalSettings? _fluentOwner;
+    private readonly MCM.Internal.IFluentSettings? _fluentOwner; // 2.3/H6: any fluent scope
     private readonly MCM.Abstractions.FluentBuilder.FluentProperty? _fluentProp;
 
     private string _displayName = string.Empty;
@@ -500,11 +500,11 @@ public class SettingsPropertyVM : ViewModel
     /// Internal because FluentProperty is internal — exposing this
     /// constructor publicly would violate accessibility rules.</summary>
     internal SettingsPropertyVM(
-        MCM.Abstractions.Base.Global.FluentGlobalSettings owner,
+        MCM.Abstractions.BaseSettings owner, // 2.3/H6: any fluent scope (all implement IFluentSettings)
         MCM.Abstractions.FluentBuilder.FluentProperty fp)
     {
         _owner = owner;
-        _fluentOwner = owner;
+        _fluentOwner = owner as MCM.Internal.IFluentSettings;
         _fluentProp = fp;
         TypeKind = fp.TypeKind;
         // Same perf pattern as the attribute ctor — bypass the setters during

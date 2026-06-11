@@ -114,6 +114,69 @@ internal static class SettingsStorage
         return Path.Combine(dir, (settingsId ?? "Unnamed") + ".json");
     }
 
+    // Phase 2.4 / finding H5 (2026-06-10 review): per-save and per-campaign
+    // settings used to resolve to the GLOBAL path -- "per-save" flags bled
+    // across every campaign on the install. Scope is now routed by the
+    // instance's base type:
+    //   Global       Configs\ModSettings\Global\<Id>.json                (unchanged)
+    //   PerCampaign  Configs\ModSettings\PerCampaign\<campaignId>\<Id>.json
+    //   PerSave      Configs\ModSettings\PerSave\<campaignId>\<Id>.json
+    // Campaign id comes from Campaign.Current.UniqueGameId via reflection
+    // (this project compiles against ReferenceAssemblies.Core only). Outside
+    // a campaign the scoped folders fall back to "_NoCampaign" -- values
+    // written there are intentionally sacrificial. NOTE: upstream per-save
+    // truly persists inside the save FILE; campaign-id scoping fixes the
+    // cross-campaign bleed without save-format surgery. Two manual saves in
+    // one campaign share values -- documented limitation.
+    public static string ResolvePathFor(object instance, string settingsId)
+    {
+        try
+        {
+            string? scope = null;
+            if (instance is MCM.Abstractions.Base.PerSave.BasePerSaveSettings) scope = "PerSave";
+            else if (instance is MCM.Abstractions.Base.PerCampaign.BasePerCampaignSettings) scope = "PerCampaign";
+            if (scope == null) return ResolvePath(settingsId);
+
+            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var dir = Path.Combine(docs, "Mount and Blade II Bannerlord", "Configs", "ModSettings",
+                                   scope, GetCampaignIdOrFallback());
+            return Path.Combine(dir, (settingsId ?? "Unnamed") + ".json");
+        }
+        catch
+        {
+            return ResolvePath(settingsId);
+        }
+    }
+
+    /// <summary>Campaign.Current.UniqueGameId via reflection; "_NoCampaign"
+    /// at the main menu / outside campaigns.</summary>
+    private static string GetCampaignIdOrFallback()
+    {
+        try
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (!asm.GetName().Name.StartsWith("TaleWorlds.CampaignSystem", StringComparison.Ordinal))
+                    continue;
+                var campaignType = asm.GetType("TaleWorlds.CampaignSystem.Campaign");
+                var current = campaignType?.GetProperty("Current",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null);
+                if (current == null) return "_NoCampaign";
+                var id = current.GetType().GetProperty("UniqueGameId",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?.GetValue(current) as string;
+                if (string.IsNullOrEmpty(id)) return "_NoCampaign";
+                // Sanitize: campaign ids are alphanumeric today, but never
+                // trust a string that becomes a folder name.
+                var bad = Path.GetInvalidFileNameChars();
+                var sb = new System.Text.StringBuilder(id!.Length);
+                foreach (var c in id!) sb.Append(Array.IndexOf(bad, c) >= 0 ? '_' : c);
+                return sb.ToString();
+            }
+        }
+        catch { }
+        return "_NoCampaign";
+    }
+
     // ---------- Preset file-system layer (Suberfudge feature, v0.8.2) ----------
     //
     // Per-mod preset snapshots live at:
@@ -264,7 +327,7 @@ internal static class SettingsStorage
         if (!BeginLoad(__id)) return;
         try
         {
-            var path = ResolvePath(settingsId);
+            var path = ResolvePathFor(instance, __id); // H5: scope-aware
             if (!File.Exists(path))
             {
                 // First run -- write defaults so the file exists for the next launch.
@@ -287,7 +350,7 @@ internal static class SettingsStorage
             // scalars / objects. Write each into the fluent dictionary via
             // Set(); the FluentGlobalSettings.Get<T> path handles type
             // coercion when consumer mods read the value back.
-            if (instance is MCM.Abstractions.Base.Global.FluentGlobalSettings fluent)
+            if (instance is IFluentSettings fluent) // 2.3/H6: any fluent scope
             {
                 foreach (var kv in obj)
                 {
@@ -376,13 +439,13 @@ internal static class SettingsStorage
         if (!BeginSave(__id)) return;
         try
         {
-            var path = ResolvePath(settingsId);
+            var path = ResolvePathFor(instance, __id); // H5: scope-aware
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
             JObject jo;
-            if (instance is MCM.Abstractions.Base.Global.FluentGlobalSettings fluent)
+            if (instance is IFluentSettings fluent) // 2.3/H6: any fluent scope
             {
                 jo = BuildFluentJson(fluent);
             }
@@ -498,10 +561,10 @@ internal static class SettingsStorage
     /// <summary>Serialize a FluentGlobalSettings instance by walking its
     /// internal _values dictionary. Skips button-type properties (their
     /// FluentProperty.Value is an Action / nothing serializable).</summary>
-    private static JObject BuildFluentJson(MCM.Abstractions.Base.Global.FluentGlobalSettings fluent)
+    private static JObject BuildFluentJson(IFluentSettings fluent)
     {
         var jo = new JObject();
-        foreach (var kv in fluent.Values)
+        foreach (var kv in fluent.ValuesSnapshot)
         {
             if (kv.Value == null) continue;
             try

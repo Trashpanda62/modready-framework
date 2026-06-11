@@ -51,11 +51,13 @@ public abstract class PerSaveSettings<TSelf> : BasePerSaveSettings
                 try
                 {
                     _instance = Activator.CreateInstance<TSelf>();
-                    // Load from per-save storage. For BetaDeps v0.7 the
-                    // per-save scope isn't separately wired — values get
-                    // loaded from the global JSON like a GlobalSettings.
-                    // Sufficient for the type to exist so consumer-mod
-                    // assemblies load and run without TypeLoadException.
+                    // Phase 2.4 / H5: SettingsStorage now routes per-save
+                    // instances to Configs\ModSettings\PerSave\<campaignId>\,
+                    // and the tracker resets this singleton on campaign
+                    // start/end so the next access reloads under the new
+                    // campaign's path instead of bleeding values across.
+                    MCM.Internal.ScopedSettingsTracker.Register(
+                        $"persave:{typeof(TSelf).FullName}", Reset);
                     try { MCM.Internal.SettingsStorage.Load(_instance, _instance.Id); }
                     catch (Exception ex)
                     {

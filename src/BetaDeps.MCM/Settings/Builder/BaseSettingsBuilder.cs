@@ -100,7 +100,10 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
         try
         {
             settings = new MCM.Abstractions.Base.PerSave.FluentPerSaveSettings(this);
-            DiagLog.Log("FluentBuilder", $"BuildAsPerSave: built per-save settings '{Id}' with {_groups.Count} group(s)");
+            // Phase 2.3 / H6: per-save fluent settings now register like
+            // global ones -- persisted (scoped path, H5) and rendered.
+            MCM.Internal.FluentSettingsRegistry.Register(settings);
+            DiagLog.Log("FluentBuilder", $"BuildAsPerSave: registered per-save settings '{Id}' with {_groups.Count} group(s)");
         }
         catch (Exception ex)
         {
@@ -120,7 +123,9 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
         try
         {
             settings = new MCM.Abstractions.Base.PerCampaign.FluentPerCampaignSettings(this);
-            DiagLog.Log("FluentBuilder", $"BuildAsPerCampaign: built per-campaign settings '{Id}' with {_groups.Count} group(s)");
+            // Phase 2.3 / H6: see BuildAsPerSave note.
+            MCM.Internal.FluentSettingsRegistry.Register(settings);
+            DiagLog.Log("FluentBuilder", $"BuildAsPerCampaign: registered per-campaign settings '{Id}' with {_groups.Count} group(s)");
         }
         catch (Exception ex)
         {
@@ -181,12 +186,12 @@ internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
     }
 
     // IRef-based overloads: read the current ref value as the initial default
-    // and stash the ref on the FluentProperty so a future write path can
-    // round-trip the value back. Right now the FluentGlobalSettings panel
-    // doesn't actually hot-bind IRef writes (that's a UI feature, not the
-    // declaration surface), so the overloads behave like the default-value
-    // overloads at the data layer -- but the JIT signature matches, which is
-    // what unblocks consumer mods.
+    // and stash the ref on the FluentProperty. Since Phase 2.2 / B2
+    // (2026-06-10), FluentGlobalSettings.Set/Get round-trip through the ref:
+    // edits in the panel and values loaded from JSON reach the consumer
+    // mod's own state, and reads show the mod's live value. Upstream MCMv5's
+    // fluent API is IRef-exclusive, so this IS the primary data path for
+    // fluent consumers (Diplomacy, RTSCamera, BEW...).
     public ISettingsPropertyGroupBuilder AddBool(string id, string displayName, MCM.Common.IRef @ref, Action<ISettingsPropertyBoolBuilder>? configure = null)
     {
         var b = new BoolPropBuilder(id, displayName, (bool)(@ref?.Value ?? false));
@@ -231,6 +236,53 @@ internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
         b.Build().Ref = @ref;
         configure?.Invoke(b);
         _properties.Add(b.Build());
+        return this;
+    }
+
+    // Phase 2.3 / finding H6: the two AddX members the group builder was
+    // missing vs upstream (signatures verified against
+    // Aragas/Bannerlord.MBOptionScreen, 2026-06-10). Both ride the B2 IRef
+    // write-through pipeline like every other ref-bound property.
+
+    public ISettingsPropertyGroupBuilder AddDropdown(string id, string displayName, int selectedIndex, MCM.Common.IRef @ref, Action<ISettingsPropertyDropdownBuilder>? configure = null)
+    {
+        var b = new DropdownPropBuilder(id, displayName);
+        var prop = b.Build();
+        prop.Ref = @ref;
+        // The ref wraps the consumer's Dropdown<T>/DropdownDefault<T>
+        // instance; the dropdown object itself is the property value (the
+        // existing attribute-path UI + DropdownConverter persistence both
+        // key off that shape). Apply the initial selection upstream-style.
+        try
+        {
+            prop.Value = @ref?.Value;
+            if (prop.Value != null && selectedIndex >= 0)
+            {
+                var idxProp = prop.Value.GetType().GetProperty("SelectedIndex",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                idxProp?.SetValue(prop.Value, selectedIndex);
+            }
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught("MCM.SettingsBuilder", $"AddDropdown({id}) init", ex);
+        }
+        configure?.Invoke(b);
+        _properties.Add(prop);
+        return this;
+    }
+
+    public ISettingsPropertyGroupBuilder AddToggle(string id, string displayName, MCM.Common.IRef @ref, Action<ISettingsPropertyToggleBuilder>? configure = null)
+    {
+        // Upstream renders a toggle as the group's on/off switch. We render
+        // it as a bool row in the group (the group-toggle visual is a UI
+        // nicety; the DATA contract -- bool round-tripped through the
+        // consumer's IRef -- is what mods depend on).
+        var b = new TogglePropBuilder(id, displayName, (bool)(@ref?.Value ?? false));
+        var prop = b.Build();
+        prop.Ref = @ref;
+        configure?.Invoke(b);
+        _properties.Add(prop);
         return this;
     }
 
@@ -279,10 +331,10 @@ internal sealed class FluentProperty
 
     /// <summary>
     /// Optional binding ref. Set by the IRef-based AddX(...) overloads on
-    /// ISettingsPropertyGroupBuilder; when set, reads/writes through this
-    /// ref should round-trip the value to the consumer mod's state instead
-    /// of just keeping it in the FluentGlobalSettings dictionary. UI not yet
-    /// wired -- present for declaration-time API compatibility.
+    /// ISettingsPropertyGroupBuilder. Since Phase 2.2 / B2:
+    /// FluentGlobalSettings.Get reads the ref's live value and Set writes
+    /// through it (with type coercion), so the consumer mod's state and the
+    /// MCM panel/JSON stay in sync.
     /// </summary>
     public MCM.Common.IRef? Ref { get; set; }
 
@@ -413,6 +465,24 @@ internal sealed class TextPropBuilder : PropBuilderBase<ISettingsPropertyTextBui
     {
         _prop.TypeKind = "text";
         _prop.Value = defaultValue ?? string.Empty;
+    }
+}
+
+// Phase 2.3 / H6: typed builders for the new AddDropdown/AddToggle members.
+internal sealed class DropdownPropBuilder : PropBuilderBase<ISettingsPropertyDropdownBuilder>, ISettingsPropertyDropdownBuilder
+{
+    public DropdownPropBuilder(string id, string displayName) : base(id, displayName)
+    {
+        _prop.TypeKind = "dropdown";
+    }
+}
+
+internal sealed class TogglePropBuilder : PropBuilderBase<ISettingsPropertyToggleBuilder>, ISettingsPropertyToggleBuilder
+{
+    public TogglePropBuilder(string id, string displayName, bool defaultValue) : base(id, displayName)
+    {
+        _prop.TypeKind = "bool"; // rendered as a bool row; see AddToggle note
+        _prop.Value = defaultValue;
     }
 }
 

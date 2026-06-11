@@ -89,15 +89,16 @@ internal static class SaveOnDonePatch
 
     private static void SaveAll()
     {
-        int saved = 0, failed = 0;
+        int saved = 0, failed = 0, skipped = 0;
         foreach (var r in SettingsRegistry.All)
         {
             try
             {
-                // FluentGlobalSettings has no Save() method on the class — route
-                // through SettingsStorage directly. Attribute-based settings
-                // expose Save() which internally calls SettingsStorage.Save.
-                if (r.Instance is MCM.Abstractions.Base.Global.FluentGlobalSettings)
+                // Fluent settings have no upstream-shaped Save() method — route
+                // through SettingsStorage directly (2.3/H6: all three fluent
+                // scopes). Attribute-based settings expose Save() which
+                // internally calls SettingsStorage.Save.
+                if (r.Instance is IFluentSettings)
                 {
                     SettingsStorage.Save(r.Instance, r.Id);
                 }
@@ -105,7 +106,20 @@ internal static class SaveOnDonePatch
                 {
                     var saveMethod = r.Instance.GetType().GetMethod(
                         "Save", BindingFlags.Public | BindingFlags.Instance);
-                    saveMethod?.Invoke(r.Instance, null);
+                    if (saveMethod == null)
+                    {
+                        // Phase 2.5 / M12: a missing Save() used to count as
+                        // "saved" -- the log claimed success while nothing
+                        // persisted (ForeignSettingsAdapter case). Count it
+                        // honestly and surface it once.
+                        BetaDeps.Foundation.CompatWarn.Once(
+                            "MCM.SaveOnDone", "Save()",
+                            r.Instance.GetType().Assembly.GetName().Name,
+                            $"'{r.Id}' has no Save() method; its settings are NOT persisted on Done");
+                        skipped++;
+                        continue;
+                    }
+                    saveMethod.Invoke(r.Instance, null);
                 }
                 saved++;
             }
@@ -115,7 +129,7 @@ internal static class SaveOnDonePatch
                 DiagLog.LogCaught(Tag, $"Save({r.Id})", ex);
             }
         }
-        DiagLog.Log(Tag, $"Done postfix: saved {saved} mod setting(s), {failed} failed");
+        DiagLog.Log(Tag, $"Done postfix: saved {saved} mod setting(s), {failed} failed, {skipped} skipped (no Save method)");
     }
 
     private static void ReloadAll()
