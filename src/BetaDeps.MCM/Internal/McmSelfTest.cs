@@ -521,7 +521,7 @@ internal static class McmSelfTest
 
         var rows = vm1.SettingPropertyGroups
             .SelectMany(g => g.SettingProperties)
-            .Where(p => !p.IsHeader && p.TypeKind != "button")
+            .Where(p => p.TypeKind != "button")
             .ToList();
         if (rows.Count == 0) return true; // nothing to drive (e.g. button-only mod)
 
@@ -583,7 +583,7 @@ internal static class McmSelfTest
             var vm2 = new SettingsVM(instance);
             var rows2 = vm2.SettingPropertyGroups
                 .SelectMany(g => g.SettingProperties)
-                .Where(p => !p.IsHeader && p.TypeKind != "button")
+                .Where(p => p.TypeKind != "button")
                 .GroupBy(p => p.Name, StringComparer.Ordinal)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 

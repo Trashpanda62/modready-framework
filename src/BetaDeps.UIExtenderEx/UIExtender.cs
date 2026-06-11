@@ -202,6 +202,7 @@ public class UIExtender
             return;
         }
         _registry.Enabled = false;
+        UIExtenderEngine.InvalidateEnabled();
         DiagLog.Log(Tag, $"Disable('{_moduleName}'): registry marked disabled");
     }
 

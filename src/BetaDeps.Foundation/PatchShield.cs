@@ -97,7 +97,6 @@ public static class PatchShield
     private static long _swallowedMissingMethod;
     private static long _swallowedMissingField;
     private static long _swallowedTypeLoad;
-    private static long _swallowedOther;
 
     /// <summary>Total methods PatchShield has finalizer-wrapped this session.</summary>
     public static int ShieldedCount { get { lock (_lock) return _shielded.Count; } }
@@ -109,9 +108,8 @@ public static class PatchShield
     public static long SwallowedMissingMethod => System.Threading.Interlocked.Read(ref _swallowedMissingMethod);
     public static long SwallowedMissingField  => System.Threading.Interlocked.Read(ref _swallowedMissingField);
     public static long SwallowedTypeLoad      => System.Threading.Interlocked.Read(ref _swallowedTypeLoad);
-    public static long SwallowedOther         => System.Threading.Interlocked.Read(ref _swallowedOther);
     public static long SwallowedTotal =>
-        SwallowedMissingMethod + SwallowedMissingField + SwallowedTypeLoad + SwallowedOther;
+        SwallowedMissingMethod + SwallowedMissingField + SwallowedTypeLoad;
 
     /// <summary>
     /// One-liner session-summary, written to runtime.log at AppDomain.ProcessExit
@@ -137,7 +135,7 @@ public static class PatchShield
                 $"unpatched culprits on {UnpatchedCount} method(s), " +
                 $"swallowed {SwallowedTotal} exception(s) " +
                 $"(MissingMethod {SwallowedMissingMethod}, MissingField {SwallowedMissingField}, " +
-                $"TypeLoad {SwallowedTypeLoad}, other {SwallowedOther}). " +
+                $"TypeLoad {SwallowedTypeLoad}). " +
                 $"Top unpatched owner: {topOwner}.");
         }
         catch (Exception ex)

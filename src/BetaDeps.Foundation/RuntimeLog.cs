@@ -88,12 +88,21 @@ public static class RuntimeLog
     public static void WriteException(string tag, string where, Exception ex)
     {
         if (ex == null) { Write(tag, where + ": (null exception)"); return; }
-        Write(tag, where + ": " + ex.GetType().Name + " -- " + (ex.Message ?? string.Empty));
+        // Format the header line inline (mirrors Write) so the summary line and
+        // the stack trace land under ONE lock -- two separate lock acquisitions
+        // let another thread's write interleave between them.
+        var line = string.Format(
+            "[{0:HH\\:mm\\:ss\\.fff}] [T{1}] [{2}] {3}",
+            DateTime.Now,
+            Thread.CurrentThread.ManagedThreadId,
+            tag ?? "?",
+            where + ": " + ex.GetType().Name + " -- " + (ex.Message ?? string.Empty));
         try
         {
             lock (_gate)
             {
-                File.AppendAllText(Path, ex.ToString() + Environment.NewLine, Encoding.UTF8);
+                EnsureHeader();
+                File.AppendAllText(Path, line + Environment.NewLine + ex.ToString() + Environment.NewLine, Encoding.UTF8);
             }
         }
         catch { }

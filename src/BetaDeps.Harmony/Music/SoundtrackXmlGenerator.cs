@@ -262,15 +262,17 @@ public static class SoundtrackXmlGenerator
             Directory.CreateDirectory(pcDir);
             string linkPath = Path.Combine(pcDir, name);
 
-            if (!File.Exists(linkPath))
+            // Always refresh: if the user replaced BYO\<ctx>\<name>.ogg with a
+            // different file of the same name, the existing PC\ link is stale
+            // (it still points at the old file's content). linkPath is always in
+            // the PC\ subdir, never the source track, so deleting it is safe.
+            try { if (File.Exists(linkPath)) File.Delete(linkPath); } catch { /* fall through; create may still succeed */ }
+            if (!CreateHardLink(linkPath, trackPath, IntPtr.Zero))
             {
-                if (!CreateHardLink(linkPath, trackPath, IntPtr.Zero))
-                {
-                    // Cross-volume or permission failure: fall back to a copy so
-                    // the track still resolves. Wasteful but correct.
-                    File.Copy(trackPath, linkPath, overwrite: false);
-                    DiagLog.Log(Tag, $"  hardlink failed for {name}; copied into PC\\ instead.");
-                }
+                // Cross-volume or permission failure: fall back to a copy so
+                // the track still resolves. Wasteful but correct.
+                File.Copy(trackPath, linkPath, overwrite: true);
+                DiagLog.Log(Tag, $"  hardlink failed for {name}; copied into PC\\ instead.");
             }
 
             // <Path> is project-relative (to Music\), extension stripped (PSAI

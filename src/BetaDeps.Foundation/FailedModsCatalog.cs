@@ -41,39 +41,42 @@ public static class FailedModsCatalog
     {
         if (rec == null || string.IsNullOrEmpty(rec.CulpritAssembly)) return;
         var key = $"{rec.CulpritAssembly}|{rec.ExceptionType}|{rec.OwnerType}.{rec.OwnerMethod}";
+        // Hold the lock across the file IO too: the !File.Exists header check is
+        // a TOCTOU and two AppendAllText calls can interleave/garble across the
+        // engine-tick threads SaveShield finalizers fire on.
         lock (_lock)
         {
             if (_sessionSeen.Contains(key)) return;
             _sessionSeen.Add(key);
-        }
 
-        try
-        {
-            var path = ResolvePath();
-            if (string.IsNullOrEmpty(path)) return;
-
-            // Header on first write so the file is grep-able even if you open
-            // it without context.
-            if (!File.Exists(path))
+            try
             {
-                File.AppendAllText(path,
-                    "# BetaDeps failed-mods catalog -- one line per (mod, exception type) seen by SaveShield.\n" +
-                    "# Format: <UTC timestamp> | <CULPRIT> | <category> | <ExceptionType> | <owner method> | <message head>\n");
-            }
+                var path = ResolvePath();
+                if (string.IsNullOrEmpty(path)) return;
 
-            var line = string.Format(
-                "{0} | {1,-32} | {2,-12} | {3,-40} | {4} | {5}\n",
-                rec.When.ToString("yyyy-MM-dd HH:mm:ss"),
-                Clip(rec.CulpritAssembly, 32),
-                Clip(rec.Category, 12),
-                Clip(rec.ExceptionType, 40),
-                Clip(rec.OwnerType + "." + rec.OwnerMethod, 80),
-                Clip(rec.Message?.Replace('\n', ' ').Replace('\r', ' ') ?? string.Empty, 200));
-            File.AppendAllText(path, line);
-        }
-        catch (Exception ex)
-        {
-            try { DiagLog.LogCaught(Tag, "Append", ex); } catch { }
+                // Header on first write so the file is grep-able even if you open
+                // it without context.
+                if (!File.Exists(path))
+                {
+                    File.AppendAllText(path,
+                        "# BetaDeps failed-mods catalog -- one line per (mod, exception type) seen by SaveShield.\n" +
+                        "# Format: <UTC timestamp> | <CULPRIT> | <category> | <ExceptionType> | <owner method> | <message head>\n");
+                }
+
+                var line = string.Format(
+                    "{0} | {1,-32} | {2,-12} | {3,-40} | {4} | {5}\n",
+                    rec.When.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Clip(rec.CulpritAssembly, 32),
+                    Clip(rec.Category, 12),
+                    Clip(rec.ExceptionType, 40),
+                    Clip(rec.OwnerType + "." + rec.OwnerMethod, 80),
+                    Clip(rec.Message?.Replace('\n', ' ').Replace('\r', ' ') ?? string.Empty, 200));
+                File.AppendAllText(path, line);
+            }
+            catch (Exception ex)
+            {
+                try { DiagLog.LogCaught(Tag, "Append", ex); } catch { }
+            }
         }
     }
 

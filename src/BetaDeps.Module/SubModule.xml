@@ -71,7 +71,6 @@
     <Module Id="BanditBlackHole" />
     <Module Id="PerfectFireArrows" />
     <Module Id="IDontCare" />
-    <Module Id="ArtemsLivelyAnimations" />
     <Module Id="ImprovedGarrisons" />
     <Module Id="DistinguishedService" />
     <Module Id="CulturedStartV2" />

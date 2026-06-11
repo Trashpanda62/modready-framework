@@ -70,7 +70,15 @@ public static class AccessTools2
             {
                 var all = type.GetMethods(flags).Where(m => string.Equals(m.Name, name, StringComparison.Ordinal)).ToArray();
                 if (all.Length == 1) found = all[0];
-                // Ambiguous -- caller must specify parameter types.
+                else if (all.Length > 1)
+                {
+                    // Ambiguous: prefer a parameterless overload (common for
+                    // GameVersion()/ToString()), else the first declared. The
+                    // real BUTR AccessTools2 returns the first match; returning
+                    // null here made patch-presence self-tests report false misses.
+                    found = Array.Find(all, m => m.GetParameters().Length == 0) ?? all[0];
+                    DiagLog.Log(Tag, $"Method({type.FullName}::{name}) ambiguous ({all.Length} overloads); picked {(found.GetParameters().Length == 0 ? "parameterless" : "first")}");
+                }
             }
             if (found != null && generics != null && found.IsGenericMethodDefinition)
                 found = found.MakeGenericMethod(generics);

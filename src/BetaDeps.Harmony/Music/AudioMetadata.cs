@@ -131,6 +131,11 @@ public static class AudioMetadata
         {
             if (tail[i] != 'O' || tail[i + 1] != 'g' || tail[i + 2] != 'g' || tail[i + 3] != 'S')
                 continue;
+            // Validate this is a real page header, not "OggS" appearing inside
+            // packet payload: stream_structure_version (offset +4) must be 0 and
+            // header_type_flag (offset +5) only uses the low 3 bits.
+            if (tail[i + 4] != 0 || (tail[i + 5] & 0xF8) != 0)
+                continue;
             // granulepos is 8 bytes LE at offset 6 within the page header.
             long g = BitConverter.ToInt64(tail, i + 6);
             if (g >= 0) granule = g;

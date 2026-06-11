@@ -9,7 +9,8 @@ namespace Bannerlord.UIExtenderEx.Prefabs2;
 /// </summary>
 public enum InsertType
 {
-    /// <summary>Insert as the first child of the target.</summary>
+    /// <summary>Insert as a sibling immediately before the target (NOT as a
+    /// child -- see PrefabPatcher.ApplyFragments).</summary>
     Prepend,
     /// <summary>Replace the target node but keep its children under the
     /// replacement.</summary>

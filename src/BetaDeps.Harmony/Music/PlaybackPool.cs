@@ -81,12 +81,16 @@ public sealed class PlaybackPool
     public string? Next()
     {
         if (_tracks.Count == 0) return null;
+        var idx = _order[_cursor++];
+        // Wrap AFTER consuming the last index so _cursor is always a valid
+        // "next" position that Peek() and the following Next() agree on. The
+        // old lead-wrap reshuffled at start-of-cycle, so Peek (which can't
+        // reshuffle) and Next disagreed exactly at the boundary.
         if (_cursor >= _order.Length)
         {
             _cursor = 0;
             if (Mode == PlaybackMode.Shuffle) _order = BuildOrder();
         }
-        var idx = _order[_cursor++];
         return _tracks[idx];
     }
 
@@ -94,8 +98,7 @@ public sealed class PlaybackPool
     public string? Peek()
     {
         if (_tracks.Count == 0) return null;
-        var c = _cursor >= _order.Length ? 0 : _cursor;
-        return _tracks[_order[c]];
+        return _tracks[_order[_cursor]];
     }
 
     /// <summary>Reset the cursor to the start of the current order.</summary>

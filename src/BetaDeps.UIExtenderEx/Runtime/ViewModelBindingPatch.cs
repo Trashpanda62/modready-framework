@@ -227,10 +227,10 @@ internal static class ViewModelBindingPatch
         // v0.5.0 perf: hover-event commands (ExecuteBeginHint/EndHint) fire on
         // every mouse-over the user does — they fill the log with thousands of
         // lines of noise per Mod Config session and obscure real failures.
-        // Log only non-hover commands by default. (Set DiagLog level higher if
-        // you need the full firehose for slider/dropdown debugging.)
-        if (commandName != "ExecuteBeginHint" && commandName != "ExecuteEndHint")
-            DiagLog.Log(Tag, $"ExecuteCommand({commandName}) (VM={__instance.GetType().Name})");
+        // Logging happens at the mixin-dispatch site below, NOT here: this
+        // prefix sits on base ViewModel.ExecuteCommand and fires for every
+        // command on every VM game-wide, so an unconditional log is a firehose.
+        // We log only the commands BetaDeps actually routes to one of our mixins.
         try
         {
             // If the VM declares a method with this name, let the original run.
@@ -256,6 +256,8 @@ internal static class ViewModelBindingPatch
                         DiagLog.Log(Tag, $"ExecuteCommand('{commandName}'): mixin {mixin.GetType().FullName}.{m.Name} expects ({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))}), binding supplied {(parameters?.Length ?? 0)} arg(s) that could not be converted; not invoked");
                         return true; // VM has no such method either; original no-ops
                     }
+                    if (commandName != "ExecuteBeginHint" && commandName != "ExecuteEndHint")
+                        DiagLog.Log(Tag, $"ExecuteCommand({commandName}) -> mixin {mixin.GetType().Name}.{m.Name} (VM={__instance.GetType().Name})");
                     m.Invoke(mixin, converted);
                     return false; // skip original
                 }

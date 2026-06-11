@@ -391,7 +391,13 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                         var hint = ExtractIdHint(dup.Id, dup.DisplayName ?? string.Empty);
                         if (!string.IsNullOrEmpty(hint))
                         {
-                            dup.DisplayName = (dup.DisplayName ?? string.Empty) + " (" + hint + ")";
+                            // Idempotent: RebuildModList runs many times per session and
+                            // dup.DisplayName mutates the persistent registry override, so
+                            // a naive append produced "X (hint) (hint)" on re-runs.
+                            var suffix = " (" + hint + ")";
+                            var cur = dup.DisplayName ?? string.Empty;
+                            if (!cur.EndsWith(suffix, System.StringComparison.Ordinal))
+                                dup.DisplayName = cur + suffix;
                         }
                     }
                 }

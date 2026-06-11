@@ -22,6 +22,17 @@ internal static class UIExtenderEngine
     private static readonly object _gate = new();
     private static readonly List<UIExtenderRegistry> _registered = new();
 
+    // Cache the enabled snapshot so the per-VM-construction read in
+    // ViewModelMixinHost.Register doesn't allocate a fresh array on every
+    // ViewModel built. INVARIANT: anything that adds a registry OR flips a
+    // UIExtenderRegistry.Enabled flag MUST mark this stale -- OnEnable below and
+    // UIExtender.Enable/Disable are the only such sites (keep it that way).
+    private static IReadOnlyList<UIExtenderRegistry> _enabledCache = System.Array.Empty<UIExtenderRegistry>();
+    private static bool _enabledDirty = true;
+
+    /// <summary>Mark the Enabled snapshot stale; rebuilt lazily on next read.</summary>
+    internal static void InvalidateEnabled() { lock (_gate) { _enabledDirty = true; } }
+
     /// <summary>Called from <see cref="UIExtender.Enable"/>. Idempotent: an
     /// Enable -> Disable -> Enable cycle reuses the already-registered entry
     /// instead of adding it twice (which double-applied every prefab patch
@@ -33,6 +44,7 @@ internal static class UIExtenderEngine
         {
             isNew = !_registered.Contains(registry);
             if (isNew) _registered.Add(registry);
+            _enabledDirty = true; // registry added or re-enabled -> snapshot stale
         }
         DiagLog.Log(Tag, $"OnEnable('{registry.ModuleName}'): {registry.Prefabs.Count} prefab patches, {registry.Mixins.Count} mixins now active{(isNew ? "" : " (re-enabled)")}");
         // Unconditional: InstallRefreshHooks dedupes per target method, so a
@@ -48,7 +60,15 @@ internal static class UIExtenderEngine
     {
         get
         {
-            lock (_gate) { return _registered.Where(r => r.Enabled).ToArray(); }
+            lock (_gate)
+            {
+                if (_enabledDirty)
+                {
+                    _enabledCache = _registered.Where(r => r.Enabled).ToArray();
+                    _enabledDirty = false;
+                }
+                return _enabledCache;
+            }
         }
     }
 }

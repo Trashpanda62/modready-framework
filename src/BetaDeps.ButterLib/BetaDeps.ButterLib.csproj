@@ -55,8 +55,10 @@
     <!-- Serilog is needed at compile time so our DependencyInjectionExtensions.AddSerilogLoggerProvider
          can match upstream BUTR ButterLib's exact signature (Action<Serilog.LoggerConfiguration>).
          At runtime AssemblyVersionShim redirects all Serilog requests to whichever copy a consumer
-         mod ships, so version differences here don't matter. PrivateAssets=all so we don't deploy it
-         (consumer mods bring their own Serilog DLLs). -->
+         mod ships, so version differences here don't matter. NOTE: this reference is NOT
+         PrivateAssets=all; with CopyLocalLockFileAssemblies=true, Serilog.dll ships in our
+         bin. That's harmless: the shim binds every Serilog load to whichever copy wins the
+         AppDomain. -->
     <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
 

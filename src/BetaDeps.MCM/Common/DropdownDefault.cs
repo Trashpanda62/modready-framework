@@ -24,6 +24,11 @@ namespace MCM.Common;
 /// currently-selected index/value, and raises <see cref="INotifyPropertyChanged"/>
 /// when the selection moves.
 /// </summary>
+/// <remarks>WARNING: Equals/GetHashCode reflect the CURRENT SelectedValue, which
+/// is mutable. Do NOT use a DropdownDefault&lt;T&gt; as a dictionary/set key --
+/// changing the selection moves its hash bucket and strands the entry.
+/// Equality-by-value is intentional (MCM settings serialization round-trips by
+/// SelectedValue), which is why this is documented rather than "fixed".</remarks>
 [Serializable]
 public class DropdownDefault<T> : IEnumerable<T>, INotifyPropertyChanged
 {

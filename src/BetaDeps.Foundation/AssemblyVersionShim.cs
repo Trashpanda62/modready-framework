@@ -3,10 +3,11 @@
 // Consumer mods are compiled against specific historical AssemblyVersions of
 // BUTR-ecosystem assemblies. This static initializer installs an
 // AppDomain.AssemblyResolve handler that returns whatever loaded assembly
-// matches the requested SIMPLE NAME, ignoring version. Currently NOT called
-// from any SubModule.OnSubModuleLoad path -- only the class is shipped, so
-// consumer mods that explicitly invoke AssemblyVersionShim.Install() can
-// opt in.
+// matches the requested SIMPLE NAME, ignoring version. Installed during early
+// load: AliasStubSubModule (ctor + OnSubModuleLoad) and BetaDepsHarmonySubModule
+// both call AssemblyVersionShim.Install() so the AssemblyResolve handler is in
+// place before consumer mods touch our impersonated assemblies. Install() is
+// idempotent (CompareExchange guard).
 
 using System;
 using System.Threading;

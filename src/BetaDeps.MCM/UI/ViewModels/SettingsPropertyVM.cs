@@ -61,39 +61,9 @@ public class SettingsPropertyVM : ViewModel
     public string Name => _property?.Name ?? _fluentProp?.Id ?? string.Empty;
     public string TypeKind { get; }
 
-    // ---- Header mode -----------------------------------------------
-    // When IsHeader = true, this VM represents a group header row in the
-    // settings list, not an actual property. Used by the prefab's
-    // NavigatableListPanel ItemTemplate to render either a section title
-    // (IsHeader=true) or a setting row (IsHeader=false, IsProperty=true)
-    // from the same MBBindingList.
-    private bool _isHeader;
-    private string _headerText = string.Empty;
-
-    [DataSourceProperty] public bool IsHeader   { get => _isHeader; set { _isHeader = value; OnPropertyChangedWithValue(value, nameof(IsHeader)); OnPropertyChanged(nameof(IsProperty)); } }
-    [DataSourceProperty] public bool IsProperty => !_isHeader;
-    [DataSourceProperty] public string HeaderText { get => _headerText; set { _headerText = value; OnPropertyChangedWithValue(value, nameof(HeaderText)); } }
-
-    /// <summary>Factory for a header-mode row VM. The prefab template
-    /// renders a different widget set when IsHeader is true.</summary>
-    public static SettingsPropertyVM CreateHeader(string headerText)
-    {
-        var vm = new SettingsPropertyVM();
-        vm._isHeader = true;
-        vm._headerText = headerText ?? string.Empty;
-        return vm;
-    }
-
-    // Private parameterless ctor used only by CreateHeader. The TypeKind
-    // stays empty and all the per-type IsBool/etc flags return false,
-    // so even if the prefab fails to gate on IsHeader/IsProperty, no
-    // value-control widget tries to render against a null _property.
-    private SettingsPropertyVM()
-    {
-        _owner = null!; // header rows never reference an owner
-        TypeKind = "header";
-    }
-    // ---- end header mode -------------------------------------------
+    // (Header-mode CreateHeader/IsHeader/HeaderText removed in Phase 6 -- the
+    // only caller was the retired fixed-slot fan; the live RowList renders
+    // group headers via PresentationRowVM, not SettingsPropertyVM.)
 
     [DataSourceProperty]
     public string DisplayName { get => _displayName; set { _displayName = value; OnPropertyChangedWithValue(value, nameof(DisplayName)); } }
@@ -202,21 +172,10 @@ public class SettingsPropertyVM : ViewModel
     [DataSourceProperty] public double MinValue    => _minValue;
     [DataSourceProperty] public double MaxValue    => _maxValue;
 
-    // ---- v0.4.4 MCMOptionRow prefab bindings -----------------------
-    // SliderWidget needs float, not double, on MinValueFloat/MaxValueFloat
-    // (binding system threw ArgumentException for type mismatches before).
-    // It also needs the slider's ValueFloat to be float; IntValue is int.
-    // MaxValueAsFloat is sanitised so (Max - Min) is always > 0 -- a
-    // zero-range slider divides by zero in native code and crashes.
-    [DataSourceProperty] public float  MinValueAsFloat => (float)_minValue;
-    [DataSourceProperty] public float  MaxValueAsFloat => (float)((_maxValue > _minValue) ? _maxValue : _minValue + 1f);
-    [DataSourceProperty] public float  IntValueAsFloat => (float)IntValue;
-    // Constants used by SliderWidget attributes (literals previously crashed).
-    [DataSourceProperty] public bool   IsDiscreteTrue  => true;
-    [DataSourceProperty] public bool   IsDiscreteFalse => false;
-    [DataSourceProperty] public int    IncrementOne    => 1;
-    [DataSourceProperty] public bool   UpdateFalse     => false;
-    // ---- end v0.4.4 prefab bindings --------------------------------
+    // (The v0.4.4 MCMOptionRow slider bindings -- MinValueAsFloat/
+    // MaxValueAsFloat/IntValueAsFloat + the IsDiscrete/Increment/Update slider
+    // constants -- were removed in Phase 6 with MCMOptionRow.xml; the live
+    // RowList slider binds PresentationRowVM's equivalents.)
 
     // ---- Dropdown surface ------------------------------------------
     // Dropdown<T> / DropdownDefault<T> instances are read by reflection on
@@ -581,8 +540,11 @@ public class SettingsPropertyVM : ViewModel
     {
         int i => i,
         long l => (int)l,
-        float f => (int)f,
-        double d => (int)d,
+        // Round (not truncate) to match the other int paths: PresentationRowVM
+        // uses (int)Math.Round, FluentSupport Convert.ToInt64, McmSelfTest
+        // Math.Round -- truncation here made the same setting read 2 vs 3.
+        float f => (int)System.Math.Round(f),
+        double d => (int)System.Math.Round(d),
         _ => 0,
     };
 
