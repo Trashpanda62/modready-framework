@@ -451,7 +451,7 @@ public static class PatchShield
     }
 
 #pragma warning disable IDE0051, IDE1006
-    private static Exception ShieldFinalizerWithResult(MethodBase __originalMethod, ref object __result, Exception __exception)
+    private static Exception? ShieldFinalizerWithResult(MethodBase __originalMethod, ref object __result, Exception __exception)
 #pragma warning restore IDE0051, IDE1006
     {
         if (__exception == null) return null;
@@ -483,7 +483,7 @@ public static class PatchShield
     }
 
 #pragma warning disable IDE0051, IDE1006
-    private static Exception ShieldFinalizerVoid(MethodBase __originalMethod, Exception __exception)
+    private static Exception? ShieldFinalizerVoid(MethodBase __originalMethod, Exception __exception)
 #pragma warning restore IDE0051, IDE1006
     {
         if (__exception == null) return null;

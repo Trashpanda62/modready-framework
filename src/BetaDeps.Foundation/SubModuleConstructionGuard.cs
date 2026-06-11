@@ -190,7 +190,7 @@ public static class SubModuleConstructionGuard
                 var id = TryExtractModuleId(arg);
                 if (string.IsNullOrEmpty(id)) continue;
 
-                if (_disabledModuleIds.Contains(id))
+                if (_disabledModuleIds.Contains(id!))
                 {
                     DiagLog.Log(Tag, $"BLOCKED construction of disabled module: {id}");
                     return false; // skip original — module isn't constructed

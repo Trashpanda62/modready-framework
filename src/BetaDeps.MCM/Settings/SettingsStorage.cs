@@ -331,7 +331,7 @@ internal static class SettingsStorage
             if (!File.Exists(path))
             {
                 // First run -- write defaults so the file exists for the next launch.
-                Save(instance, settingsId);
+                Save(instance, __id);
                 return;
             }
             // Phase 1.3 / finding H8: parse with recovery. A crash/power-loss
@@ -342,7 +342,7 @@ internal static class SettingsStorage
             // .corrupt-<timestamp>, the .bak (previous good save, rotated by
             // WriteAtomic) is restored when parseable, and only then do we
             // fall back to compiled defaults.
-            var obj = ReadJsonWithRecovery(path, settingsId);
+            var obj = ReadJsonWithRecovery(path, __id);
             if (obj == null)
                 return; // unreadable + unrecoverable: keep compiled defaults; evidence preserved
 

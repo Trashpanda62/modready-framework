@@ -765,7 +765,7 @@ public static class IncompatibleModDetector
                 foreach (XmlNode n in depNodes)
                 {
                     var idAttr = n.Attributes?["Id"]?.Value;
-                    if (!string.IsNullOrEmpty(idAttr)) deps.Add(idAttr);
+                    if (!string.IsNullOrEmpty(idAttr)) deps.Add(idAttr!);
                 }
             }
 
