@@ -38,6 +38,10 @@ public class ButterLibSubModule : MBSubModuleBase
             // BEW finalizers.
             BEWPatch.Enable();
 
+            // Options > Keybinds whitelist postfix so consumer-mod hotkey
+            // categories (HotKeyCategoryContainer) render in the options UI.
+            OptionsKeybindCategoryPatch.Install(new global::HarmonyLib.Harmony("betadeps.butterlib.hotkeyoptions"));
+
             // Bind ExceptionHandlerSubSystem.Instance early so consumer mods
             // (notably AdmiralNelson's) that call .Instance?.Disable() in their
             // own OnSubModuleLoad don't NRE and pop the "unable to disable
