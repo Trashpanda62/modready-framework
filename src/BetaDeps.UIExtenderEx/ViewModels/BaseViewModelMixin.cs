@@ -50,4 +50,15 @@ public abstract class BaseViewModelMixin<TViewModel> where TViewModel : ViewMode
 
     protected void OnPropertyChangedWithValue<T>(T value, [CallerMemberName] string? propertyName = null) where T : struct
         => ViewModel?.OnPropertyChangedWithValue((object)value, propertyName);
+
+    /// <summary>Standard set-and-notify helper, matching the upstream BUTR
+    /// surface (BannerCraft mixins call it). Returns true when the value
+    /// changed and a property-change notification was raised.</summary>
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (System.Collections.Generic.EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
 }
