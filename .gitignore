@@ -41,6 +41,10 @@ desktop.ini
 PatchedOptions.dump.xml
 merged-*.xml
 
+# Shield-fixture build output + dev flag (Phase 3 gate; never shipped) ---------
+tools/shield-fixture/bin/
+shieldfixture-path.flag
+
 # NuGet -----------------------------------------------------------------------
 *.nupkg
 *.snupkg

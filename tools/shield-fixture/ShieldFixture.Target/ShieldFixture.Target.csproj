@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Synthetic fixture for the Phase 3 PatchShield gate. NOT shipped:
+       lives under tools\, is never referenced by src\ projects, and is
+       only loaded at runtime when shieldfixture-path.flag exists. -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>ShieldFixture.Target</AssemblyName>
+    <RootNamespace>ShieldFixture.Target</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\bin\</OutputPath>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+</Project>

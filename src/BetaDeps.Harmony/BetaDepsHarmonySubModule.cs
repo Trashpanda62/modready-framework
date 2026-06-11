@@ -336,6 +336,11 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     {
         base.OnBeforeInitialModuleScreenSetAsRoot();
         TryInstallPatchShield("OnBeforeInitialModuleScreenSetAsRoot");
+
+        // Phase 3 gate (dev-only; no-op unless shieldfixture-path.flag
+        // exists): synthetic broken-mod fixture proving culprit-targeted
+        // unpatching leaves innocent patches intact.
+        ShieldFixtureSelfTest.RunIfRequested();
     }
 
     // Re-install the shield at every lifecycle point a consumer mod could
