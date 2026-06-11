@@ -486,16 +486,30 @@ public static class IncompatibleModDetector
             var betaDepsDir = Path.Combine(modulesRoot!, "BetaDeps");
             Directory.CreateDirectory(betaDepsDir);
 
-            var loaded = ReadLoadedSubModuleIds();
-            DiagLog.Log(Tag, $"MarkBootSuccessful: writing {loaded.Count} loaded mod IDs to {LastGoodFile}");
+            // M11 (Phase 4.5): the baseline is the LAUNCHER ENABLED SET, not
+            // the loaded-assembly scan. The loaded scan recorded only mods
+            // whose submodules had constructed by the main menu (9 of 22 in
+            // a live session) -- every lazily-loaded mod then looked "new
+            // since last good" and became a suspect after any unrelated
+            // crash. Reaching the main menu vouches for the entire enabled
+            // set. The loaded scan remains only as a fallback when
+            // LauncherData.xml is unreadable.
+            var baseline = ReadEnabledMods();
+            var source = "launcher enabled-set";
+            if (baseline.Count == 0)
+            {
+                baseline = ReadLoadedSubModuleIds();
+                source = "loaded submodules (LauncherData.xml unreadable)";
+            }
+            DiagLog.Log(Tag, $"MarkBootSuccessful: writing {baseline.Count} mod IDs ({source}) to {LastGoodFile}");
 
             var path = Path.Combine(betaDepsDir, LastGoodFile);
             using (var sw = new StreamWriter(path, append: false))
             {
                 sw.WriteLine($"# BetaDeps last-good modlist  recorded {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                sw.WriteLine("# Mods listed here loaded successfully to the main menu in this session.");
+                sw.WriteLine("# Mods enabled in the launcher for a session that reached the main menu.");
                 sw.WriteLine("# Next session's runtime detection treats anything NOT in this list as a suspect after a crash.");
-                foreach (var id in loaded.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+                foreach (var id in baseline.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
                     sw.WriteLine(id);
             }
 

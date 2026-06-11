@@ -60,6 +60,11 @@ Name: "{autodesktop}\Bannerlord (BLSE)"; Filename: "{app}\bin\Win64_Shipping_Cli
 [Run]
 Filename: "{app}\bin\Win64_Shipping_Client\{#LauncherExe}"; Description: "Launch the BLSE launcher now"; Flags: nowait postinstall skipifsilent
 
+[UninstallRun]
+; M5 (Phase 4.2): remove the persistent User-scope CREST_SHOW_STUBS env var
+; BetaDeps sets at runtime (BLSE launcher hide-stubs opt-out). Best-effort.
+Filename: "{sys}\reg.exe"; Parameters: "delete ""HKCU\Environment"" /v CREST_SHOW_STUBS /f"; Flags: runhidden; RunOnceId: "RemoveCrestShowStubsEnv"
+
 [Code]
 { ---- Locate the Bannerlord install ------------------------------------------ }
 { Tries the Steam registry path + the common library location; falls back to the

@@ -172,32 +172,84 @@ public static class MO2Bootstrap
         return false;
     }
 
+    // M7 (Phase 4.4): the old heuristic returned "ModOrganizer.exe" if ANY
+    // ModOrganizer process older than us existed -- a false positive
+    // whenever MO2 was merely open while the game launched from Steam.
+    // Real ancestry via NtQueryInformationProcess instead: walk up to four
+    // ancestors (MO2 -> BLSE LauncherEx -> game is a real chain) and report
+    // ModOrganizer only if it is genuinely in our parent chain.
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct PROCESS_BASIC_INFORMATION
+    {
+        public IntPtr Reserved1;
+        public IntPtr PebBaseAddress;
+        public IntPtr Reserved2_0;
+        public IntPtr Reserved2_1;
+        public IntPtr UniqueProcessId;
+        public IntPtr InheritedFromUniqueProcessId;
+    }
+
+    [System.Runtime.InteropServices.DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(
+        IntPtr processHandle, int processInformationClass,
+        ref PROCESS_BASIC_INFORMATION processInformation,
+        int processInformationLength, out int returnLength);
+
+    private static int GetParentPid(Process process)
+    {
+        var pbi = new PROCESS_BASIC_INFORMATION();
+        int status = NtQueryInformationProcess(process.Handle, 0, ref pbi,
+            System.Runtime.InteropServices.Marshal.SizeOf(pbi), out _);
+        if (status != 0) return -1;
+        return pbi.InheritedFromUniqueProcessId.ToInt32();
+    }
+
+    /// <summary>Name of the nearest ancestor named ModOrganizer (walking at
+    /// most 4 levels), else the direct parent's name, else null. PID reuse
+    /// is guarded by requiring each ancestor to have started before its
+    /// child.</summary>
     private static string? TryGetParentProcessName()
     {
-        // No managed API for "get parent PID" until .NET 5. We're on net472,
-        // so use the Win32 toolhelp snapshot via Process.GetProcesses() and
-        // ParentProcessId lookup. To keep this dependency-free we use a
-        // smaller WMI-less approach: scan all Process records, find the one
-        // whose Id matches ours, then look up its parent via ProcessId in
-        // the Process API. .NET 4.x's Process.Parent doesn't exist, so we
-        // approximate by scanning for processes whose StartTime is older
-        // than ours AND named ModOrganizer.exe -- noisy but cheap. If this
-        // proves too imprecise, swap to NtQueryInformationProcess via
-        // P/Invoke in v0.8.2.
         try
         {
-            var meStart = Process.GetCurrentProcess().StartTime;
-            foreach (var p in Process.GetProcessesByName("ModOrganizer"))
+            string? directParentName = null;
+            var current = Process.GetCurrentProcess();
+            var childStart = current.StartTime;
+            for (int depth = 0; depth < 4; depth++)
             {
+                int parentPid = GetParentPid(current);
+                if (depth > 0) current.Dispose();
+                if (parentPid <= 0) break;
+
+                Process parent;
+                try { parent = Process.GetProcessById(parentPid); }
+                catch { break; } // parent exited; chain ends
+
                 try
                 {
-                    if (p.StartTime < meStart) return p.ProcessName + ".exe";
+                    // A recycled PID would belong to a process started AFTER
+                    // the child -- reject it.
+                    if (parent.StartTime > childStart) { parent.Dispose(); break; }
                 }
-                catch { }
+                catch { parent.Dispose(); break; }
+
+                directParentName ??= parent.ProcessName + ".exe";
+                if (parent.ProcessName.IndexOf("ModOrganizer", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var name = parent.ProcessName + ".exe";
+                    parent.Dispose();
+                    return name;
+                }
+                childStart = parent.StartTime;
+                current = parent;
             }
+            return directParentName;
         }
-        catch { }
-        return null;
+        catch
+        {
+            return null;
+        }
     }
 
     // ---------- Real-game-path derivation ----------

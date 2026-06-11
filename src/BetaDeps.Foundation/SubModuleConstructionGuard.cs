@@ -113,11 +113,24 @@ public static class SubModuleConstructionGuard
             // LoadSubModules, InitializeSubModule, etc. across game versions.
             // The prefix is a no-op for calls that don't carry a module id we
             // recognize, so multi-patching is safe.
-            var candidates = moduleType
+            //
+            // M6 (Phase 4.3): VOID candidates only. The prefix blocks a
+            // disabled module by returning false (skip original) WITHOUT
+            // setting __result -- on a non-void method that hands the engine
+            // a default null/false it never produced, which is worse than
+            // not blocking. A non-void loader on some future game version
+            // just isn't guarded (the disable markers still work via the
+            // launcher set); log what we skipped so it's visible.
+            var allCandidates = moduleType
                 .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
                 .Where(m => m.Name.IndexOf("SubModule", StringComparison.OrdinalIgnoreCase) >= 0
                          && m.Name.IndexOf("Load", StringComparison.OrdinalIgnoreCase) >= 0)
                 .ToList();
+            var candidates = allCandidates.Where(m => m.ReturnType == typeof(void)).ToList();
+            foreach (var nonVoid in allCandidates.Where(m => m.ReturnType != typeof(void)))
+            {
+                DiagLog.Log(Tag, $"  skipping non-void candidate {nonVoid.Name} (returns {nonVoid.ReturnType.Name}; skip-without-result would inject a default value into the engine)");
+            }
 
             if (candidates.Count == 0)
             {
