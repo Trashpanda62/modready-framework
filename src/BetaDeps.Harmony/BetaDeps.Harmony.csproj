@@ -39,7 +39,7 @@
          at startup; shipping an older 2.3.x copy makes them log a "wrong
          Harmony version" warning. The HarmonyLib API is stable across 2.x
          so behavior doesn't change, only the version string. -->
-    <PackageReference Include="Lib.Harmony" Version="2.4.*" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
 
     <!-- Harmony 2.3.x marks its Mono.Cecil and MonoMod transitive deps as
          PrivateAssets internally, which suppresses their output during build.
@@ -47,13 +47,13 @@
          Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\, so we depend on
          them directly to force them into the output folder.
          All MIT-licensed: Mono.Cecil (c) JB Evain; MonoMod (c) 0x0ade et al. -->
-    <PackageReference Include="Mono.Cecil" Version="0.11.*" />
-    <PackageReference Include="MonoMod.RuntimeDetour" Version="25.*" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+    <PackageReference Include="MonoMod.RuntimeDetour" Version="25.3.4" />
 
     <!-- TaleWorlds reference assemblies, used by reference only. PrivateAssets=all
          prevents them from being copied into our output folder; the game already
          has them. -->
-    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

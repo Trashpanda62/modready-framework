@@ -34,11 +34,11 @@
     <!-- Harmony for the runtime patches that drive prefab + VM mixin engines.
          Marked PrivateAssets so we don't double-ship 0Harmony.dll; BetaDeps.Harmony
          is the canonical source of that file in the module tree. -->
-    <PackageReference Include="Lib.Harmony" Version="2.4.*" PrivateAssets="all" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
 
     <!-- TaleWorlds reference assemblies for the Gauntlet / ViewModel / Mission types
          we need to interop with. Private so they don't copy. -->
-    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,4 @@
+ApiCompat gap report -- consumer-referenced BUTR surface missing from BetaDeps shims
+audit: butr-api-audit.txt | bin: src/BetaDeps.Foundation/bin/Release/net472,src/BetaDeps.Harmony/bin/Release/net472,src/BetaDeps.HarmonyHost/bin/Release/net472,src/BetaDeps.ButterLib/bin/Release/net472,src/BetaDeps.MCM/bin/Release/net472,src/BetaDeps.UIExtenderEx/bin/Release/net472,src/BetaDeps.TacticsEditor/bin/Release/net472 | refs checked: 343
+
+CLEAN -- every externally-referenced type and member is present.

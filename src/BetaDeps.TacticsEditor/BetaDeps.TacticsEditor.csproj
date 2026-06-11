@@ -25,14 +25,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.4.*" PrivateAssets="all" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
     <!-- Core brings TaleWorlds.Core/Library/MountAndBlade/Engine/InputSystem/
          ScreenSystem. We intentionally do NOT reference
          TaleWorlds.MountAndBlade.View.dll: the editor reaches MissionScreen
          via ScreenManager.TopScreen as object + reflection, so no separate
          View reference is needed. -->
-    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

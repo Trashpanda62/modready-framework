@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Phase 0.2 (2026-06-10): reproducible restores.
+    All PackageReference versions are pinned exactly in each csproj (no floating
+    ranges) and every project writes/validates a packages.lock.json. Commit the
+    lock files. To deliberately bump a package: edit the csproj version, delete
+    the project's packages.lock.json, restore, commit both.
+  -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>

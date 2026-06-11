@@ -37,13 +37,13 @@
     <!-- TaleWorlds reference assemblies (game version probe needs ApplicationVersion).
          Pinned to a recent stable release; floating version lets CI pull whatever
          matches the target game version at build time. -->
-    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="*-*" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
 
     <!-- v0.7: SubModuleConstructionGuard uses HarmonyLib to patch the engine's
          SubModule loader. Lib.Harmony is also referenced by BetaDeps.Harmony.
          This duplicate ref is harmless because at runtime there's only one
          0Harmony.dll on disk (shipped from BetaDeps.Harmony). MIT terms. -->
-    <PackageReference Include="Lib.Harmony" Version="2.4.*" PrivateAssets="all" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
