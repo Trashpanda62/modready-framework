@@ -21,6 +21,7 @@ using System;
 using System.Reflection;
 
 using BetaDeps.Foundation;
+using BetaDeps.Harmony.Music;
 
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -31,6 +32,11 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
 {
     private const string Tag = "BetaDeps.Harmony";
     private static bool _unhandledHookInstalled;
+
+    // v1.0 BYO music picker (workstream C2). Loaded once after the Harmony gate
+    // opens; PsaiRedirectManager.TryLoadRuntime is then pumped from the tick
+    // until PSAI is initialized and our soundtrack is merged in.
+    private static MusicConfig? _musicConfig;
 
     // [ThreadStatic] guard so a recursive failure inside our own log writer
     // (e.g. RuntimeLog.Write itself throws TypeLoadException somehow) doesn't
@@ -290,6 +296,38 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "OnSubModuleLoad/sigsafe", ex);
+        }
+
+        // v1.0 BYO music picker: scan Music\BYO\ and install the PSAI redirect
+        // patch. The soundtrack is merged into PSAI later (OnApplicationTick),
+        // once PSAI itself has initialized. All failures are swallowed and
+        // logged -- a music-feature fault must never take the game down.
+        try
+        {
+            _musicConfig = MusicConfig.Load();
+            PsaiRedirectManager.Install(_musicConfig);
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnSubModuleLoad/music", ex);
+        }
+    }
+
+    protected override void OnApplicationTick(float dt)
+    {
+        base.OnApplicationTick(dt);
+
+        // Tick-driven: wait for TaleWorlds.PSAI.dll to load, resolve PsaiCore,
+        // install the redirect prefix, then merge our soundtrack once PSAI is
+        // initialized. Cheap no-op after that. Workstream C3 will also drive the
+        // settlement music manager's clip-advance loop from here.
+        try
+        {
+            PsaiRedirectManager.Pump();
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnApplicationTick/music", ex);
         }
     }
 
