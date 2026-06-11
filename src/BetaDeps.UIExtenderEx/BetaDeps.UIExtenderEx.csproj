@@ -22,9 +22,14 @@
     <Product>Bannerlord Beta Dependencies</Product>
 
     <!-- AssemblyVersion impersonates upstream BUTR UIExtenderEx so mods
-         compiled against Bannerlord.UIExtenderEx v2.13.x.x bind to ours. -->
-    <AssemblyVersion>2.13.2.0</AssemblyVersion>
-    <FileVersion>2.13.2.0</FileVersion>
+         compiled against Bannerlord.UIExtenderEx v2.x bind to ours.
+         M19 (Phase 4.1): all three version surfaces agree on the advertised
+         line (AssemblyVersion == FileVersion == alias SubModule.xml ==
+         v2.14.99.0) so mods gating on Assembly.GetName().Version and mods
+         gating on the module version see the same answer. Policy:
+         docs/VERSION-POLICY.md. -->
+    <AssemblyVersion>2.14.99.0</AssemblyVersion>
+    <FileVersion>2.14.99.0</FileVersion>
     <InformationalVersion>BetaDeps 0.9.2</InformationalVersion>
 
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>

@@ -22,9 +22,12 @@
     <!-- AssemblyVersion impersonates upstream BUTR ButterLib's release line so
          existing mods compiled against Bannerlord.ButterLib v2.10.x.x have
          their assembly references resolve to ours at load time. InformationalVersion
-         carries our actual BetaDeps build version for diagnostic purposes. -->
-    <AssemblyVersion>2.10.4.0</AssemblyVersion>
-    <FileVersion>2.10.4.0</FileVersion>
+         carries our actual BetaDeps build version for diagnostic purposes.
+         M19 (Phase 4.1): AssemblyVersion == FileVersion == alias SubModule.xml
+         (v2.10.99.0) so version-gating mods see one consistent line. Policy:
+         docs/VERSION-POLICY.md. -->
+    <AssemblyVersion>2.10.99.0</AssemblyVersion>
+    <FileVersion>2.10.99.0</FileVersion>
     <InformationalVersion>BetaDeps 0.9.2</InformationalVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection and friends must land in bin
