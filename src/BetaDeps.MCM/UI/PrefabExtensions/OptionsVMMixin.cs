@@ -842,13 +842,14 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     }
 
     /// <summary>
-    /// Reset every property of the currently-selected settings class to the
-    /// value the consumer mod's class definition initializes it to. We
-    /// construct a fresh instance of the same settings type (which executes
-    /// the class's field initializers and parameterless ctor), then copy each
-    /// [SettingPropertyX]-decorated property from the fresh instance into the
-    /// live singleton. The result is persisted via the same save path used
-    /// when the user clicks Done on the Options panel.
+    /// Reset every property of the currently-selected settings class to its
+    /// default. Attribute settings: construct a fresh instance of the type
+    /// (which executes the field initializers + parameterless ctor) and copy
+    /// each [SettingPropertyX]-decorated property onto the live singleton.
+    /// Fluent settings have no such attributes, so they reset via
+    /// IFluentSettings.ResetToDefaults() (the per-property default captured at
+    /// construction). Either way the result is persisted via the same save path
+    /// used when the user clicks Done on the Options panel.
     /// </summary>
 
     // SaveCurrent was the v0.3.2-and-earlier per-keystroke persist. Removed in
@@ -867,30 +868,43 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
         }
         try
         {
-            var t = current.GetType();
-            object? fresh;
-            try { fresh = System.Activator.CreateInstance(t); }
-            catch (System.Exception ex)
+            int copied;
+            // Fluent settings (Diplomacy, RTSCamera, ImprovedGarrisons, BEW, ...)
+            // carry no [SettingProperty] attributes to reflect -- their values
+            // live in the builder/IRefs -- so the old attribute-only loop was a
+            // silent no-op for them (Nexus v0.9.2 "Reset to Defaults does nothing").
+            // Route to the captured-defaults reset instead.
+            if (current is MCM.Internal.IFluentSettings fluent)
             {
-                DiagLog.LogCaught(Tag, $"ExecuteResetDefaults/CreateInstance({t.FullName})", ex);
-                return;
+                copied = fluent.ResetToDefaults();
             }
-            if (fresh == null) return;
-
-            int copied = 0;
-            foreach (var p in t.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            else
             {
-                if (p.GetCustomAttributes(inherit: true).OfType<MCM.Abstractions.Attributes.SettingPropertyAttribute>().FirstOrDefault() == null) continue;
-                if (!p.CanWrite) continue;
-                try
-                {
-                    var defaultVal = p.GetValue(fresh);
-                    p.SetValue(current, defaultVal);
-                    copied++;
-                }
+                var t = current.GetType();
+                object? fresh;
+                try { fresh = System.Activator.CreateInstance(t); }
                 catch (System.Exception ex)
                 {
-                    DiagLog.LogCaught(Tag, $"ExecuteResetDefaults/Set({t.Name}.{p.Name})", ex);
+                    DiagLog.LogCaught(Tag, $"ExecuteResetDefaults/CreateInstance({t.FullName})", ex);
+                    return;
+                }
+                if (fresh == null) return;
+
+                copied = 0;
+                foreach (var p in t.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                {
+                    if (p.GetCustomAttributes(inherit: true).OfType<MCM.Abstractions.Attributes.SettingPropertyAttribute>().FirstOrDefault() == null) continue;
+                    if (!p.CanWrite) continue;
+                    try
+                    {
+                        var defaultVal = p.GetValue(fresh);
+                        p.SetValue(current, defaultVal);
+                        copied++;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        DiagLog.LogCaught(Tag, $"ExecuteResetDefaults/Set({t.Name}.{p.Name})", ex);
+                    }
                 }
             }
 

@@ -29,6 +29,8 @@ public sealed class FluentGlobalSettings : BaseSettings, MCM.Internal.IFluentSet
 
     private readonly SettingsBuilderImpl _builder;
     private readonly Dictionary<string, object?> _values = new(StringComparer.Ordinal);
+    // Per-property compiled default, snapshotted in the ctor before Load runs.
+    private readonly Dictionary<string, object?> _defaults = new(StringComparer.Ordinal);
     // Phase 2.2 / finding B2: id -> declared property, so Set/Get can reach
     // the consumer mod's IRef binding instead of stopping at the dictionary.
     private readonly Dictionary<string, FluentProperty> _props = new(StringComparer.Ordinal);
@@ -42,13 +44,18 @@ public sealed class FluentGlobalSettings : BaseSettings, MCM.Internal.IFluentSet
         Id = builder.Id;
         DisplayName = builder.DisplayName;
 
-        // Seed defaults from the builder.
+        // Seed defaults from the builder. The ctor runs BEFORE SettingsStorage.Load
+        // applies saved JSON, so each IRef's live value here is the consumer mod's
+        // compiled default -- snapshot it into _defaults so Reset-to-Defaults works
+        // for fluent settings (which have no [SettingProperty] attributes).
         foreach (var g in builder._groups)
         {
             foreach (var p in g._properties)
             {
                 _values[p.Id] = p.Value;
                 _props[p.Id] = p;
+                try { _defaults[p.Id] = p.Ref != null ? p.Ref.Value : p.Value; }
+                catch { _defaults[p.Id] = p.Value; }
             }
         }
     }
@@ -99,6 +106,17 @@ public sealed class FluentGlobalSettings : BaseSettings, MCM.Internal.IFluentSet
         MCM.Internal.FluentRefs.WriteThrough(Tag, Id, prop, value);
 
         OnPropertyChanged(id);
+    }
+
+    public int ResetToDefaults()
+    {
+        int n = 0;
+        foreach (var kv in _defaults)
+        {
+            try { Set(kv.Key, kv.Value); n++; }
+            catch (Exception ex) { DiagLog.LogCaught(Tag, $"ResetToDefaults({Id}.{kv.Key})", ex); }
+        }
+        return n;
     }
 
     /// <summary>IFluentSettings: snapshot for serialization (Phase 2.3).</summary>

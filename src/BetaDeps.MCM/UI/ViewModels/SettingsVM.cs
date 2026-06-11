@@ -202,6 +202,14 @@ public class SettingsVM : ViewModel
         // values onto Settings via reflection.
         try
         {
+            // Fluent settings have no [SettingProperty] attributes; route to the
+            // fluent default-reset (Nexus v0.9.2 "Reset to Defaults does nothing").
+            if (Settings is MCM.Internal.IFluentSettings fluent)
+            {
+                fluent.ResetToDefaults();
+                BuildGroups();
+                return;
+            }
             var t = Settings.GetType();
             var fresh = Activator.CreateInstance(t);
             if (fresh == null) return;

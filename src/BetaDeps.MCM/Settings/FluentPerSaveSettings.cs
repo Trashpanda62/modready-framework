@@ -38,6 +38,8 @@ public sealed class FluentPerSaveSettings : BasePerSaveSettings, MCM.Internal.IF
     private readonly SettingsBuilderImpl _builder;
     private readonly Dictionary<string, object?> _values = new(StringComparer.Ordinal);
     private readonly Dictionary<string, FluentProperty> _props = new(StringComparer.Ordinal);
+    // Per-property compiled default, snapshotted in the ctor before Load runs.
+    private readonly Dictionary<string, object?> _defaults = new(StringComparer.Ordinal);
 
     public override string Id { get; }
     public override string DisplayName { get; }
@@ -56,6 +58,9 @@ public sealed class FluentPerSaveSettings : BasePerSaveSettings, MCM.Internal.IF
                 {
                     _values[p.Id] = p.Value;
                     _props[p.Id] = p;
+                    // ctor runs before Load -> IRef live value is the compiled default.
+                    try { _defaults[p.Id] = p.Ref != null ? p.Ref.Value : p.Value; }
+                    catch { _defaults[p.Id] = p.Value; }
                 }
             }
         }
@@ -90,6 +95,17 @@ public sealed class FluentPerSaveSettings : BasePerSaveSettings, MCM.Internal.IF
         _props.TryGetValue(id, out var prop);
         MCM.Internal.FluentRefs.WriteThrough(Tag, Id, prop, value);
         OnPropertyChanged(id);
+    }
+
+    public int ResetToDefaults()
+    {
+        int n = 0;
+        foreach (var kv in _defaults)
+        {
+            try { Set(kv.Key, kv.Value); n++; }
+            catch (Exception ex) { BetaDeps.Foundation.DiagLog.LogCaught(Tag, $"ResetToDefaults({Id}.{kv.Key})", ex); }
+        }
+        return n;
     }
 
     // Legacy accessors kept for any existing internal callers.

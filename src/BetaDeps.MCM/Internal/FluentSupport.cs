@@ -37,6 +37,11 @@ internal interface IFluentSettings
     void Set(string id, object? value);
     /// <summary>Snapshot of the current values for serialization.</summary>
     IReadOnlyDictionary<string, object?> ValuesSnapshot { get; }
+    /// <summary>Reset every property to the default captured at construction
+    /// (before Load applied saved JSON), writing through each IRef. Fluent
+    /// settings have no [SettingProperty] attributes to reflect for a reset, so
+    /// the "Reset to Defaults" button routes here. Returns the count reset.</summary>
+    int ResetToDefaults();
 }
 
 internal static class FluentRefs
