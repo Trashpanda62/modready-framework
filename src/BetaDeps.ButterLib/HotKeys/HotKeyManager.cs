@@ -118,9 +118,26 @@ internal sealed class HotKeyManagerImpl : HotKeyManager
         if (!_built)
         {
             _built = true;
+
+            // Register a GameKeyContext so the keys show in Options > Keybinds
+            // and player rebinds persist with the keybind profile. On failure
+            // (game-version drift in the InputSystem surface) the keys still
+            // fire on their defaults via the ticker -- degraded, and warned.
+            try
+            {
+                var categoryId = _categoryName ?? _modName;
+                var context = new HotKeyCategoryContainer(categoryId, _keys);
+                global::TaleWorlds.InputSystem.HotKeyManager.RegisterContext(context, ignoreSerialize: false);
+                DiagLog.Log(Tag, $"registered GameKeyContext '{categoryId}' -- keys visible in Options > Keybinds");
+            }
+            catch (Exception ex)
+            {
+                DiagLog.LogCaught(Tag, $"GameKeyContext registration for '{_modName}'", ex);
+                CompatWarn.Once("ButterLib.HotKeys", "Build", _modName,
+                    "hotkeys fire on their default keys, but Options keybind registration failed on this game version (see runtime.log)");
+            }
+
             HotKeyTicker.Register(_keys, _modName);
-            CompatWarn.Once("ButterLib.HotKeys", "Build", _modName,
-                "hotkeys fire on their default keys; in-game rebinding via Options is not implemented yet");
             try { DiagLog.Log(Tag, $"Build() mod '{_modName}' with {_keys.Count} keys (input polling active)"); } catch { }
         }
         return _keys.ToArray();

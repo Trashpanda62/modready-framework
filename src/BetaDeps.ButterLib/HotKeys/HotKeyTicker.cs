@@ -114,7 +114,14 @@ internal static class HotKeyTicker
                     continue;
                 }
 
+                // Poll the player's current bind when the key is registered in
+                // a GameKeyContext (Options rebinds land in GameKey.KeyboardKey);
+                // fall back to the declared default otherwise.
                 var input = key.DefaultKey;
+                var boundKey = key.GameKey?.KeyboardKey;
+                if (boundKey != null && boundKey.InputKey != InputKey.Invalid)
+                    input = boundKey.InputKey;
+
                 bool pressedThisFrame = Input.IsKeyPressed(input);
                 if (pressedThisFrame) key.OnPressedInternal();
                 if (Input.IsKeyDown(input))
