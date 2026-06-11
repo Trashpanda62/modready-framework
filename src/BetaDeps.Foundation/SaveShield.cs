@@ -19,9 +19,16 @@
 //   - The argument list snapshot (for LoadGameAction, this exposes the
 //     SaveGameFileInfo, which carries the mod-list captured at save time)
 //
-// Re-throws the exception so the user still sees the crash UI; the
-// recovery angle is a v0.7.4+ followup once we can identify safe-to-skip
-// duplicates vs ones that would corrupt the world.
+// Throw/swallow policy (retightened Phase 1.5 / finding H2, 2026-06-10):
+//   - SAVE-LOAD targets ALWAYS re-throw -- the user sees the crash UI and
+//     runtime.log has the diagnostics. No exceptions: the finalizer can't
+//     synthesize a usable return value, and continuing on a
+//     half-deserialized campaign corrupts saves.
+//   - MISSION-INIT targets that return void may swallow
+//     MissingMethod/MissingField/TypeLoad thrown by a non-engine culprit
+//     frame (a stale mod's handler), unless the user opted out via
+//     saveshield-swallow-disabled.flag.
+//   - Duplicate-key ArgumentException is never swallowed anywhere.
 //
 // Lifecycle: installed alongside PatchShield at every campaign-init
 // lifecycle hook (BetaDepsHarmonySubModule).
@@ -674,16 +681,34 @@ public static class SaveShield
                 catch (Exception catEx) { try { DiagLog.LogCaught(Tag, "catalog-append", catEx); } catch { } }
             }
 
-            // v4 #99 swallow-mode: if the user has opted in AND the
-            // exception is one of the recoverable kinds AND the culprit
-            // is a non-engine mod, swallow the throw so the game keeps
-            // running. The mod's broken handler is dropped for this call
-            // site only; everything outside it is untouched.
-            if (record != null && IsSwallowEnabled() && IsRecoverableException(ex) && !string.IsNullOrEmpty(record.CulpritAssembly))
+            // v4 #99 swallow-mode, retightened in Phase 1.5 / finding H2
+            // (2026-06-10 review). Swallow ONLY when ALL of these hold:
+            //   1. swallow not opted out,
+            //   2. recoverable exception kind (MissingMethod/MissingField/
+            //      TypeLoad -- duplicate-key ArgumentException was REMOVED:
+            //      this file's own header documents that state is
+            //      unrecoverable once a duplicate key fires in the
+            //      serializer, and continuing risks writing a corrupted
+            //      save later),
+            //   3. culprit frame is a non-engine mod,
+            //   4. category is MISSION-INIT -- NEVER SAVE-LOAD. The
+            //      finalizer has no ref __result, so swallowing on a
+            //      non-void SAVE-LOAD target (LoadSaveGameData,
+            //      LoadGameAction) handed the engine a null/default and it
+            //      carried on with a half-deserialized campaign,
+            //   5. the target method returns void -- same reasoning; e.g.
+            //      Mission.SpawnTroop returns an Agent, and a silent null
+            //      Agent just moves the crash somewhere unrecognizable.
+            var returnsVoid = __originalMethod is MethodInfo mi && mi.ReturnType == typeof(void);
+            if (record != null && IsSwallowEnabled() && IsRecoverableException(ex)
+                && !string.IsNullOrEmpty(record.CulpritAssembly)
+                && string.Equals(category, "MISSION-INIT", StringComparison.Ordinal)
+                && returnsVoid)
             {
                 Interlocked.Increment(ref _swallowedCount);
                 DiagLog.Log(Tag, $"SWALLOWED {ex.GetType().Name} from '{record.CulpritAssembly}' -- game continues. " +
-                                 "(saveshield-swallow.flag is present; click 'Toggle SaveShield Swallow' in Mod Config to disable.)");
+                                 "(Swallow is on by default; click 'Toggle SaveShield Swallow' in Mod Config to create " +
+                                 SwallowDisableFlagName + " and disable it.)");
                 return null!;
             }
         }
@@ -700,12 +725,16 @@ public static class SaveShield
     private static bool IsRecoverableException(Exception ex)
     {
         if (ex == null) return false;
+        // Phase 1.5 / H2: duplicate-key ArgumentException removed from this
+        // list. The header's own analysis is right: once the serializer hits
+        // a duplicate key the object table is half-populated and nothing
+        // downstream is trustworthy -- swallowing it traded an honest crash
+        // for delayed corruption. (It also depended on English exception
+        // text; non-English installs never matched. M2/Phase 3 replaces the
+        // remaining text matching used for diagnostics.)
         return ex is MissingMethodException
             || ex is MissingFieldException
-            || ex is TypeLoadException
-            || (ex is ArgumentException ae &&
-                ae.Message != null &&
-                (ae.Message.Contains("same key") || ae.Message.Contains("already been added")));
+            || ex is TypeLoadException;
     }
 
     /// <summary>

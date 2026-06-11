@@ -43,12 +43,13 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     // produce an infinite recursion inside FirstChanceException.
     [System.ThreadStatic] private static bool _inFirstChance;
 
-    // Shared one-shot gate for IncompatibleModDetector.RunEarlyPhase. Same
-    // mechanism as AliasStubSubModule -- whichever runs first wins, the
-    // other is a no-op. Constructor (not OnSubModuleLoad) so this hook
-    // runs DURING the SubModule construction phase, before any other mod's
-    // class has been instantiated. That's the only phase that survives if
-    // a later mod's ctor throws and Bannerlord aborts the sequence.
+    // Gate for this ctor's early shim installs. (Phase 1.2: RunEarlyPhase
+    // owns its OWN one-shot gate internally now -- calling it from several
+    // places is safe and later calls log a no-op line.) Constructor (not
+    // OnSubModuleLoad) so this hook runs DURING the SubModule construction
+    // phase, before any other mod's class has been instantiated. That's the
+    // only phase that survives if a later mod's ctor throws and Bannerlord
+    // aborts the sequence.
     private static int _ctorEarlyDetectionRan;
 
     public BetaDepsHarmonySubModule()
@@ -458,18 +459,53 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             return;
         }
 
-        int created = 0;
+        // Phase 1.6 / finding H3 (2026-06-10 review): alias folders used to be
+        // created once and never touched again ("if exists -> continue").
+        // After any BetaDeps update the alias folders kept the OLD build's
+        // DLLs, and -- with AssemblyVersion pinned across releases -- the CLR
+        // happily bound new BetaDeps code against a stale Foundation/Harmony
+        // copy that loaded first from an alias folder. That produced exactly
+        // the MissingMethodException class this stack exists to prevent, with
+        // no diagnostic pointing at the stale alias. Each materialised folder
+        // now carries a betadeps-version.txt stamp; on FileVersion mismatch
+        // the folder is re-copied. Refreshed DLLs take effect NEXT launch
+        // (this session already loaded the old ones), which is exactly the
+        // window the old code left permanently broken.
+        var stampVersion = TryGetOwnFileVersion();
+
+        int created = 0, refreshed = 0;
         foreach (var sub in System.IO.Directory.GetDirectories(aliasStaging))
         {
             var name = System.IO.Path.GetFileName(sub);
             var dest = System.IO.Path.Combine(modulesRoot!, name);
-            if (System.IO.Directory.Exists(dest))
-                continue; // already there from a previous launch
+            var stampPath = System.IO.Path.Combine(dest, AliasStampFile);
             try
             {
-                CopyDirectoryRecursive(sub, dest);
-                created++;
-                DiagLog.Log(Tag, $"BootstrapAliasFolders: created Modules\\{name}");
+                if (!System.IO.Directory.Exists(dest))
+                {
+                    CopyDirectoryRecursive(sub, dest);
+                    TryWriteStamp(stampPath, stampVersion);
+                    created++;
+                    DiagLog.Log(Tag, $"BootstrapAliasFolders: created Modules\\{name} (stamp {stampVersion})");
+                    continue;
+                }
+
+                var existing = System.IO.File.Exists(stampPath)
+                    ? System.IO.File.ReadAllText(stampPath).Trim()
+                    : "(no stamp -- pre-1.0 install)";
+
+                // Old .stale-* shunt files from a previous refresh are
+                // unlocked by now; garbage-collect them opportunistically.
+                CleanupStaleFiles(dest);
+
+                if (!string.IsNullOrEmpty(stampVersion) &&
+                    string.Equals(existing, stampVersion, StringComparison.Ordinal))
+                    continue; // up to date
+
+                RefreshDirectoryRecursive(sub, dest);
+                TryWriteStamp(stampPath, stampVersion);
+                refreshed++;
+                DiagLog.Log(Tag, $"BootstrapAliasFolders: refreshed Modules\\{name} ({existing} -> {stampVersion}); takes effect next launch");
             }
             catch (Exception ex)
             {
@@ -477,11 +513,39 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             }
         }
 
-        if (created > 0)
+        if (created > 0 || refreshed > 0)
         {
-            DiagLog.Log(Tag, $"BootstrapAliasFolders: materialised {created} alias folder(s). " +
+            DiagLog.Log(Tag, $"BootstrapAliasFolders: materialised {created}, refreshed {refreshed} alias folder(s). " +
                               "Consumer mods that depend on Bannerlord.Harmony / UIExtenderEx / ButterLib / MBOptionScreen " +
-                              "will be visible to the launcher on the next start.");
+                              "will see the current binaries on the next start.");
+        }
+    }
+
+    // Phase 1.6 / H3 -----------------------------------------------------
+
+    private const string AliasStampFile = "betadeps-version.txt";
+
+    private static string TryGetOwnFileVersion()
+    {
+        try
+        {
+            var loc = typeof(BetaDepsHarmonySubModule).Assembly.Location;
+            if (string.IsNullOrEmpty(loc)) return string.Empty;
+            return System.Diagnostics.FileVersionInfo.GetVersionInfo(loc).FileVersion ?? string.Empty;
+        }
+        catch { return string.Empty; }
+    }
+
+    private static void TryWriteStamp(string stampPath, string version)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(version))
+                System.IO.File.WriteAllText(stampPath, version + Environment.NewLine);
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, $"TryWriteStamp({stampPath})", ex); } catch { }
         }
     }
 
@@ -492,5 +556,47 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             System.IO.File.Copy(f, System.IO.Path.Combine(dst, System.IO.Path.GetFileName(f)), overwrite: true);
         foreach (var d in System.IO.Directory.GetDirectories(src))
             CopyDirectoryRecursive(d, System.IO.Path.Combine(dst, System.IO.Path.GetFileName(d)));
+    }
+
+    /// <summary>
+    /// Like CopyDirectoryRecursive, but tolerant of in-use targets. By the
+    /// time this runs, the alias modules' DLLs are LOADED in this process
+    /// (the Bannerlord.Harmony host constructs before BetaDeps), so
+    /// File.Copy(overwrite:true) gets a sharing violation. Windows does
+    /// allow RENAMING a loaded DLL, so locked targets are shunted aside to
+    /// "*.stale-&lt;timestamp&gt;" and the fresh copy lands under the real name.
+    /// The shunt files are deleted by CleanupStaleFiles on a later launch.
+    /// </summary>
+    private static void RefreshDirectoryRecursive(string src, string dst)
+    {
+        System.IO.Directory.CreateDirectory(dst);
+        foreach (var f in System.IO.Directory.GetFiles(src))
+        {
+            var target = System.IO.Path.Combine(dst, System.IO.Path.GetFileName(f));
+            try
+            {
+                System.IO.File.Copy(f, target, overwrite: true);
+            }
+            catch (Exception)
+            {
+                var stale = target + ".stale-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                System.IO.File.Move(target, stale);
+                System.IO.File.Copy(f, target);
+            }
+        }
+        foreach (var d in System.IO.Directory.GetDirectories(src))
+            RefreshDirectoryRecursive(d, System.IO.Path.Combine(dst, System.IO.Path.GetFileName(d)));
+    }
+
+    private static void CleanupStaleFiles(string dir)
+    {
+        try
+        {
+            foreach (var f in System.IO.Directory.GetFiles(dir, "*.stale-*", System.IO.SearchOption.AllDirectories))
+            {
+                try { System.IO.File.Delete(f); } catch { /* still locked; next launch */ }
+            }
+        }
+        catch { }
     }
 }

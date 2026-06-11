@@ -168,8 +168,35 @@ public static class IncompatibleModDetector
     /// to retry the mod -- the standard reversal path, no orphan files
     /// or hidden state in any mod folder.
     /// </summary>
+    // Phase 1.2 / finding B1 (2026-06-10 review): RunEarlyPhase is invoked
+    // from up to THREE places per launch (AliasStubSubModule ctor,
+    // BetaDepsHarmonySubModule ctor, BetaDepsHarmonySubModule.OnSubModuleLoad),
+    // each historically guarded by a DIFFERENT caller-owned gate -- and the
+    // OnSubModuleLoad call had no gate at all. Because STEP 0 writes the
+    // launch marker, every invocation after the first saw the marker the
+    // first one just wrote and concluded "previous session crashed",
+    // running the suspect scan on every launch. With auto-disable enabled
+    // that disabled innocent, newly-installed mods on clean relaunches
+    // (see the May 23 ROT-Core/BannerKings entries in
+    // betadeps-auto-disabled.log for this bug in the wild).
+    // The idempotency gate now lives HERE, in the callee, where it can't
+    // be forgotten by a future caller.
+    private static int _earlyPhaseRan;
+
+    // Phase 1.2 / finding B1: in-memory ModuleList removals queued during
+    // the SubModule construction phase, flushed at the main-menu milestone
+    // (MarkBootSuccessful) when the engine is no longer iterating modules.
+    private static readonly List<string> _pendingInMemoryRemovals = new();
+
     public static void RunEarlyPhase()
     {
+        // One-shot: only the first invocation this session does any work.
+        if (System.Threading.Interlocked.Exchange(ref _earlyPhaseRan, 1) != 0)
+        {
+            try { DiagLog.Log(Tag, "RunEarlyPhase: already ran this session; no-op."); } catch { }
+            return;
+        }
+
         // STEP 0 (FIRST): write the launch marker BEFORE any other work.
         // Earlier versions wrote this at the end of the method, which meant
         // a crash anywhere upstream (in this method or in another mod that
@@ -277,13 +304,15 @@ public static class IncompatibleModDetector
 
             int disabledCount = 0;
             var nowDisabled = new List<string>();
+            // Phase 1.4 / M4: markers written only after doc.Save succeeds.
+            var pendingMarkers = new List<(string Id, string Reason)>();
 
             // Static known-bad list (currently empty). Kept as a structural
             // hook in case a future emergency requires immediate disable of
             // a specific mod ahead of the runtime scan.
             foreach (var kvp in _knownIncompatibleOnBetaBranch)
             {
-                if (TryDisableInXml(doc, kvp.Key, kvp.Value, nowDisabled))
+                if (TryDisableInXml(doc, kvp.Key, kvp.Value, nowDisabled, pendingMarkers))
                     disabledCount++;
             }
 
@@ -360,7 +389,7 @@ public static class IncompatibleModDetector
 
                                 if (TryDisableInXml(doc, suspect,
                                     "auto-detected: previous launch crashed and this mod was not in the last clean modlist",
-                                    nowDisabled))
+                                    nowDisabled, pendingMarkers))
                                     disabledCount++;
                             }
                         }
@@ -404,17 +433,30 @@ public static class IncompatibleModDetector
                 DiagLog.Log(Tag, $"RunEarlyPhase: LauncherData.xml updated. {disabledCount} mod(s) disabled: {string.Join(", ", nowDisabled)}");
                 DiagLog.Log(Tag, "  effect takes hold on the NEXT game launch; this session may still crash on the already-loaded modlist");
 
-                // Critical step: also remove the disabled mods from
-                // Bannerlord's in-memory ModuleList. Without this, the
-                // engine still has the mod queued for construction THIS
-                // session -- it will hard-crash on mods like ROT that
-                // throw during their SubModule ctor. Removing from
-                // ModuleList stops the construction call from ever firing.
-                // Also prevents Bannerlord from later writing LauncherData.xml
-                // back over our changes (its write reflects in-memory state).
-                foreach (var modId in nowDisabled)
+                // Phase 1.4 / M4: markers only after the XML write committed,
+                // so SubModuleConstructionGuard's view (markers) can never
+                // disagree with what the launcher shows (LauncherData.xml).
+                foreach (var (id, reason) in pendingMarkers)
+                    WriteDisableMarker(id, reason);
+
+                // Phase 1.2 / finding B1: do NOT mutate the engine's in-memory
+                // ModuleList here. RunEarlyPhase executes inside a SubModule
+                // constructor -- i.e. while the engine is mid-iteration over
+                // that very list -- and removing entries during the walk risks
+                // an InvalidOperationException/index shift that crashes the
+                // load. In-session construction blocking is
+                // SubModuleConstructionGuard's job: the disable markers this
+                // method just wrote are read by Guard.Install(), which runs
+                // immediately after us in BetaDepsHarmonySubModule's ctor,
+                // BEFORE any consumer mod constructs. The removals below are
+                // queued and flushed at MarkBootSuccessful (main menu, engine
+                // idle) -- which still prevents Bannerlord from writing
+                // LauncherData.xml back over our changes at exit, since that
+                // write reflects in-memory state.
+                lock (_pendingInMemoryRemovals)
                 {
-                    TryRemoveFromInMemoryModuleList(modId);
+                    foreach (var modId in nowDisabled)
+                        _pendingInMemoryRemovals.Add(modId);
                 }
             }
             catch (Exception ex)
@@ -468,10 +510,39 @@ public static class IncompatibleModDetector
             }
             var oldMarker = Path.Combine(betaDepsDir, LaunchMarkerFile);
             try { if (File.Exists(oldMarker)) File.Delete(oldMarker); } catch { }
+
+            // Phase 1.2 / finding B1: flush ModuleList removals queued by
+            // RunEarlyPhase. Safe here -- the engine reached the main menu,
+            // so no module-construction iteration is in flight. This keeps
+            // Bannerlord's exit-time LauncherData.xml write from re-enabling
+            // mods we disabled this session.
+            FlushPendingModuleListRemovals();
         }
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "MarkBootSuccessful", ex);
+        }
+    }
+
+    /// <summary>
+    /// Apply the in-memory ModuleList removals queued during RunEarlyPhase.
+    /// Called from MarkBootSuccessful (main menu, engine idle). Public so a
+    /// later safe milestone can also flush if boot never reaches the menu.
+    /// </summary>
+    public static void FlushPendingModuleListRemovals()
+    {
+        List<string> pending;
+        lock (_pendingInMemoryRemovals)
+        {
+            if (_pendingInMemoryRemovals.Count == 0) return;
+            pending = new List<string>(_pendingInMemoryRemovals);
+            _pendingInMemoryRemovals.Clear();
+        }
+        DiagLog.Log(Tag, $"FlushPendingModuleListRemovals: {pending.Count} queued removal(s)");
+        foreach (var modId in pending)
+        {
+            try { TryRemoveFromInMemoryModuleList(modId); }
+            catch (Exception ex) { DiagLog.LogCaught(Tag, $"  flush({modId})", ex); }
         }
     }
 
@@ -495,7 +566,7 @@ public static class IncompatibleModDetector
     {
         try
         {
-            var idNode = doc.SelectSingleNode($"//UserModData[Id='{modId}']");
+            var idNode = FindUserModDataNode(doc, modId); // M4: no XPath interpolation
             var selNode = idNode?.SelectSingleNode("IsSelected");
             return string.Equals(selNode?.InnerText?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
         }
@@ -509,9 +580,17 @@ public static class IncompatibleModDetector
     /// appends successful disables to <paramref name="nowDisabled"/> and
     /// is responsible for saving the document.
     /// </summary>
-    private static bool TryDisableInXml(XmlDocument doc, string modId, string reason, List<string> nowDisabled)
+    // Phase 1.4 / finding M4: mod ids are no longer string-interpolated into
+    // XPath (an id containing a quote threw XPathException and aborted the
+    // whole scan), and the disable marker is NOT written here anymore --
+    // markers used to land per-mod while doc.Save happened later, so a save
+    // failure left markers (which SubModuleConstructionGuard obeys) pointing
+    // at mods that LauncherData.xml still showed enabled. Markers are now
+    // collected by the caller and written only after doc.Save succeeds.
+    private static bool TryDisableInXml(XmlDocument doc, string modId, string reason,
+        List<string> nowDisabled, List<(string Id, string Reason)> pendingMarkers)
     {
-        var idNode = doc.SelectSingleNode($"//UserModData[Id='{modId}']");
+        var idNode = FindUserModDataNode(doc, modId);
         if (idNode == null)
         {
             DiagLog.Log(Tag, $"  [SKIP] {modId}: no UserModData entry in LauncherData.xml (mod not installed?)");
@@ -530,9 +609,28 @@ public static class IncompatibleModDetector
         }
         selNode.InnerText = "false";
         nowDisabled.Add(modId);
+        pendingMarkers.Add((modId, reason));
         DiagLog.Log(Tag, $"  [DISABLE] {modId}: {reason}");
-        WriteDisableMarker(modId, reason);
         return true;
+    }
+
+    /// <summary>
+    /// Locate the UserModData element whose Id child matches modId. Walks the
+    /// node list and compares text instead of interpolating modId into an
+    /// XPath expression (XPath 1.0 has no quote escaping; a malicious or just
+    /// unlucky mod id like "O'Brien's Mod" threw XPathException).
+    /// </summary>
+    private static XmlNode? FindUserModDataNode(XmlDocument doc, string modId)
+    {
+        var nodes = doc.SelectNodes("//UserModData");
+        if (nodes == null) return null;
+        foreach (XmlNode n in nodes)
+        {
+            var id = n.SelectSingleNode("Id")?.InnerText?.Trim();
+            if (!string.IsNullOrEmpty(id) && string.Equals(id, modId, StringComparison.OrdinalIgnoreCase))
+                return n;
+        }
+        return null;
     }
 
     /// <summary>

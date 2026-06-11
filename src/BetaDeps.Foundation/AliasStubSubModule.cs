@@ -25,8 +25,10 @@ public class AliasStubSubModule : MBSubModuleBase
 {
     private const string Tag = "AliasStub";
 
-    // Idempotent gate -- runs once across all AliasStub instances and across
-    // BetaDepsHarmonySubModule's own constructor. We do this in the instance
+    // Idempotent gate -- runs the early shim installs once across all
+    // AliasStub instances. (Phase 1.2: RunEarlyPhase now owns its OWN
+    // one-shot gate internally; this gate only avoids redundant shim
+    // Install() calls.) We do this in the instance
     // constructor (not OnSubModuleLoad) because OnSubModuleLoad doesn't fire
     // if another module's SubModule.ctor throws during the construction phase
     // and Bannerlord aborts the sequence -- which is exactly what Banner Kings

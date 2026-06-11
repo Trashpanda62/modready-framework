@@ -271,8 +271,17 @@ internal static class SettingsStorage
                 Save(instance, settingsId);
                 return;
             }
-            var json = File.ReadAllText(path);
-            var obj = JObject.Parse(json);
+            // Phase 1.3 / finding H8: parse with recovery. A crash/power-loss
+            // mid-write used to leave truncated JSON; the parse threw, this
+            // method kept compiled defaults, and the next Done-click then
+            // OVERWROTE the damaged file with defaults -- the user's settings
+            // were unrecoverable. Now: damaged file is quarantined as
+            // .corrupt-<timestamp>, the .bak (previous good save, rotated by
+            // WriteAtomic) is restored when parseable, and only then do we
+            // fall back to compiled defaults.
+            var obj = ReadJsonWithRecovery(path, settingsId);
+            if (obj == null)
+                return; // unreadable + unrecoverable: keep compiled defaults; evidence preserved
 
             // Fluent-builder settings: keys are property ids, values are
             // scalars / objects. Write each into the fluent dictionary via
@@ -397,7 +406,7 @@ internal static class SettingsStorage
                     }
                 }
             }
-            File.WriteAllText(path, jo.ToString());
+            WriteAtomic(path, jo.ToString());
             DiagLog.Log(Tag, $"saved '{settingsId}' to {path}");
         }
         catch (Exception ex)
@@ -405,6 +414,85 @@ internal static class SettingsStorage
             DiagLog.LogCaught(Tag, $"Save({settingsId})", ex);
         }
         finally { EndSave(__id); }
+    }
+
+    // Phase 1.3 / finding H8 -------------------------------------------------
+
+    /// <summary>
+    /// Crash-safe file write: content goes to a temp file first, then swaps
+    /// into place. The previous file content survives as "<path>.bak", so a
+    /// torn write can never destroy the last good save. File.Replace is the
+    /// atomic path; the copy fallback covers exotic filesystems/AV locks
+    /// where Replace throws.
+    /// </summary>
+    private static void WriteAtomic(string path, string content)
+    {
+        var tmp = path + ".tmp";
+        File.WriteAllText(tmp, content);
+
+        if (!File.Exists(path))
+        {
+            File.Move(tmp, path);
+            return;
+        }
+
+        try
+        {
+            File.Replace(tmp, path, path + ".bak");
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"WriteAtomic: File.Replace({path}) -- using copy fallback", ex);
+            try { File.Copy(path, path + ".bak", overwrite: true); } catch { }
+            File.Copy(tmp, path, overwrite: true);
+            try { File.Delete(tmp); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// Read + parse a settings JSON. On parse failure: quarantine the damaged
+    /// file (.corrupt-&lt;timestamp&gt;), then try the .bak; if the .bak parses
+    /// it is restored as the live file. Returns null only when nothing
+    /// readable exists -- caller keeps compiled defaults.
+    /// </summary>
+    private static JObject? ReadJsonWithRecovery(string path, string settingsId)
+    {
+        try
+        {
+            return JObject.Parse(File.ReadAllText(path));
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"ReadJsonWithRecovery: parse failed for {path}", ex);
+        }
+
+        // Preserve the evidence before anything can overwrite it.
+        try
+        {
+            var quarantine = path + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            if (!File.Exists(quarantine)) File.Copy(path, quarantine, overwrite: false);
+            DiagLog.Log(Tag, $"  damaged file preserved as {quarantine}");
+        }
+        catch { }
+
+        var bak = path + ".bak";
+        try
+        {
+            if (File.Exists(bak))
+            {
+                var obj = JObject.Parse(File.ReadAllText(bak));
+                try { File.Copy(bak, path, overwrite: true); } catch { }
+                DiagLog.Log(Tag, $"  recovered '{settingsId}' from {bak} (previous good save)");
+                return obj;
+            }
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"ReadJsonWithRecovery: .bak recovery for {path}", ex);
+        }
+
+        DiagLog.Log(Tag, $"  '{settingsId}': no usable .bak; using compiled defaults");
+        return null;
     }
 
     /// <summary>Serialize a FluentGlobalSettings instance by walking its
