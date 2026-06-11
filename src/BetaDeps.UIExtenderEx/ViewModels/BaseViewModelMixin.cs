@@ -1,6 +1,8 @@
 // BetaDeps clean-room re-implementation. MIT, copyright 2026 Maxfield
 // Management Group.
 
+using System.Runtime.CompilerServices;
+
 using TaleWorlds.Library;
 
 namespace Bannerlord.UIExtenderEx.ViewModels;
@@ -34,4 +36,18 @@ public abstract class BaseViewModelMixin<TViewModel> where TViewModel : ViewMode
     /// <summary>Called when the target VM is being finalized so the mixin can
     /// release any resources it acquired.</summary>
     public virtual void OnFinalize() { }
+
+    // Property-change helpers forwarding to the attached VM, matching the
+    // upstream BUTR base-class surface. Consumer mixins (e.g. CDE's
+    // CharacterAttributeItemVMMixin) call these from their constructors and
+    // property setters; without them the type binds but every call throws
+    // MissingMethodException at JIT time (found live 2026-06-11).
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        => ViewModel?.OnPropertyChanged(propertyName);
+
+    protected void OnPropertyChangedWithValue(object value, [CallerMemberName] string? propertyName = null)
+        => ViewModel?.OnPropertyChangedWithValue(value, propertyName);
+
+    protected void OnPropertyChangedWithValue<T>(T value, [CallerMemberName] string? propertyName = null) where T : struct
+        => ViewModel?.OnPropertyChangedWithValue((object)value, propertyName);
 }

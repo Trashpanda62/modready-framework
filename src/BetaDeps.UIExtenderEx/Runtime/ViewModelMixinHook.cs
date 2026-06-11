@@ -111,6 +111,14 @@ internal static class ViewModelMixinHook
                 // override RefreshValues resolves to the base implementation --
                 // patching that is fine (the postfix no-ops on VMs without mixins).
                 var method = AccessTools2.Method(targetType, methodName);
+                // Harmony refuses an inherited slot resolved through the derived
+                // type (ReflectedType != DeclaringType): "You can only patch
+                // implemented methods". Re-resolve on the declaring type (found
+                // live 2026-06-11 via Diplomacy's NavalKingdomManagementVMMixin).
+                if (method != null && method.DeclaringType != null && method.ReflectedType != method.DeclaringType)
+                {
+                    method = AccessTools2.Method(method.DeclaringType, methodName) ?? method;
+                }
                 if (method == null || method.IsAbstract)
                 {
                     DiagLog.Log(Tag, $"{mixinReg.MixinType.FullName}: refresh method {targetType.Name}.{methodName} {(method == null ? "not found" : "is abstract")}; refresh forwarding disabled for this mixin");
