@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.7.2": {
+      "Bannerlord.ReferenceAssemblies.Core": {
+        "type": "Direct",
+        "requested": "[1.4.5.115026, )",
+        "resolved": "1.4.5.115026",
+        "contentHash": "qcmwHJ/VMzOxrtIo9GcYn10AXFzO9gY1iaI73pg9rosde6Ok30cN8/i4okHqu/CnJk1yMnELt1kXSSmDGFXEPg=="
+      },
+      "Lib.Harmony": {
+        "type": "Direct",
+        "requested": "[2.4.2, )",
+        "resolved": "2.4.2",
+        "contentHash": "D2X9ojVjqbqdqWVK3VQETrEb56yVoXxtEp6tP5UvW0PP+bA4uJiswqOxF8GhH02ECwyevUa9vwhwdLzyXfksbw=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.4, )",
+        "resolved": "13.0.4",
+        "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
+      }
+    }
+  }
+}

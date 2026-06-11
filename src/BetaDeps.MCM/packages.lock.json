@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.7.2": {
+      "Bannerlord.ReferenceAssemblies.Core": {
+        "type": "Direct",
+        "requested": "[1.4.5.115026, )",
+        "resolved": "1.4.5.115026",
+        "contentHash": "qcmwHJ/VMzOxrtIo9GcYn10AXFzO9gY1iaI73pg9rosde6Ok30cN8/i4okHqu/CnJk1yMnELt1kXSSmDGFXEPg=="
+      },
+      "Lib.Harmony": {
+        "type": "Direct",
+        "requested": "[2.4.2, )",
+        "resolved": "2.4.2",
+        "contentHash": "D2X9ojVjqbqdqWVK3VQETrEb56yVoXxtEp6tP5UvW0PP+bA4uJiswqOxF8GhH02ECwyevUa9vwhwdLzyXfksbw=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.4, )",
+        "resolved": "13.0.4",
+        "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
+      },
+      "Mono.Cecil": {
+        "type": "Transitive",
+        "resolved": "0.11.6",
+        "contentHash": "f33RkDtZO8VlGXCtmQIviOtxgnUdym9xx/b1p9h91CRGOsJFxCFOFK1FDbVt1OCf1aWwYejUFa2MOQyFWTFjbA=="
+      },
+      "MonoMod.Backports": {
+        "type": "Transitive",
+        "resolved": "1.1.2",
+        "contentHash": "baYlNy8n8kmaNhNvqmZ/dIPOeO1r9//dG1i2WbunMWtWZ2EKtIgmXaS+ZzphzTsikkGnoD4Jwr5g0TVdpDjgpw==",
+        "dependencies": {
+          "MonoMod.ILHelpers": "1.1.0",
+          "System.ValueTuple": "4.5.0"
+        }
+      },
+      "MonoMod.Core": {
+        "type": "Transitive",
+        "resolved": "1.3.4",
+        "contentHash": "yeLEs4Y+hfFjiShKotDYKWiwnADra2kj8pYl66QewdcM/IRPIbjG6wAIVq38Zj9Ry2me33DCwXOHWrTnR7dZ1Q==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.6",
+          "MonoMod.Backports": "1.1.2",
+          "MonoMod.ILHelpers": "1.1.0",
+          "MonoMod.Utils": "25.0.12"
+        }
+      },
+      "MonoMod.ILHelpers": {
+        "type": "Transitive",
+        "resolved": "1.1.0",
+        "contentHash": "L2FWjhTrv7tcIxshfZ+M3OcaNr4cNw0IwiVZEgwqRnZ5QAN3+RrNJ8ZwCzwXUWyPDqooJxMcjjg8PsSYUiNBjQ=="
+      },
+      "MonoMod.RuntimeDetour": {
+        "type": "Transitive",
+        "resolved": "25.3.4",
+        "contentHash": "hzAogPejsFAAWUaa+dFXH2GR2LdLSEAfPfT1sz1wCPXBxHzufbcVo8NkpsrhLEYVIQ0BDb1Xsyv/MqyFShC4bA==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.6",
+          "MonoMod.Backports": "1.1.2",
+          "MonoMod.Core": "1.3.4",
+          "MonoMod.ILHelpers": "1.1.0",
+          "MonoMod.Utils": "25.0.12"
+        }
+      },
+      "MonoMod.Utils": {
+        "type": "Transitive",
+        "resolved": "25.0.12",
+        "contentHash": "8i/uRhkl7vW2DNMmDsIz+D7VaMtv9/jH+m7f4y5Zz3FJGbm15MVSwVfOp/fVV/1Ld6YFxk6jophDNVbAZUKR1Q==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.6",
+          "MonoMod.Backports": "1.1.2",
+          "MonoMod.ILHelpers": "1.1.0"
+        }
+      },
+      "System.ValueTuple": {
+        "type": "Transitive",
+        "resolved": "4.5.0",
+        "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
+      },
+      "Bannerlord.UIExtenderEx": {
+        "type": "Project",
+        "dependencies": {
+          "BetaDeps.Foundation": "[0.9.0, )",
+          "BetaDeps.Harmony": "[0.9.0, )"
+        }
+      },
+      "betadeps.foundation": {
+        "type": "Project"
+      },
+      "betadeps.harmony": {
+        "type": "Project",
+        "dependencies": {
+          "BetaDeps.Foundation": "[0.9.0, )",
+          "Lib.Harmony": "[2.4.2, )",
+          "Mono.Cecil": "[0.11.6, )",
+          "MonoMod.RuntimeDetour": "[25.3.4, )"
+        }
+      }
+    }
+  }
+}
