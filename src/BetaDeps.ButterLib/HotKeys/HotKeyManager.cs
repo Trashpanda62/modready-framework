@@ -74,11 +74,12 @@ public abstract class HotKeyManager
 }
 
 /// <summary>
-/// Default no-op HotKeyManager. Stores keys in-memory; doesn't wire them to
-/// the input system (that's a Phase 2+ feature in BetaDeps). Consumer mods
-/// that just want their key registration code to NOT throw get a usable
-/// manager back; their OnPressed/OnReleased handlers will never fire, but
-/// FCL still gets past OnBeforeInitialModuleScreenSetAsRoot.
+/// Default HotKeyManager. Stores keys in-memory during the Add phase; Build()
+/// hands them to <see cref="HotKeyTicker"/>, which polls the input system
+/// every application tick and fires OnPressed / OnReleased / IsDown /
+/// IsDownAndReleased on each key's DefaultKey (Phase 2C real wiring).
+/// In-game rebinding via Options is not implemented yet -- Build emits a
+/// CompatWarn so that residual gap stays visible.
 /// </summary>
 internal sealed class HotKeyManagerImpl : HotKeyManager
 {
@@ -117,7 +118,10 @@ internal sealed class HotKeyManagerImpl : HotKeyManager
         if (!_built)
         {
             _built = true;
-            try { DiagLog.Log(Tag, $"Build() mod '{_modName}' with {_keys.Count} keys"); } catch { }
+            HotKeyTicker.Register(_keys, _modName);
+            CompatWarn.Once("ButterLib.HotKeys", "Build", _modName,
+                "hotkeys fire on their default keys; in-game rebinding via Options is not implemented yet");
+            try { DiagLog.Log(Tag, $"Build() mod '{_modName}' with {_keys.Count} keys (input polling active)"); } catch { }
         }
         return _keys.ToArray();
     }
@@ -125,13 +129,12 @@ internal sealed class HotKeyManagerImpl : HotKeyManager
 
 /// <summary>
 /// Internal singleton that backs HotKeyManager.StaticInstance. Returns a
-/// fresh HotKeyManagerImpl from Create / CreateWithOwnCategory; tracks
-/// every registered key in HotKeys.
+/// fresh HotKeyManagerImpl from Create / CreateWithOwnCategory; HotKeys
+/// reflects every key activated through Build() (the ticker's registry).
 /// </summary>
 internal sealed class DefaultHotKeyManagerStatic : IHotKeyManagerStatic
 {
-    private readonly List<HotKeyBase> _hotKeys = new();
-    public IList<HotKeyBase> HotKeys => _hotKeys;
+    public IList<HotKeyBase> HotKeys => HotKeyTicker.ActiveKeys;
 
     public HotKeyManager Create(string modName) => new HotKeyManagerImpl(modName, null);
     public HotKeyManager CreateWithOwnCategory(string modName, string categoryName)

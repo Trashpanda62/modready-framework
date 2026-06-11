@@ -9,6 +9,8 @@
 
 using System;
 
+using BetaDeps.Foundation;
+
 using TaleWorlds.InputSystem;
 
 namespace Bannerlord.ButterLib.HotKeys;
@@ -64,8 +66,17 @@ public abstract class HotKeyBase
     }
 
     // Implicit conversion to GameKey, used at call sites that expect a GameKey.
+    // BetaDeps polls hotkeys directly (HotKeyTicker) and never creates
+    // TaleWorlds GameKeys, so this conversion has nothing to return -- warn
+    // through the compat channel before throwing so the gap is reportable.
     public static implicit operator GameKey(HotKeyBase hotKey)
-        => hotKey?.GameKey ?? throw new InvalidOperationException("HotKeyBase has no associated GameKey yet.");
+    {
+        if (hotKey?.GameKey is { } gameKey) return gameKey;
+        CompatWarn.Once("ButterLib.HotKeys", "implicit operator GameKey",
+            hotKey?.GetType().Assembly.GetName().Name,
+            "BetaDeps dispatches hotkeys by polling and does not create TaleWorlds GameKeys; this conversion always fails");
+        throw new InvalidOperationException("HotKeyBase has no associated GameKey yet.");
+    }
 
     // Override-points consumer mods derive (protected virtual matches upstream).
     protected virtual void OnPressed() { }

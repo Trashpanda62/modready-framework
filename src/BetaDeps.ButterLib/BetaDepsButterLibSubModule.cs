@@ -65,14 +65,23 @@ public class ButterLibSubModule : MBSubModuleBase
                 DiagLog.LogCaught(Tag, "HotKeyManager.StaticInstance install", ex);
             }
 
-            // Build the root DI container and publish via GenericServiceProvider.
+            // Register ButterLib's own services into the OPEN collection. The
+            // container is no longer built (sealed) here -- consumer mods load
+            // after us and can register their services via this.GetServices()
+            // in their OnSubModuleLoad; the build happens in our
+            // OnBeforeInitialModuleScreenSetAsRoot (H14 sealed-DI fix).
             try
             {
-                var services = new ServiceCollection();
-                services.AddSingleton<IHotKeyManagerStatic>(_ => HotKeyManager.StaticInstance!);
-                var serviceProvider = services.BuildServiceProvider();
-                GenericServiceProvider.SetServiceProvider(serviceProvider);
-                DiagLog.Log(Tag, "DI container built and published");
+                var services = GenericServiceProvider.OpenCollection;
+                if (services == null)
+                {
+                    DiagLog.Log(Tag, "DI bootstrap: open collection already closed (external SetServiceProvider?); IHotKeyManagerStatic not registered");
+                }
+                else
+                {
+                    services.AddSingleton<IHotKeyManagerStatic>(_ => HotKeyManager.StaticInstance!);
+                    DiagLog.Log(Tag, "DI registration open; container builds at OnBeforeInitialModuleScreenSetAsRoot");
+                }
             }
             catch (Exception ex)
             {
@@ -100,8 +109,33 @@ public class ButterLibSubModule : MBSubModuleBase
     protected override void OnBeforeInitialModuleScreenSetAsRoot()
     {
         base.OnBeforeInitialModuleScreenSetAsRoot();
+
+        // Every consumer mod's OnSubModuleLoad has run by now -- their service
+        // registrations (via this.GetServices()) are in the open collection.
+        // Build the container. NOTE: OnBeforeInitialModuleScreenSetAsRoot fires
+        // in module load order and BetaDeps loads FIRST (it is the consumers'
+        // dependency), so the window closes here: consumer mods must register
+        // services from OnSubModuleLoad. A consumer registering from its own
+        // OnBeforeInitialModuleScreenSetAsRoot gets null from GetServices()
+        // plus a CompatWarn (upstream has the same window).
+        try { GenericServiceProvider.Seal(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "GenericServiceProvider.Seal", ex); }
+
         try { QuarantineXorberaxShoulderCamera(); }
         catch (Exception ex) { DiagLog.LogCaught(Tag, "QuarantineXorberaxShoulderCamera", ex); }
+    }
+
+    /// <summary>
+    /// Per-frame driver for the hotkey input wiring (Phase 2C / H14 real
+    /// wiring). Runs on the main thread, where the TaleWorlds Input statics
+    /// are valid. HotKeyTicker.Tick is allocation-free over an immutable
+    /// snapshot, so the per-frame cost with no registered hotkeys is one
+    /// array-length check.
+    /// </summary>
+    protected override void OnApplicationTick(float dt)
+    {
+        base.OnApplicationTick(dt);
+        HotKeyTicker.Tick();
     }
 
     /// <summary>

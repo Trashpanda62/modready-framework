@@ -68,6 +68,26 @@ public static class DependencyInjectionExtensions
     public static IServiceProvider GetServiceProvider() => _SharedProvider;
 
     /// <summary>
+    /// Upstream BUTR API: the open IServiceCollection consumer mods register
+    /// their services into during the load phase (their OnSubModuleLoad).
+    /// Returns null once ButterLib has built the container at
+    /// OnBeforeInitialModuleScreenSetAsRoot -- same lifecycle contract as
+    /// upstream. Before Phase 2C the container was built (and sealed) during
+    /// ButterLib's own load, so consumer registration was impossible (H14).
+    /// </summary>
+    public static IServiceCollection? GetServices(this MBSubModuleBase subModule)
+    {
+        var open = GenericServiceProvider.OpenCollection;
+        if (open == null)
+        {
+            CompatWarn.Once("ButterLib.DI", "GetServices (after container sealed)",
+                subModule?.GetType().Assembly.GetName().Name,
+                "service registration attempted after the container was built; returns null per upstream contract");
+        }
+        return open;
+    }
+
+    /// <summary>
     /// Upstream BUTR ButterLib signature; consumer mods like Fluid Combat Lite
     /// call this from their SubModule.OnSubModuleLoad to set up a per-mod
     /// Serilog file logger. We stub it as a no-op that returns a fresh
