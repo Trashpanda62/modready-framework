@@ -66,9 +66,29 @@ naval gating:
   off-engine (8 assertions); the live audio behavior needs an in-game check.
 - Spike teardown (plan §14) confirmed already complete (no `MusicSpike*` code remains).
 
-Remaining for the picker: **UI-A** — the in-game MCM enable/mode/volume controls
-per context (the engine works today by dropping `.ogg` files into
-`Music/BYO/<Context>/`; UI-A surfaces the toggles).
+### Music picker UI — in the native Options > Sound tab
+
+Per the design call, the picker lives in the **game Options menu, below the
+volume sliders** (not a Mod Config tab). Built from the real native prefab
+structure (read from the game install):
+
+- Injected into `<OptionsGroupedPage Id="AudioOptionsPage">` in the `Options`
+  movie (`MusicOptionsPatch`), so it renders only on the Sound tab, after the
+  audio options = below the volume sliders.
+- Bound to `MusicCategoryMixin` on `GroupedOptionCategoryVM`. The audio category
+  is identified **language-independently** — `MusicOptionsRootMixin` captures the
+  root `OptionsVM.AudioOptions` instance and the category mixin compares by
+  reference (no fragile localized-label matching).
+- One `MusicRowVM` per context: enable checkbox, Shuffle/Sequential toggle,
+  volume slider, and a live track count — writing straight back to
+  `MusicConfig.Current`'s per-context settings (settlement contexts apply live;
+  PSAI contexts apply next launch).
+- Fully guarded; a UI fault leaves the vanilla audio tab untouched.
+
+Compiles into the build; **needs an in-game pass to confirm rendering** (injecting
+into a data-driven native tab can't be verified off-engine). The runtime.log line
+`MusicCategoryMixin: BYO music UI bound to the audio category (N row(s))` confirms
+the mixin attached and bound.
 
 ### All-in-One installer → v1.0.0
 

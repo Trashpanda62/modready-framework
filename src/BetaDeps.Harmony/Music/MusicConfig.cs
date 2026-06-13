@@ -59,6 +59,13 @@ public sealed class MusicConfig
 
     public int TotalTracks => _pools.Values.Sum(p => p.Count);
 
+    /// <summary>
+    /// The live config built at load, so the Options-screen music UI (which lives
+    /// in the MCM assembly) can read/write per-context settings without a hard
+    /// reference back into the SubModule. Set at the end of Load().
+    /// </summary>
+    public static MusicConfig? Current { get; private set; }
+
     private MusicConfig() { }
 
     /// <summary>
@@ -90,6 +97,7 @@ public sealed class MusicConfig
             DiagLog.LogCaught(Tag, "Load", ex);
             cfg.InitEmpty();
         }
+        Current = cfg;
         return cfg;
     }
 
