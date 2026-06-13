@@ -307,6 +307,9 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         {
             _musicConfig = MusicConfig.Load();
             PsaiRedirectManager.Install(_musicConfig);
+            // C3: the settlement (Town/Village/Tavern) Engine.Music path. Inert
+            // unless the player dropped BYO tracks in a settlement context.
+            SettlementMusicManager.Install(_musicConfig);
         }
         catch (Exception ex)
         {
@@ -325,6 +328,7 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         try
         {
             PsaiRedirectManager.Pump();
+            SettlementMusicManager.Pump();   // C3: settlement clip-advance loop
         }
         catch (Exception ex)
         {

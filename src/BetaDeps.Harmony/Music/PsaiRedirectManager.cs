@@ -485,16 +485,9 @@ public static class PsaiRedirectManager
 
     private static bool NavalDlcPresent()
     {
-        try
-        {
-            if (_config == null || string.IsNullOrEmpty(_config.ModuleDir)) return false;
-            var modulesRoot = Path.GetDirectoryName(_config.ModuleDir);   // ...\Modules
-            if (string.IsNullOrEmpty(modulesRoot)) return false;
-            return Directory.Exists(Path.Combine(modulesRoot!, "NavalDLC"));
-        }
-        catch
-        {
-            return false;
-        }
+        var modulesRoot = string.IsNullOrEmpty(_config?.ModuleDir)
+            ? null
+            : Path.GetDirectoryName(_config!.ModuleDir);   // ...\Modules
+        return NavalGate.IsAvailable(modulesRoot);
     }
 }

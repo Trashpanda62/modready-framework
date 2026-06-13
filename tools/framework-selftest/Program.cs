@@ -35,6 +35,7 @@ namespace BetaDeps.FrameworkSelfTest
                 ProfileStoreTests.Run();
                 ModJsonTests.Run();
                 ModScaffolderTests.Run();
+                NavalGateTests.Run();
             }
             catch (Exception ex)
             {
@@ -253,6 +254,51 @@ namespace BetaDeps.FrameworkSelfTest
     {
         public static MethodConflict? FirstOrDefaultByMethod(this IReadOnlyList<MethodConflict> list, string method)
             => list.FirstOrDefault(c => c.TargetMethod == method);
+    }
+
+    // ----------------------------------------------------------------------
+    // Music picker -- NavalGate (War Sails DLC detection)
+    // ----------------------------------------------------------------------
+    internal static class NavalGateTests
+    {
+        public static void Run()
+        {
+            Console.WriteLine("[NavalGate]");
+            var baseDir = Path.Combine(Path.GetTempPath(), "bd-naval-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(baseDir);
+            try
+            {
+                // No NavalDLC folder + no naval assembly loaded -> not available.
+                Program.Check("naval: absent when no folder/assembly",
+                    !BetaDeps.Harmony.Music.NavalGate.IsAvailable(baseDir));
+                // Create the module folder -> available.
+                Directory.CreateDirectory(Path.Combine(baseDir, "NavalDLC"));
+                Program.Check("naval: detected via Modules\\NavalDLC folder",
+                    BetaDeps.Harmony.Music.NavalGate.IsAvailable(baseDir));
+                // Null modules root falls back to assembly scan (none here) -> false.
+                Program.Check("naval: null root + no naval assembly -> false",
+                    !BetaDeps.Harmony.Music.NavalGate.IsAvailable(null));
+
+                // SettlementMusicManager.ClassifySettlement (pure mapping)
+                var Town = BetaDeps.Harmony.Music.MusicContext.SettlementTown;
+                var Village = BetaDeps.Harmony.Music.MusicContext.SettlementVillage;
+                var Tavern = BetaDeps.Harmony.Music.MusicContext.SettlementTavern;
+                Program.Check("settlement: town",
+                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, false) == Town);
+                Program.Check("settlement: village",
+                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, false) == Village);
+                Program.Check("settlement: tavern beats town",
+                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, true) == Tavern);
+                Program.Check("settlement: village+tavern stays village",
+                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, true) == Village);
+                Program.Check("settlement: neither -> null",
+                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, false, false) == null);
+            }
+            finally
+            {
+                try { Directory.Delete(baseDir, recursive: true); } catch { }
+            }
+        }
     }
 
     // ----------------------------------------------------------------------

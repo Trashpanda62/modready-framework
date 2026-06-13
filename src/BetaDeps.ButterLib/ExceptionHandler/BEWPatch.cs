@@ -125,9 +125,15 @@ public static class BEWPatch
         try
         {
             var methodSig = $"{__originalMethod?.DeclaringType?.FullName}.{__originalMethod?.Name}";
-            var msgHead = __exception.Message ?? string.Empty;
-            if (msgHead.Length > 200) msgHead = msgHead.Substring(0, 200);
-            var key = $"{methodSig}|{__exception.GetType().Name}|{msgHead}";
+            // Leak/throttle fix: key on (method, exception type) ONLY -- NOT the
+            // message. A persistent fault whose Message varies per occurrence
+            // (entity ids, frame numbers, ReflectionTypeLoadException LoaderException
+            // text) otherwise minted a brand-new dictionary key every tick on this
+            // 60Hz finalizer path: an unbounded growth of _swallowCounts AND a
+            // defeated throttle (every distinct message re-logged at count==1). With
+            // a (method|type) key the dictionary cardinality is bounded by
+            // methods x exception-types; the full message is still written below.
+            var key = $"{methodSig}|{__exception.GetType().Name}";
             long count;
             lock (_swallowLogLock)
             {

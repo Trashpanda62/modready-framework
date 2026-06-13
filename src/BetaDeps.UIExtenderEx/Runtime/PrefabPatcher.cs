@@ -297,14 +297,62 @@ internal static class PrefabPatcher
         var patchName = reg.PatchType.FullName ?? reg.PatchType.Name;
         if (!TryGetV1Content(patch, patchName, out var fragments)) return false;
 
-        var insertType = patch.Type switch
+        // v1 PrefabExtensionInsertPatch uses CHILD semantics, NOT the sibling
+        // semantics of v2 InsertType. Prefabs/InsertPatch.cs defines Prepend as
+        // "first child of the target" and Append as "last child" -- mapping those
+        // onto v2 InsertType.Prepend/Append (which are sibling-before/after on the
+        // PARENT, see ApplyFragments) silently dropped the inserted widget into the
+        // wrong container, so older CDE-class mods' UI changes rendered in the wrong
+        // place or not at all. Route them through child insertion instead.
+        switch (patch.Type)
         {
-            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Prepend => InsertType.Prepend,
-            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Append  => InsertType.Append,
-            Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Replace => InsertType.Replace,
-            _ => InsertType.Child,
-        };
-        return ApplyFragments(doc, target, insertType, fragments, removeRootNode: false, patchName);
+            case Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Replace:
+                return ApplyFragments(doc, target, InsertType.Replace, fragments, removeRootNode: false, patchName);
+            case Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Prepend:
+                return ApplyV1ChildInsert(doc, target, fragments, prepend: true, patchName);
+            case Bannerlord.UIExtenderEx.Prefabs.InsertPatch.Append:
+            default: // InsertPatch.Child also lands here -- both are last-child inserts
+                return ApplyV1ChildInsert(doc, target, fragments, prepend: false, patchName);
+        }
+    }
+
+    /// <summary>
+    /// v1 child-insert placement: import <paramref name="fragments"/> into the
+    /// target's &lt;Children&gt; container (Gauntlet widgets store visible kids
+    /// there; fall back to the target itself if absent), either as the leading
+    /// children (<paramref name="prepend"/>) or appended as the trailing ones.
+    /// Mirrors ApplyFragments' InsertType.Child container resolution.
+    /// </summary>
+    private static bool ApplyV1ChildInsert(XmlDocument doc, XmlNode target, List<XmlNode> fragments, bool prepend, string patchName)
+    {
+        var imported = fragments.Select(n => doc.ImportNode(n, deep: true)).ToList();
+
+        XmlNode container = target;
+        foreach (XmlNode c in target.ChildNodes)
+        {
+            if (c.NodeType == XmlNodeType.Element &&
+                string.Equals(c.LocalName, "Children", StringComparison.Ordinal))
+            {
+                container = c;
+                break;
+            }
+        }
+
+        if (prepend)
+        {
+            var first = container.FirstChild;
+            // Insert in list order so fragments keep their order as the leading children.
+            foreach (var n in imported)
+            {
+                if (first != null) container.InsertBefore(n, first);
+                else container.AppendChild(n);
+            }
+        }
+        else
+        {
+            foreach (var n in imported) container.AppendChild(n);
+        }
+        return true;
     }
 
     private static bool ApplyV1InsertAsSibling(XmlDocument doc, XmlNode target, PrefabRegistration reg)

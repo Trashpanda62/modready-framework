@@ -47,6 +47,36 @@ SubModule.xml + a sample mod.json — zero C#), **HarmonyTweak** (csproj + a sta
 dependency, and the generated mod.json round-trips through `ModJsonParser`. Pure
 file-gen, engine-free; 14 self-test assertions. (Standalone CLI wrapper is TODO.)
 
+### Music selector — settlement path + naval gate
+
+The non-destructive BYO music picker's PSAI path (menu/campaign/battle/siege/naval)
+was already built + wired; this build completes the **settlement** half and the
+naval gating:
+
+- **`SettlementMusicManager`** (`Harmony/Music`): the Town/Village/Tavern path.
+  Settlement music is FMOD-event-based (PSAI can't reach it), so it drives a free
+  `TaleWorlds.Engine.Music` channel — acquire on settlement entry, `LoadClip` +
+  `PlayMusic` from the context's `PlaybackPool`, advance when `IsMusicPlaying`
+  goes false, `StopMusic`/`UnloadClip` on exit. All engine access is reflection +
+  try/catch (a music fault can never crash the game). Tick-driven beside
+  `PsaiRedirectManager.Pump()`.
+- **`NavalGate`** (`Harmony/Music`): single War-Sails detection point (Modules\NavalDLC
+  folder or a loaded naval assembly) so the Naval context/UI row gates correctly.
+- Pure logic (settlement classification, naval detection) is unit-tested
+  off-engine (8 assertions); the live audio behavior needs an in-game check.
+- Spike teardown (plan §14) confirmed already complete (no `MusicSpike*` code remains).
+
+Remaining for the picker: **UI-A** — the in-game MCM enable/mode/volume controls
+per context (the engine works today by dropping `.ogg` files into
+`Music/BYO/<Context>/`; UI-A surfaces the toggles).
+
+### All-in-One installer → v1.0.0
+
+`installer/` (Inno Setup bundle of BLSE + the five BetaDeps modules) bumped to
+**v1.0.0** (`Build-Installer.ps1` default, `.iss` `AppVersion`, README). It stages
+the current `dist\Modules`, so it ships the v1.0.0 modules. Compiling the `.exe`
+needs Inno Setup 6 + a BLSE download (`-BlseDir`).
+
 ## In-game wiring
 
 `FrameworkBootstrap.RunLateInit` is called from the same late lifecycle hooks
@@ -73,6 +103,32 @@ Everything is wrapped so a framework fault can never crash module load.
 ## API docs
 
 Consumer guide: `docs/BETADEPS-NATIVE-API.md` → **Module 7: BetaDeps.Framework**.
+
+## Bug-fix pass (2026-06-13)
+
+A multi-agent adversarial bug hunt (10 subsystem clusters, each finding
+independently verified) surfaced **7 confirmed correctness bugs**, all fixed:
+
+- **VersionProbe** (`Foundation`): cached a failed `Unknown` detection permanently
+  if probed before TaleWorlds version types load → could silently disable beta
+  sigsafe patches for the session. Now memoizes only successful detections.
+- **AddBool/AddToggle IRef overloads** (`MCM`): hard `(bool)` unbox threw
+  `InvalidCastException` into a consumer mod's load if a non-bool ref was bound.
+  Now coerced defensively like the int/text overloads.
+- **PrefabPatcher v1 Insert** (`UIExtenderEx`): v1 `Prepend`/`Append` (child
+  semantics) were mapped to v2 sibling ops → older mods' widgets placed in the
+  wrong container. Now route through child insertion.
+- **BEWPatch dedup dict** (`ButterLib`): keyed on the exception *message*, so a
+  per-tick varying message leaked memory on the 60 Hz finalizer path and defeated
+  the throttle. Now keyed on (method, exception-type).
+- **McmSelfTest backup/restore** (`MCM`): only snapshotted the Global folder,
+  leaving per-save/per-campaign settings unprotected if the test crashed. Now
+  backs up the whole `ModSettings` tree.
+- **PatchShield verdict cache** (`Foundation`): a second distinct culprit on the
+  same method could never be unpatched. Now re-enters the unpatch path while
+  retries remain, still stops walking once the cap is hit.
+- **ModJsonParser.Parse** (`MCM`, new code): could throw on a type-mismatched
+  `default`/`min`/`max`. Now returns a validation error (regression-tested).
 
 ## Bugs caught + fixed during the build
 

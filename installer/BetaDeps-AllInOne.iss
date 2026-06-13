@@ -14,7 +14,7 @@
 
 #define AppName "BetaDeps (All-in-One)"
 #ifndef AppVersion
-  #define AppVersion "0.9.0"
+  #define AppVersion "1.0.0"
 #endif
 #define AppPublisher "Maxfield Management Group"
 #define LauncherExe "Bannerlord.BLSE.LauncherEx.exe"

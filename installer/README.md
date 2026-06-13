@@ -36,10 +36,10 @@ Then build:
 
 ```
 cd C:\dev\beta-deps
-.\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 0.9.0
+.\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 1.0.0
 ```
 
-Output: `dist\BetaDeps-AllInOne-v0.9.0.exe`.
+Output: `dist\BetaDeps-AllInOne-v1.0.0.exe`.
 
 ## Licensing / credit
 

@@ -326,17 +326,35 @@ internal static class McmSelfTest
     // Backup / restore
     // --------------------------------------------------------------------
 
+    private const string SelfTestBackupPrefix = "SelfTestBackup-";
+
+    /// <summary>
+    /// Resolve ...\Configs\ModSettings (the PARENT of Global). It also holds
+    /// PerSave\&lt;campaignId&gt;\, PerCampaign\&lt;campaignId&gt;\, and _Profiles\,
+    /// so backing up the whole tree -- not just Global -- means a crashed self-test
+    /// can't leave test values in the player's per-save / per-campaign settings
+    /// (the earlier Global-only backup had no safety net for those scopes).
+    /// </summary>
+    private static string ResolveModSettingsRoot()
+    {
+        var globalDir = Path.GetDirectoryName(SettingsStorage.ResolvePath("__probe__")) ?? string.Empty;
+        return Path.GetDirectoryName(globalDir) ?? globalDir;
+    }
+
     private static string BackupAllSettings()
     {
-        var anyPath = SettingsStorage.ResolvePath("__probe__");
-        var globalDir = Path.GetDirectoryName(anyPath) ?? string.Empty;
-        var backupDir = Path.Combine(globalDir, $"SelfTestBackup-{DateTime.Now:yyyyMMdd-HHmmss}");
+        var root = ResolveModSettingsRoot();
+        var backupDir = Path.Combine(root, $"{SelfTestBackupPrefix}{DateTime.Now:yyyyMMdd-HHmmss}");
         Directory.CreateDirectory(backupDir);
-        if (Directory.Exists(globalDir))
+        if (Directory.Exists(root))
         {
-            foreach (var file in Directory.GetFiles(globalDir, "*.json"))
+            foreach (var file in Directory.GetFiles(root, "*.json", SearchOption.AllDirectories))
             {
-                var target = Path.Combine(backupDir, Path.GetFileName(file));
+                var rel = file.Substring(root.Length).TrimStart(Path.DirectorySeparatorChar, '/');
+                // Don't recurse a prior/this backup folder into the new backup.
+                if (rel.StartsWith(SelfTestBackupPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+                var target = Path.Combine(backupDir, rel);
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                 File.Copy(file, target, overwrite: true);
             }
         }
@@ -345,12 +363,13 @@ internal static class McmSelfTest
 
     private static void RestoreAllSettings(string backupDir)
     {
-        var anyPath = SettingsStorage.ResolvePath("__probe__");
-        var globalDir = Path.GetDirectoryName(anyPath) ?? string.Empty;
-        if (!Directory.Exists(backupDir) || string.IsNullOrEmpty(globalDir)) return;
-        foreach (var file in Directory.GetFiles(backupDir, "*.json"))
+        var root = ResolveModSettingsRoot();
+        if (!Directory.Exists(backupDir) || string.IsNullOrEmpty(root)) return;
+        foreach (var file in Directory.GetFiles(backupDir, "*.json", SearchOption.AllDirectories))
         {
-            var target = Path.Combine(globalDir, Path.GetFileName(file));
+            var rel = file.Substring(backupDir.Length).TrimStart(Path.DirectorySeparatorChar, '/');
+            var target = Path.Combine(root, rel);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             File.Copy(file, target, overwrite: true);
         }
         // Also re-load each in-memory instance so it picks up the restored JSON.

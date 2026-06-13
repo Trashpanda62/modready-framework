@@ -17,12 +17,12 @@
 
   Usage:
     cd C:\dev\beta-deps
-    .\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 0.9.0
+    .\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 1.0.0
 #>
 
 param(
   [Parameter(Mandatory = $true)] [string] $BlseDir,
-  [string] $Version = '0.9.0'
+  [string] $Version = '1.0.0'
 )
 
 $ErrorActionPreference = 'Stop'
