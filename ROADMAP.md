@@ -65,13 +65,30 @@ Lower the bar to author a Bannerlord mod.
 
 Turn BetaDeps from a dependency mod into the recommended foundation for new mods. Each line item below is its own multi-week project.
 
+### v2.0 framework-core — SHIPPED in the v2.0.0 build (2026-06-13)
+
+The developer-framework primitives — the parts that compile + are unit-verified
+off-engine — landed together and bumped the module to **v2.0.0**. New public
+surface under the `BetaDeps.Framework` namespace (see `docs/BETADEPS-NATIVE-API.md`
+Module 7). All five below verified by the `tools/framework-selftest` harness
+(54 assertions, runs without the game):
+
+- **EventBus** — typed + named-channel pub/sub for mod-to-mod IPC; exception-isolated, throttle, reentrancy-safe (`Foundation/Framework/EventBus.cs`).
+- **ModConflictDetector** — scans Harmony's registry for methods patched by ≥2 third-party owners, ranks High/Medium/Low; auto-logs in-game via `FrameworkBootstrap` (`Foundation/Framework/ModConflictDetector.cs`).
+- **Mod presets (whole-loadout profiles)** — `SettingsProfileStore` (engine-free file engine) + `ProfileManager` (MCM glue: capture every Global settings file → named profile → switch + live reload).
+- **Performance profiler** — manual `Measure` scopes + opt-in Harmony auto-instrument (flag-gated `perf-profiler.flag`), per-owner cost attribution (`Foundation/Framework/PerfProfiler.cs`).
+- **Per-campaign settings** — already completed in v0.9.x (`PerCampaignSettings<T>` + scoped `Configs\ModSettings\PerCampaign\<campaignId>\`); the v2.0 line is satisfied.
+
+Remaining Phase 3 items below (weather/settlement/RTS/etc.) are the gameplay
+megafeatures — each still its own multi-week project needing live-game work.
+
 | Item | Hours | Notes |
 |---|---|---|
-| **Event bus / mod-to-mod IPC** | 12–20 | Type-safe event registration, subscription, throttle controls |
-| **Mod conflict detector** | 8–12 | Surfaces Harmony patches from different mods targeting the same method, suggests resolution |
-| **Per-campaign settings** | 12–16 | Different MCM values per save-game, savegame integration |
-| **Mod presets** | 4–6 | Save and switch between settings profiles |
-| **Performance profiler** | 8–12 | Per-mod cost surface (Harmony patch overhead, allocations) |
+| ✅ **Event bus / mod-to-mod IPC** | 12–20 | DONE v2.0.0 — type-safe + named-channel, throttle, exception isolation |
+| ✅ **Mod conflict detector** | 8–12 | DONE v2.0.0 — surfaces ≥2-owner Harmony overlaps, severity-ranked, auto-logged |
+| ✅ **Per-campaign settings** | 12–16 | DONE (v0.9.x) — per-campaign-id scoped storage + singleton reset |
+| ✅ **Mod presets** | 4–6 | DONE v2.0.0 — whole-loadout profile capture/apply with live reload |
+| ✅ **Performance profiler** | 8–12 | DONE v2.0.0 — manual scopes + opt-in per-mod Harmony auto-instrument |
 | **Mod-list search/filter** (already in v1.0 above; extended here with tags, categories) | 2–4 | |
 | **Weather framework** | 20–40 | Reusable weather engine — wind, rain, snow effects mod authors can call |
 | **Settlement framework** ("more lively cities") | 30–60 | Background events, NPC patterns, day-night routines |

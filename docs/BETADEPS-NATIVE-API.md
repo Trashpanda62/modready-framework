@@ -15,9 +15,11 @@ instead of through the bundled BUTR-impersonation aliases
   hooks, `SafeBind`, `DiagLog`) that the alias surface intentionally
   doesn't expose.
 
-**Status as of v0.9.0:** the BUTR-impersonation surface and the
-BetaDeps-native surface co-exist. v1.0 keeps both. v2.0 deprecates the
-aliases for new mods (existing mods keep working forever). The public
+**Status as of v2.0.0:** the BUTR-impersonation surface and the
+BetaDeps-native surface co-exist. v2.0.0 adds the **framework-core**
+primitives (EventBus, ModConflictDetector, ProfileManager, PerfProfiler) —
+see **[Module 7: BetaDeps.Framework](#module-7-betadepsframework-v20)** below.
+The aliases stay supported for existing mods forever. The pre-v2.0 public
 API surfaces documented here are unchanged since v0.7.3; two structural
 changes since then are worth knowing:
 
@@ -530,6 +532,100 @@ Config button row are surfaced by `OptionsVMMixin` and write/delete flag
 files under `Modules\BetaDeps\`. If you ship a similar opt-in feature for
 your own mod, mimic that pattern (flag file + UI toggle that creates or
 deletes it).
+
+---
+
+## Module 7: BetaDeps.Framework (v2.0)
+
+The v2.0 framework-core primitives. All live under the `BetaDeps.Framework`
+namespace; `EventBus`, `ModConflictDetector`, `PerfProfiler`, and
+`SettingsProfileStore` ship in `BetaDeps.Foundation.dll`, and `ProfileManager`
+ships in `MCMv5.dll` — but you reach the whole surface with one
+`using BetaDeps.Framework;` (referencing `BetaDeps` covers it). These are pull
+APIs: nothing happens until you call them (the one exception is the auto
+conflict scan, which BetaDeps runs for you).
+
+### EventBus — mod-to-mod messaging
+
+Two flavors. Use the **typed** API when both mods reference a shared contract
+type; use the **named-channel** API for true IPC where the two mods share no
+type at all.
+
+```csharp
+using BetaDeps.Framework;
+
+// Typed (shared contract assembly):
+IDisposable sub = EventBus.Subscribe<WarDeclared>(e => Log(e.Attacker));
+EventBus.Publish(new WarDeclared { Attacker = "Vlandia" });
+sub.Dispose();                       // unsubscribe (idempotent)
+
+// Named channel (no shared type — the real IPC case):
+EventBus.Subscribe("Diplomacy.WarDeclared", payload => { /* inspect payload */ });
+EventBus.Publish("Diplomacy.WarDeclared", someDto);
+
+// Optional per-subscription throttle (handler sees at most one event / 250ms):
+EventBus.Subscribe<TickEvent>(OnTick, minIntervalMs: 250);
+```
+
+Guarantees: a throwing handler is caught + logged (never breaks siblings or the
+publisher); you may subscribe/unsubscribe from inside a handler; `Publish`
+returns the number of handlers that actually fired. Counters:
+`EventBus.PublishedCount`, `DeliveredCount`, `ThrottledCount`, `HandlerFaultCount`.
+
+### ModConflictDetector — who's fighting whom
+
+Surfaces engine methods Harmony-patched by two or more *different* third-party
+mods (BetaDeps's own shields are excluded). BetaDeps auto-runs a scan at the
+late lifecycle hooks and writes it to `runtime.log`; you can also pull it:
+
+```csharp
+foreach (MethodConflict c in ModConflictDetector.Scan())   // High → Low order
+    Log($"{c.Severity}: {c.TargetSignature} -- {string.Join(", ", c.Contributors.Select(x => x.Owner))}");
+
+string report   = ModConflictDetector.ToText();      // runtime.log-style block
+string markdown = ModConflictDetector.ToMarkdown();  // GitHub-issue table
+```
+
+Severity: **High** = ≥2 owners with *transpilers* on one method (IL collision);
+**Medium** = ≥2 *prefixes* (a prefix can skip the original); **Low** = postfix/
+finalizer overlap only.
+
+### ProfileManager — whole-loadout settings profiles
+
+The per-mod preset layer snapshots one mod's settings; a *profile* snapshots
+**every** mod's Global settings into one named bundle so a player can keep
+"Hardcore" / "Casual" loadouts and switch the whole stack at once.
+
+```csharp
+using BetaDeps.Framework;
+
+ProfileManager.CaptureAll("Hardcore");       // snapshot all Global settings now
+IReadOnlyList<string> profiles = ProfileManager.List();
+ProfileManager.Apply("Hardcore");            // copy back + live-reload each mod
+ProfileManager.Delete("Hardcore");
+```
+
+Profiles live at `Configs\ModSettings\_Profiles\<name>\`. Per-save and
+per-campaign settings are intentionally excluded (they're already save-scoped).
+The MCM-free file engine (`SettingsProfileStore`) is public too if you want to
+profile a different directory of `<id>.json` files.
+
+### PerfProfiler — which mod costs frames
+
+```csharp
+using (PerfProfiler.Measure("MyMod", "RecalcInfluence"))
+{
+    // ... work ...
+}
+foreach (var e in PerfProfiler.Snapshot())   // highest total time first
+    Log($"{e.Key}: {e.TotalMs:F2}ms / {e.Calls} calls  [{string.Join(",", e.Owners)}]");
+```
+
+`PerfProfiler.Enabled = false` makes `Measure` a zero-cost no-op for shipped
+builds. **Opt-in auto-instrument**: drop an empty `perf-profiler.flag` into
+`Modules\BetaDeps\` and BetaDeps wraps every Harmony-patched method with timing,
+attributing cost to the owning mod(s) — the per-mod frame-cost surface, no code
+required. (Or call `PerfProfiler.InstrumentAllPatchedMethods()` yourself.)
 
 ---
 

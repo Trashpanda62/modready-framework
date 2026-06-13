@@ -403,6 +403,18 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         {
             DiagLog.LogCaught(Tag, $"{from}/SaveShield", ex);
         }
+
+        // v2.0: framework auto-wiring. Runs AFTER the shields so the global
+        // Harmony registry is fully populated. Read-only conflict scan +
+        // flag-gated perf instrumentation; see FrameworkBootstrap.
+        try
+        {
+            BetaDeps.Framework.FrameworkBootstrap.RunLateInit(from);
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"{from}/FrameworkLateInit", ex);
+        }
     }
 
     /// <summary>

@@ -30,7 +30,7 @@
          docs/VERSION-POLICY.md. -->
     <AssemblyVersion>2.14.99.0</AssemblyVersion>
     <FileVersion>2.14.99.0</FileVersion>
-    <InformationalVersion>BetaDeps 0.9.2</InformationalVersion>
+    <InformationalVersion>BetaDeps 2.0.0</InformationalVersion>
 
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>

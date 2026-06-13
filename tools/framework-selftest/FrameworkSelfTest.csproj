@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- BetaDeps v2.0 framework self-test harness.
+       A plain net472 console that exercises the engine-free framework
+       primitives (EventBus, ModConflictDetector, PerfProfiler) with real
+       assertions so they can be verified on a dev box WITHOUT launching
+       Bannerlord. Not shipped in the mod zip; lives under tools\ next to
+       the shield-fixture harness. Run: dotnet run -c Release. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>FrameworkSelfTest</AssemblyName>
+    <RootNamespace>BetaDeps.FrameworkSelfTest</RootNamespace>
+    <Configurations>Debug;Release</Configurations>
+    <!-- Keep this out of any dist/ship path. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The framework primitives live in BetaDeps.Foundation. -->
+    <ProjectReference Include="..\..\src\BetaDeps.Foundation\BetaDeps.Foundation.csproj" />
+    <!-- Foundation marks Lib.Harmony PrivateAssets=all, so the console needs
+         its own ref to load 0Harmony.dll at runtime for ConflictDetector /
+         PerfProfiler. Same pinned version Foundation builds against. -->
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+  </ItemGroup>
+
+</Project>
