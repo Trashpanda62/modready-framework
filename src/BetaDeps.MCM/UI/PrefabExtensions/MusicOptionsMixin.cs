@@ -5,19 +5,20 @@
 //
 //   MusicOptionsRootMixin  attaches to the root OptionsVM and captures the
 //                          AudioOptions category instance. This is how we tell
-//                          the audio category apart from Video/Gameplay
-//                          WITHOUT matching a localized label -- we compare the
-//                          category VM by reference.
+//                          the audio category apart from Video/Gameplay WITHOUT
+//                          matching a localized label -- we compare the category
+//                          VM by reference.
 //
-//   MusicCategoryMixin     attaches to every GroupedOptionCategoryVM (the type
-//                          backing each <OptionsGroupedPage>). Only the one that
-//                          == the captured AudioOptions instance exposes the
-//                          music rows; the others stay empty/hidden. The
-//                          MusicOptionsPatch panel (injected into AudioOptionsPage)
-//                          binds {BetaDepsMusicRows} + @BetaDepsMusicVisible here.
+//   MusicCategoryMixin     attaches to every GroupedOptionCategoryVM. Only the one
+//                          that == the captured AudioOptions instance exposes the
+//                          music rows; the others stay empty/hidden.
 //
-// Both are fully guarded -- a mixin fault logs and leaves the vanilla audio tab
-// untouched.
+// IMPORTANT (timing): the root OptionsVM mixin attaches AFTER the per-category
+// mixins (observed in runtime.log: categories at t+356ms, root at t+515ms). So
+// the audio-category match CANNOT be decided eagerly in the category ctor -- the
+// AudioOptions instance isn't captured yet. BetaDepsMusicVisible / BetaDepsMusicRows
+// are therefore evaluated LAZILY (the binding reads them at render time, well
+// after capture), and OnRefresh re-notifies so a tab switch re-reads them.
 //
 // Original work. MIT, copyright 2026 Maxfield Management Group.
 
@@ -39,6 +40,33 @@ namespace MCM.UI.PrefabExtensions;
 internal static class MusicUiState
 {
     public static object? AudioCategory;
+    private static bool _logged;
+
+    public static void Capture(object? optionsVm)
+    {
+        try
+        {
+            if (optionsVm == null) return;
+            // Resolve the AudioOptions getter robustly (property, then getter method).
+            var t = optionsVm.GetType();
+            var prop = t.GetProperty("AudioOptions", BindingFlags.Public | BindingFlags.Instance);
+            var val = prop != null
+                ? prop.GetValue(optionsVm)
+                : t.GetMethod("get_AudioOptions", BindingFlags.Public | BindingFlags.Instance)?.Invoke(optionsVm, null);
+            if (val != null)
+            {
+                AudioCategory = val;
+                if (!_logged) { _logged = true; DiagLog.Log("MusicUiState", $"captured AudioOptions ({val.GetType().Name})."); }
+            }
+            else if (!_logged)
+            {
+                _logged = true;
+                DiagLog.Log("MusicUiState", "AudioOptions property returned null at capture; music UI will not bind. " +
+                    "Check the OptionsVM audio property name.");
+            }
+        }
+        catch (Exception ex) { DiagLog.LogCaught("MusicUiState", "Capture", ex); }
+    }
 }
 
 [ViewModelMixin(
@@ -46,22 +74,8 @@ internal static class MusicUiState
     TargetTypeName = "TaleWorlds.MountAndBlade.ViewModelCollection.GameOptions.OptionsVM")]
 internal sealed class MusicOptionsRootMixin : BaseViewModelMixin<ViewModel>
 {
-    private const string Tag = "MusicOptionsRootMixin";
-
-    public MusicOptionsRootMixin(ViewModel vm) : base(vm) { Capture(); }
-
-    public override void OnRefresh() => Capture();
-
-    private void Capture()
-    {
-        try
-        {
-            var p = ViewModel?.GetType().GetProperty("AudioOptions", BindingFlags.Public | BindingFlags.Instance);
-            var v = p?.GetValue(ViewModel);
-            if (v != null) MusicUiState.AudioCategory = v;
-        }
-        catch (Exception ex) { DiagLog.LogCaught(Tag, "Capture", ex); }
-    }
+    public MusicOptionsRootMixin(ViewModel vm) : base(vm) { MusicUiState.Capture(ViewModel); }
+    public override void OnRefresh() => MusicUiState.Capture(ViewModel);
 }
 
 [ViewModelMixin(
@@ -72,51 +86,64 @@ internal sealed class MusicCategoryMixin : BaseViewModelMixin<ViewModel>
     private const string Tag = "MusicCategoryMixin";
 
     private MBBindingList<MusicRowVM> _rows = new();
-    private bool _visible;
     private bool _built;
+    private bool _boundLogged;
 
-    public MusicCategoryMixin(ViewModel vm) : base(vm) { Build(); }
+    public MusicCategoryMixin(ViewModel vm) : base(vm) { }
 
-    public override void OnRefresh() => Build();
+    // The audio category isn't known until the root mixin captures AudioOptions
+    // (which attaches AFTER us). Re-notify on every refresh so the binding
+    // re-reads the (now lazy) visibility + rows once capture has happened.
+    public override void OnRefresh()
+    {
+        try
+        {
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsMusicVisible));
+            ViewModel.NotifyPropertyChanged(nameof(BetaDepsMusicRows));
+        }
+        catch { }
+    }
 
-    [DataSourceProperty] public MBBindingList<MusicRowVM> BetaDepsMusicRows => _rows;
+    private bool IsAudioCategory()
+        => MusicUiState.AudioCategory != null && ReferenceEquals(ViewModel, MusicUiState.AudioCategory);
 
     [DataSourceProperty]
     public bool BetaDepsMusicVisible
     {
-        get => _visible;
-        set
+        get
         {
-            if (_visible == value) return;
-            _visible = value;
-            try { ViewModel.NotifyPropertyChanged(nameof(BetaDepsMusicVisible)); } catch { }
+            var audio = IsAudioCategory();
+            if (audio) EnsureBuilt();
+            return audio;
         }
     }
 
-    private void Build()
+    [DataSourceProperty]
+    public MBBindingList<MusicRowVM> BetaDepsMusicRows
     {
+        get { EnsureBuilt(); return _rows; }
+    }
+
+    private void EnsureBuilt()
+    {
+        if (_built || !IsAudioCategory()) return;
         try
         {
-            bool isAudio = MusicUiState.AudioCategory != null
-                           && ReferenceEquals(ViewModel, MusicUiState.AudioCategory);
-            if (!isAudio) { BetaDepsMusicVisible = false; return; }
-
-            if (!_built)
+            var cfg = MusicConfig.Current;
+            var list = new MBBindingList<MusicRowVM>();
+            if (cfg != null)
             {
-                var cfg = MusicConfig.Current;
-                var list = new MBBindingList<MusicRowVM>();
-                if (cfg != null)
-                {
-                    foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
-                        list.Add(new MusicRowVM(ctx));
-                }
-                _rows = list;
-                _built = true;
-                try { ViewModel.NotifyPropertyChanged(nameof(BetaDepsMusicRows)); } catch { }
+                foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
+                    list.Add(new MusicRowVM(ctx));
+            }
+            _rows = list;
+            _built = true;
+            if (!_boundLogged)
+            {
+                _boundLogged = true;
                 DiagLog.Log(Tag, $"BYO music UI bound to the audio category ({list.Count} row(s)).");
             }
-            BetaDepsMusicVisible = true;
         }
-        catch (Exception ex) { DiagLog.LogCaught(Tag, "Build", ex); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "EnsureBuilt", ex); }
     }
 }
