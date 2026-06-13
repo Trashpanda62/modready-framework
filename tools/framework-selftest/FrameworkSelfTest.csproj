@@ -24,6 +24,10 @@
   <ItemGroup>
     <!-- The framework primitives live in BetaDeps.Foundation. -->
     <ProjectReference Include="..\..\src\BetaDeps.Foundation\BetaDeps.Foundation.csproj" />
+    <!-- mod.json declarative settings (ModJsonParser/ModJsonLoader) live in MCM.
+         The parser is pure; the loader drives the fluent builder, which has no
+         TaleWorlds dependency, so it runs off-engine here. -->
+    <ProjectReference Include="..\..\src\BetaDeps.MCM\BetaDeps.MCM.csproj" />
     <!-- Foundation marks Lib.Harmony PrivateAssets=all, so the console needs
          its own ref to load 0Harmony.dll at runtime for ConflictDetector /
          PerfProfiler. Same pinned version Foundation builds against. -->

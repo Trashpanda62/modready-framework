@@ -33,6 +33,8 @@ namespace BetaDeps.FrameworkSelfTest
                 ConflictDetectorTests.Run();
                 PerfProfilerTests.Run();
                 ProfileStoreTests.Run();
+                ModJsonTests.Run();
+                ModScaffolderTests.Run();
             }
             catch (Exception ex)
             {
@@ -188,10 +190,10 @@ namespace BetaDeps.FrameworkSelfTest
             var t = typeof(ConflictDetectorTests);
 
             // Medium: two owners both prefix TargetMedium
-            var a = new Harmony("Test.ModA");
+            var a = new HarmonyLib.Harmony("Test.ModA");
             a.Patch(t.GetMethod(nameof(TargetMedium)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(PrefixA))));
-            var b = new Harmony("Test.ModB");
+            var b = new HarmonyLib.Harmony("Test.ModB");
             b.Patch(t.GetMethod(nameof(TargetMedium)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(PrefixB))));
 
@@ -204,7 +206,7 @@ namespace BetaDeps.FrameworkSelfTest
             // Solo: one real owner + a BetaDeps owner -> must NOT count as a conflict
             a.Patch(t.GetMethod(nameof(TargetSolo)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(PrefixA))));
-            var bd = new Harmony("BetaDeps.Foundation.PatchShield");
+            var bd = new HarmonyLib.Harmony("BetaDeps.Foundation.PatchShield");
             bd.Patch(t.GetMethod(nameof(TargetSolo)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(BetaDepsPrefix))));
 
@@ -251,6 +253,174 @@ namespace BetaDeps.FrameworkSelfTest
     {
         public static MethodConflict? FirstOrDefaultByMethod(this IReadOnlyList<MethodConflict> list, string method)
             => list.FirstOrDefault(c => c.TargetMethod == method);
+    }
+
+    // ----------------------------------------------------------------------
+    // Modder layer -- new-mod scaffolding (ModScaffolder)
+    // ----------------------------------------------------------------------
+    internal static class ModScaffolderTests
+    {
+        public static void Run()
+        {
+            Console.WriteLine("[ModScaffolder]");
+            var baseDir = Path.Combine(Path.GetTempPath(), "bd-scaffold-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(baseDir);
+            try
+            {
+                // SettingsOnly: no C#, just SubModule.xml + mod.json + README
+                var so = ModScaffolder.Generate(
+                    new ScaffoldOptions { ModId = "MyTweak", ModName = "My Tweak", Author = "Steve", Template = ModTemplate.SettingsOnly },
+                    baseDir);
+                var modDir = Path.Combine(baseDir, "MyTweak");
+                Program.Check("scaffold: SubModule.xml written", File.Exists(Path.Combine(modDir, "SubModule.xml")));
+                Program.Check("scaffold: mod.json written", File.Exists(Path.Combine(modDir, "mod.json")));
+                Program.Check("scaffold: README written", File.Exists(Path.Combine(modDir, "README.md")));
+                Program.Check("scaffold: settings-only has no src/", !Directory.Exists(Path.Combine(modDir, "src")));
+
+                var subxml = File.ReadAllText(Path.Combine(modDir, "SubModule.xml"));
+                Program.Check("scaffold: SubModule.xml declares BetaDeps dependency",
+                    subxml.Contains("DependedModule Id=\"BetaDeps\"") && subxml.Contains("<Id value=\"MyTweak\""));
+                Program.Check("scaffold: settings-only SubModule.xml has empty SubModules",
+                    subxml.Contains("<SubModules />"));
+
+                // The generated mod.json must be valid + parse via ModJsonParser
+                var genJson = File.ReadAllText(Path.Combine(modDir, "mod.json"));
+                var parsed = ModJsonParser.Parse(genJson);
+                Program.Check("scaffold: generated mod.json parses clean", parsed.Ok && parsed.Schema!.Id == "MyTweak");
+
+                // HarmonyTweak: code template
+                ModScaffolder.Generate(
+                    new ScaffoldOptions { ModId = "MyPatch", Template = ModTemplate.HarmonyTweak },
+                    baseDir);
+                var pDir = Path.Combine(baseDir, "MyPatch");
+                Program.Check("scaffold: harmony csproj written", File.Exists(Path.Combine(pDir, "src", "MyPatch.csproj")));
+                Program.Check("scaffold: harmony SubModule.cs written", File.Exists(Path.Combine(pDir, "src", "SubModule.cs")));
+                Program.Check("scaffold: harmony has no Settings.cs", !File.Exists(Path.Combine(pDir, "src", "Settings.cs")));
+                var cs = File.ReadAllText(Path.Combine(pDir, "src", "SubModule.cs"));
+                Program.Check("scaffold: SubModule.cs derives MBSubModuleBase + right namespace",
+                    cs.Contains("MBSubModuleBase") && cs.Contains("namespace MyPatch"));
+                var csproj = File.ReadAllText(Path.Combine(pDir, "src", "MyPatch.csproj"));
+                Program.Check("scaffold: csproj targets net472", csproj.Contains("net472"));
+
+                // Full: adds Settings.cs
+                ModScaffolder.Generate(
+                    new ScaffoldOptions { ModId = "MyFull", Template = ModTemplate.Full },
+                    baseDir);
+                Program.Check("scaffold: full template adds Settings.cs",
+                    File.Exists(Path.Combine(baseDir, "MyFull", "src", "Settings.cs")));
+                var setcs = File.ReadAllText(Path.Combine(baseDir, "MyFull", "src", "Settings.cs"));
+                Program.Check("scaffold: Settings.cs uses AttributeGlobalSettings",
+                    setcs.Contains("AttributeGlobalSettings<MyFullSettings>"));
+
+                // Invalid ids rejected
+                Program.Check("scaffold: empty id throws", Throws(() =>
+                    ModScaffolder.Generate(new ScaffoldOptions { ModId = "" }, baseDir)));
+                Program.Check("scaffold: id starting with digit throws", Throws(() =>
+                    ModScaffolder.Generate(new ScaffoldOptions { ModId = "9bad" }, baseDir)));
+                Program.Check("scaffold: id with space throws", Throws(() =>
+                    ModScaffolder.Generate(new ScaffoldOptions { ModId = "bad name" }, baseDir)));
+            }
+            finally
+            {
+                try { Directory.Delete(baseDir, recursive: true); } catch { }
+            }
+        }
+
+        private static bool Throws(Action a)
+        {
+            try { a(); return false; } catch (ArgumentException) { return true; } catch { return false; }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Modder layer -- mod.json declarative settings (ModJsonParser/Loader)
+    // ----------------------------------------------------------------------
+    internal static class ModJsonTests
+    {
+        public static void Run()
+        {
+            Console.WriteLine("[ModJson declarative settings]");
+
+            // --- parser: full valid schema with groups + all four types ---
+            string full = @"{
+              ""id"": ""MyTweaks_v1"", ""name"": ""My Tweaks"", ""scope"": ""global"",
+              ""groups"": [{ ""name"": ""Combat"", ""order"": 2, ""properties"": [
+                { ""id"": ""enable"", ""name"": ""Enable"", ""type"": ""bool"", ""default"": true, ""hint"": ""on/off"" },
+                { ""id"": ""dmg"", ""name"": ""Damage"", ""type"": ""int"", ""min"": 0, ""max"": 100, ""default"": 50 },
+                { ""id"": ""speed"", ""name"": ""Speed"", ""type"": ""float"", ""min"": 0.0, ""max"": 5.0, ""default"": 1.5 },
+                { ""id"": ""tag"", ""name"": ""Tag"", ""type"": ""text"", ""default"": ""hi"" }
+              ]}]
+            }";
+            var r = ModJsonParser.Parse(full);
+            Program.Check("modjson: valid parse Ok", r.Ok);
+            Program.Eq("modjson: id", "MyTweaks_v1", r.Schema?.Id);
+            Program.Eq("modjson: name", "My Tweaks", r.Schema?.Name);
+            Program.Eq("modjson: scope global", "global", r.Schema?.Scope);
+            Program.Eq("modjson: one group", 1, r.Schema?.Groups.Count ?? 0);
+            Program.Eq("modjson: group order", 2, r.Schema?.Groups[0].Order ?? -1);
+            Program.Eq("modjson: four properties", 4, r.Schema?.Groups[0].Properties.Count ?? 0);
+            var dmg = r.Schema!.Groups[0].Properties.First(p => p.Id == "dmg");
+            Program.Check("modjson: int min/max/default", dmg.Min == 0 && dmg.Max == 100 && (int)dmg.Default! == 50);
+            var en = r.Schema.Groups[0].Properties.First(p => p.Id == "enable");
+            Program.Check("modjson: bool default + hint", (bool)en.Default! && en.Hint == "on/off");
+
+            // --- flat properties (no groups) -> single General group ---
+            string flat = @"{ ""id"":""Flat_v1"", ""properties"":[
+                { ""id"":""x"", ""type"":""bool"", ""default"":false } ] }";
+            var rf = ModJsonParser.Parse(flat);
+            Program.Check("modjson: flat props wrapped in a group",
+                rf.Ok && rf.Schema!.Groups.Count == 1 && rf.Schema.Groups[0].Properties.Count == 1);
+            Program.Eq("modjson: name falls back to id", "Flat_v1", rf.Schema?.Name);
+
+            // --- validation failures ---
+            Program.Check("modjson: missing id fails",
+                !ModJsonParser.Parse(@"{ ""name"":""x"", ""properties"":[] }").Ok);
+            Program.Check("modjson: unknown type fails",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""color""}] }").Ok);
+            Program.Check("modjson: min>max fails",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""int"",""min"":10,""max"":1}] }").Ok);
+            Program.Check("modjson: malformed JSON fails",
+                !ModJsonParser.Parse(@"{ not json").Ok);
+            Program.Check("modjson: duplicate id fails",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""bool""},{""id"":""p"",""type"":""bool""}] }").Ok);
+
+            // --- default-out-of-range clamps + warns ---
+            var rc = ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""int"",""min"":0,""max"":10,""default"":99}] }");
+            Program.Check("modjson: out-of-range default clamped to max",
+                rc.Ok && (int)rc.Schema!.Groups[0].Properties[0].Default! == 10 && rc.Warnings.Count > 0);
+
+            // --- unknown scope warns, defaults global ---
+            var rs = ModJsonParser.Parse(@"{ ""id"":""a"", ""scope"":""weird"", ""properties"":[{""id"":""p"",""type"":""bool""}] }");
+            Program.Check("modjson: unknown scope -> global + warning",
+                rs.Schema?.Scope == "global" && rs.Warnings.Any(w => w.Contains("scope")));
+
+            // --- end-to-end Load: build + register real fluent settings, read back ---
+            string loadJson = @"{ ""id"":""SelfTestModJson_v1"", ""name"":""Self Test"", ""properties"":[
+                { ""id"":""enable"", ""type"":""bool"", ""default"":true },
+                { ""id"":""dmg"", ""type"":""int"", ""min"":0, ""max"":100, ""default"":42 },
+                { ""id"":""speed"", ""type"":""float"", ""min"":0, ""max"":5, ""default"":2.5 },
+                { ""id"":""tag"", ""type"":""text"", ""default"":""hello"" } ] }";
+            var lr = ModJsonLoader.Load(loadJson);
+            try
+            {
+                Program.Check("modjson: Load Ok + settings built", lr.Ok && lr.Settings != null);
+                Program.Eq("modjson: built id", "SelfTestModJson_v1", lr.Settings?.Id);
+                var fs = lr.Settings as MCM.Abstractions.Base.Global.FluentGlobalSettings;
+                Program.Check("modjson: built settings is FluentGlobalSettings", fs != null);
+                if (fs != null)
+                {
+                    Program.Eq("modjson: read back bool", true, fs.Get<bool>("enable"));
+                    Program.Eq("modjson: read back int", 42, fs.Get<int>("dmg"));
+                    Program.Eq("modjson: read back float", 2.5f, fs.Get<float>("speed"));
+                    Program.Eq("modjson: read back text", "hello", fs.Get<string>("tag"));
+                }
+            }
+            finally
+            {
+                // hermetic: remove the defaults file Load wrote under Documents
+                try { if (lr.SettingsFilePath != null && File.Exists(lr.SettingsFilePath)) File.Delete(lr.SettingsFilePath); } catch { }
+            }
+        }
     }
 
     // ----------------------------------------------------------------------
@@ -372,7 +542,7 @@ namespace BetaDeps.FrameworkSelfTest
             // auto-instrument: patch PerfWork with an owner, instrument, call it
             PerfProfiler.Reset();
             var t = typeof(PerfProfilerTests);
-            var h = new Harmony("Test.Perf");
+            var h = new HarmonyLib.Harmony("Test.Perf");
             h.Patch(t.GetMethod(nameof(PerfWork)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(OwnerPrefix))));
             int n = PerfProfiler.Instrument(new[] { (MethodBase)t.GetMethod(nameof(PerfWork))! });
@@ -401,7 +571,7 @@ namespace BetaDeps.FrameworkSelfTest
 
             // exception balance: finalizer still accounts a throwing method, and
             // the per-thread timing stack stays balanced afterwards.
-            var hb = new Harmony("Test.PerfBoom");
+            var hb = new HarmonyLib.Harmony("Test.PerfBoom");
             hb.Patch(t.GetMethod(nameof(PerfBoom)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(OwnerPrefix))));
             PerfProfiler.Instrument(new[] { (MethodBase)t.GetMethod(nameof(PerfBoom))! });

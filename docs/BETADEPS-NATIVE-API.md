@@ -15,10 +15,10 @@ instead of through the bundled BUTR-impersonation aliases
   hooks, `SafeBind`, `DiagLog`) that the alias surface intentionally
   doesn't expose.
 
-**Status as of v2.0.0:** the BUTR-impersonation surface and the
-BetaDeps-native surface co-exist. v2.0.0 adds the **framework-core**
+**Status as of v1.0.0:** the BUTR-impersonation surface and the
+BetaDeps-native surface co-exist. v1.0.0 adds the **framework-core**
 primitives (EventBus, ModConflictDetector, ProfileManager, PerfProfiler) —
-see **[Module 7: BetaDeps.Framework](#module-7-betadepsframework-v20)** below.
+see **[Module 7: BetaDeps.Framework](#module-7-betadepsframework-v10)** below.
 The aliases stay supported for existing mods forever. The pre-v2.0 public
 API surfaces documented here are unchanged since v0.7.3; two structural
 changes since then are worth knowing:
@@ -535,9 +535,9 @@ deletes it).
 
 ---
 
-## Module 7: BetaDeps.Framework (v2.0)
+## Module 7: BetaDeps.Framework (v1.0)
 
-The v2.0 framework-core primitives. All live under the `BetaDeps.Framework`
+The v1.0 framework-core primitives. All live under the `BetaDeps.Framework`
 namespace; `EventBus`, `ModConflictDetector`, `PerfProfiler`, and
 `SettingsProfileStore` ship in `BetaDeps.Foundation.dll`, and `ProfileManager`
 ships in `MCMv5.dll` — but you reach the whole surface with one
@@ -626,6 +626,71 @@ builds. **Opt-in auto-instrument**: drop an empty `perf-profiler.flag` into
 `Modules\BetaDeps\` and BetaDeps wraps every Harmony-patched method with timing,
 attributing cost to the owning mod(s) — the per-mod frame-cost surface, no code
 required. (Or call `PerfProfiler.InstrumentAllPatchedMethods()` yourself.)
+
+---
+
+## Declarative settings (`mod.json`) — no C# required
+
+A tweak mod that only changes a few numbers doesn't need a compiled assembly at
+all. Drop a **`mod.json`** in your module folder (or any `*.betadeps.json`) and
+BetaDeps builds an MCM settings page from it at load — persistence, the Mod
+Config UI, and presets all work the same as a coded settings class.
+
+```json
+{
+  "id": "MyTweaks_v1",
+  "name": "My Tweaks",
+  "scope": "global",
+  "groups": [
+    { "name": "Combat", "order": 0, "properties": [
+      { "id": "enable", "name": "Enable",     "type": "bool",  "default": true, "hint": "Turn the tweak on/off" },
+      { "id": "dmg",    "name": "Damage x",   "type": "int",   "min": 0, "max": 100, "default": 50 },
+      { "id": "speed",  "name": "Move speed", "type": "float", "min": 0.0, "max": 5.0, "default": 1.0 },
+      { "id": "label",  "name": "HUD label",  "type": "text",  "default": "Fast" }
+    ]}
+  ]
+}
+```
+
+- `scope`: `global` (default), `percampaign`, or `persave`.
+- A flat top-level `"properties": [...]` (no `groups`) is also accepted and lands
+  in a single "General" group.
+- Property types: `bool`, `int` (needs `min`/`max`), `float` (needs `min`/`max`),
+  `text`. Optional per-property `hint` and `requireRestart`.
+- The parser validates and reports: missing `id`, unknown type, `min > max`,
+  duplicate ids, and out-of-range defaults (clamped + warned).
+
+A coded mod can read the same values back through MCM:
+`BaseSettingsBuilder`/`FluentGlobalSettings.Get<T>(id)`, or just let the JSON file
+under `Configs\ModSettings\Global\<id>.json` be edited by hand. For programmatic
+use, `BetaDeps.Framework.ModJsonParser.Parse(json)` (pure → schema) and
+`ModJsonLoader.Load(json)` / `LoadFile(path)` are public.
+
+---
+
+## Scaffolding a new mod
+
+`BetaDeps.Framework.ModScaffolder.Generate(options, targetRoot)` writes a
+ready-to-build starter mod that consumes BetaDeps, so you don't hand-author the
+SubModule.xml the launcher needs.
+
+```csharp
+ModScaffolder.Generate(new ScaffoldOptions {
+    ModId = "MyFirstTweak",          // valid identifier; also the folder name
+    ModName = "My First Tweak",
+    Author = "you",
+    Template = ModTemplate.SettingsOnly   // SettingsOnly | HarmonyTweak | Full
+}, @"C:\dev\mymods");
+```
+
+- **SettingsOnly** — `SubModule.xml` + a sample `mod.json` (no code; pairs with the
+  declarative-settings loader above).
+- **HarmonyTweak** — adds `src\<id>.csproj` + a starter `MBSubModuleBase` wired for
+  a `SafeBind` Harmony patch and `DiagLog` logging.
+- **Full** — HarmonyTweak plus an `AttributeGlobalSettings` class.
+
+Every template declares `<DependedModule Id="BetaDeps" />` so the launcher load
+order is correct, and `Generate` returns the list of files it wrote.
 
 ---
 

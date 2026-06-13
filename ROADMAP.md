@@ -52,8 +52,8 @@ Lower the bar to author a Bannerlord mod.
 
 | Item | Hours | Notes |
 |---|---|---|
-| **JSON/YAML settings declaration** | 8–12 | Parser, runtime settings-class generator. Drop `mod.json` → get Mod Config menu + persistence with zero C#. Massive for tweak mods. |
-| **Mod templates** — `betadeps new-mod` CLI | 8–12 | Scaffolds working starter projects (combat-tweak, ai-tweak, world-tweak, etc.) |
+| ✅ **JSON/YAML settings declaration** | 8–12 | DONE (2026-06-13) — `mod.json` → Mod Config menu + persistence with zero C#. `BetaDeps.Framework.ModJsonParser`/`ModJsonLoader`; auto-discovered at MCM load. 26 self-test assertions. |
+| ✅ **Mod templates** — `betadeps new-mod` | 8–12 | DONE (2026-06-13) — `BetaDeps.Framework.ModScaffolder.Generate` (SettingsOnly / HarmonyTweak / Full templates → SubModule.xml + mod.json/csproj/SubModule.cs). Standalone CLI wrapper still TODO. 14 self-test assertions. |
 | **Hot reload** of settings + content | 4–8 | File-watcher on `mod.json`, refresh Mod Config without restart. Real engine integration is the hard part. |
 | **Debug overlay** — in-game F12 panel | 8–12 | Shows Harmony patches grouped by target, mixin attachments, live settings state, recent exceptions. Invaluable for mod authors. |
 | **Localization fallback** | 4–6 | Automatic language-string lookup; mod authors stop needing to ship 24 XMLs for one menu label |
@@ -65,13 +65,14 @@ Lower the bar to author a Bannerlord mod.
 
 Turn BetaDeps from a dependency mod into the recommended foundation for new mods. Each line item below is its own multi-week project.
 
-### v2.0 framework-core — SHIPPED in the v2.0.0 build (2026-06-13)
+### Framework-core — SHIPPED as the v1.0.0 release (2026-06-13)
 
 The developer-framework primitives — the parts that compile + are unit-verified
-off-engine — landed together and bumped the module to **v2.0.0**. New public
-surface under the `BetaDeps.Framework` namespace (see `docs/BETADEPS-NATIVE-API.md`
+off-engine — landed together and the module ships as **v1.0.0** (Steve's call to
+brand the framework launch v1.0; tested in-game 2026-06-13). New public surface
+under the `BetaDeps.Framework` namespace (see `docs/BETADEPS-NATIVE-API.md`
 Module 7). All five below verified by the `tools/framework-selftest` harness
-(54 assertions, runs without the game):
+(55 assertions, runs without the game):
 
 - **EventBus** — typed + named-channel pub/sub for mod-to-mod IPC; exception-isolated, throttle, reentrancy-safe (`Foundation/Framework/EventBus.cs`).
 - **ModConflictDetector** — scans Harmony's registry for methods patched by ≥2 third-party owners, ranks High/Medium/Low; auto-logs in-game via `FrameworkBootstrap` (`Foundation/Framework/ModConflictDetector.cs`).
@@ -84,11 +85,11 @@ megafeatures — each still its own multi-week project needing live-game work.
 
 | Item | Hours | Notes |
 |---|---|---|
-| ✅ **Event bus / mod-to-mod IPC** | 12–20 | DONE v2.0.0 — type-safe + named-channel, throttle, exception isolation |
-| ✅ **Mod conflict detector** | 8–12 | DONE v2.0.0 — surfaces ≥2-owner Harmony overlaps, severity-ranked, auto-logged |
+| ✅ **Event bus / mod-to-mod IPC** | 12–20 | DONE v1.0.0 — type-safe + named-channel, throttle, exception isolation |
+| ✅ **Mod conflict detector** | 8–12 | DONE v1.0.0 — surfaces ≥2-owner Harmony overlaps, severity-ranked, auto-logged |
 | ✅ **Per-campaign settings** | 12–16 | DONE (v0.9.x) — per-campaign-id scoped storage + singleton reset |
-| ✅ **Mod presets** | 4–6 | DONE v2.0.0 — whole-loadout profile capture/apply with live reload |
-| ✅ **Performance profiler** | 8–12 | DONE v2.0.0 — manual scopes + opt-in per-mod Harmony auto-instrument |
+| ✅ **Mod presets** | 4–6 | DONE v1.0.0 — whole-loadout profile capture/apply with live reload |
+| ✅ **Performance profiler** | 8–12 | DONE v1.0.0 — manual scopes + opt-in per-mod Harmony auto-instrument |
 | **Mod-list search/filter** (already in v1.0 above; extended here with tags, categories) | 2–4 | |
 | **Weather framework** | 20–40 | Reusable weather engine — wind, rain, snow effects mod authors can call |
 | **Settlement framework** ("more lively cities") | 30–60 | Background events, NPC patterns, day-night routines |

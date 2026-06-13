@@ -50,6 +50,16 @@ public class MCMSubModule : MBSubModuleBase
         base.OnBeforeInitialModuleScreenSetAsRoot();
         try
         {
+            // v1.x modder layer: build MCM pages from any consumer mod's
+            // declarative mod.json BEFORE DiscoverAll, so the fluent settings
+            // they produce are merged into the registry in the same pass.
+            try
+            {
+                int n = BetaDeps.Framework.ModJsonLoader.DiscoverAndLoad();
+                if (n > 0) DiagLog.Log(Tag, $"declarative mod.json: built {n} settings page(s)");
+            }
+            catch (Exception mjEx) { DiagLog.LogCaught(Tag, "ModJson DiscoverAndLoad", mjEx); }
+
             SettingsRegistry.DiscoverAll();
         }
         catch (Exception ex)
