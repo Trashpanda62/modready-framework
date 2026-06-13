@@ -192,9 +192,31 @@ internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
     // mod's own state, and reads show the mod's live value. Upstream MCMv5's
     // fluent API is IRef-exclusive, so this IS the primary data path for
     // fluent consumers (Diplomacy, RTSCamera, BEW...).
+    // Defensive bool coercion for the IRef overloads. IRef.Value is object?, so a
+    // consumer can legally bind a non-bool ref (ProxyRef<int>, a string-valued
+    // PropertyRef, etc.) to a bool-shaped Add*; a hard `(bool)` unbox would throw
+    // InvalidCastException straight into that mod's OnSubModuleLoad (CreateGroup
+    // invokes the lambda with no try/catch). Mirror the AddInteger/AddFloatingInteger
+    // (v0.6) and AddText hardening so a quirky ref degrades to a logged default.
+    private static bool CoerceBool(string id, MCM.Common.IRef? @ref)
+    {
+        try
+        {
+            var v = @ref?.Value;
+            if (v is bool b) return b;
+            if (v == null) return false;
+            return Convert.ToBoolean(v);
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught("MCM.SettingsBuilder", $"AddBool({id}) ref bool coercion -> false", ex);
+            return false;
+        }
+    }
+
     public ISettingsPropertyGroupBuilder AddBool(string id, string displayName, MCM.Common.IRef @ref, Action<ISettingsPropertyBoolBuilder>? configure = null)
     {
-        var b = new BoolPropBuilder(id, displayName, (bool)(@ref?.Value ?? false));
+        var b = new BoolPropBuilder(id, displayName, CoerceBool(id, @ref));
         b.Build().Ref = @ref;
         configure?.Invoke(b);
         _properties.Add(b.Build());
@@ -278,7 +300,7 @@ internal sealed class PropertyGroupBuilderImpl : ISettingsPropertyGroupBuilder
         // it as a bool row in the group (the group-toggle visual is a UI
         // nicety; the DATA contract -- bool round-tripped through the
         // consumer's IRef -- is what mods depend on).
-        var b = new TogglePropBuilder(id, displayName, (bool)(@ref?.Value ?? false));
+        var b = new TogglePropBuilder(id, displayName, CoerceBool(id, @ref));
         var prop = b.Build();
         prop.Ref = @ref;
         configure?.Invoke(b);

@@ -24,26 +24,40 @@ public enum GameBranch
 
 public static class VersionProbe
 {
+    private static readonly object _gate = new();
     private static GameBranch? _cached;
     private static int? _cachedMajor;
     private static int? _cachedMinor;
 
-    /// <summary>Returns the detected branch. Cached after first call.</summary>
+    /// <summary>
+    /// Returns the detected branch. Only a SUCCESSFUL detection is memoized.
+    /// An Unknown result (the version types aren't loaded yet -- e.g. when this
+    /// is read during very early SubModule construction) is returned transiently
+    /// WITHOUT caching, so a later read after TaleWorlds.Library loads can still
+    /// succeed. Caching Unknown permanently used to disable beta sigsafe patches
+    /// for the whole session once anything probed too early.
+    /// </summary>
     public static GameBranch Branch
     {
         get
         {
-            if (_cached.HasValue) return _cached.Value;
-            _cached = Detect();
-            return _cached.Value;
+            var c = _cached;
+            if (c.HasValue) return c.Value;
+            lock (_gate)
+            {
+                if (_cached.HasValue) return _cached.Value;
+                var result = Detect();          // sets _cachedMajor/_cachedMinor on success
+                if (result != GameBranch.Unknown) _cached = result;   // memoize success only
+                return result;
+            }
         }
     }
 
-    /// <summary>Major version number (e.g. 1 for e1.4.2).</summary>
-    public static int Major => _cachedMajor ?? 0;
+    /// <summary>Major version number (e.g. 1 for e1.4.2). Triggers detection if needed.</summary>
+    public static int Major { get { if (!_cached.HasValue) { _ = Branch; } return _cachedMajor ?? 0; } }
 
-    /// <summary>Minor version number (e.g. 4 for e1.4.2).</summary>
-    public static int Minor => _cachedMinor ?? 0;
+    /// <summary>Minor version number (e.g. 4 for e1.4.2). Triggers detection if needed.</summary>
+    public static int Minor { get { if (!_cached.HasValue) { _ = Branch; } return _cachedMinor ?? 0; } }
 
     public static bool IsBeta => Branch == GameBranch.Beta;
     public static bool IsPublic => Branch == GameBranch.Public;

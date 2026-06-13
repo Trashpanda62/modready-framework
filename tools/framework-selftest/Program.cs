@@ -383,6 +383,14 @@ namespace BetaDeps.FrameworkSelfTest
                 !ModJsonParser.Parse(@"{ not json").Ok);
             Program.Check("modjson: duplicate id fails",
                 !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""bool""},{""id"":""p"",""type"":""bool""}] }").Ok);
+            // regression: Parse must NOT throw on a type-mismatched default/min/max
+            // (Newtonsoft Value<long>/<double> throw) -- it returns Ok=false instead.
+            Program.Check("modjson: string default on float fails (no throw)",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""float"",""default"":""abc""}] }").Ok);
+            Program.Check("modjson: array default on int fails (no throw)",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""int"",""default"":[1,2]}] }").Ok);
+            Program.Check("modjson: object min fails (no throw)",
+                !ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""int"",""min"":{}}] }").Ok);
 
             // --- default-out-of-range clamps + warns ---
             var rc = ModJsonParser.Parse(@"{ ""id"":""a"", ""properties"":[{""id"":""p"",""type"":""int"",""min"":0,""max"":10,""default"":99}] }");

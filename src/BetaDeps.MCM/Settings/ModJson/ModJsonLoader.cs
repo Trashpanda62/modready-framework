@@ -158,26 +158,41 @@ namespace BetaDeps.Framework
             }
 
             var defTok = pt["default"];
-            switch (prop.Type)
+            // Newtonsoft's JToken.Value<long>/<double> (and min/max conversion)
+            // THROW on a type-mismatched token (e.g. "default":"abc" on an int, or
+            // "min":[1,2]). Parse is a public API documented "never throws", so any
+            // conversion fault here becomes a validation error, not an exception.
+            try
             {
-                case "bool":
-                    prop.Default = defTok?.Type == JTokenType.Boolean ? defTok.Value<bool>() : (object)false;
-                    break;
-                case "int":
-                    prop.Min = pt.Value<double?>("min") ?? 0;
-                    prop.Max = pt.Value<double?>("max") ?? 100;
-                    if (prop.Min > prop.Max) { result.Errors.Add($"property '{prop.Id}': min {prop.Min} > max {prop.Max}"); return; }
-                    prop.Default = ClampInt(defTok != null ? defTok.Value<long>() : (long)prop.Min, prop, result);
-                    break;
-                case "float":
-                    prop.Min = pt.Value<double?>("min") ?? 0;
-                    prop.Max = pt.Value<double?>("max") ?? 1;
-                    if (prop.Min > prop.Max) { result.Errors.Add($"property '{prop.Id}': min {prop.Min} > max {prop.Max}"); return; }
-                    prop.Default = ClampFloat(defTok != null ? defTok.Value<double>() : prop.Min, prop, result);
-                    break;
-                case "text":
-                    prop.Default = defTok?.Value<string>() ?? "";
-                    break;
+                switch (prop.Type)
+                {
+                    case "bool":
+                        prop.Default = defTok?.Type == JTokenType.Boolean ? defTok.Value<bool>() : (object)false;
+                        break;
+                    case "int":
+                        prop.Min = pt.Value<double?>("min") ?? 0;
+                        prop.Max = pt.Value<double?>("max") ?? 100;
+                        if (prop.Min > prop.Max) { result.Errors.Add($"property '{prop.Id}': min {prop.Min} > max {prop.Max}"); return; }
+                        prop.Default = ClampInt(defTok != null ? defTok.Value<long>() : (long)prop.Min, prop, result);
+                        break;
+                    case "float":
+                        prop.Min = pt.Value<double?>("min") ?? 0;
+                        prop.Max = pt.Value<double?>("max") ?? 1;
+                        if (prop.Min > prop.Max) { result.Errors.Add($"property '{prop.Id}': min {prop.Min} > max {prop.Max}"); return; }
+                        prop.Default = ClampFloat(defTok != null ? defTok.Value<double>() : prop.Min, prop, result);
+                        break;
+                    case "text":
+                        // A string token round-trips; any other scalar becomes its
+                        // string form; object/array -> ToString (never throws).
+                        prop.Default = defTok == null ? ""
+                            : (defTok.Type == JTokenType.String ? (defTok.Value<string>() ?? "") : defTok.ToString());
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"property '{prop.Id}': invalid min/max/default value ({ex.GetType().Name})");
+                return;
             }
             group.Properties.Add(prop);
         }

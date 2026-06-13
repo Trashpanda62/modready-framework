@@ -288,11 +288,23 @@ public static class PatchShield
             // this path can run per-frame until the unpatch lands).
             if (_verdictCache.TryGetValue(verdictKey, out var cachedSwallow))
             {
-                if (!cachedSwallow) return false;
-                CountSwallow(ex);
-                LogThrottled("swallow|" + verdictKey,
-                    $"swallowed {ex.GetType().Name} from a patch on {sigKey}: {ex.Message}");
-                return true;
+                if (!cachedSwallow) return false;   // cached rethrow: stable; skip the walk
+                // Cached SWALLOW: short-circuit (skip the StackTrace walk) ONLY once
+                // this method's unpatch retries are spent. While retries remain, fall
+                // through and re-walk -- the verdict key is (method|exceptionType), so a
+                // second, DISTINCT culprit throwing the same exception kind on the same
+                // method would otherwise hit this cached true and never reach
+                // TryUnpatchOffendingPatches, leaving its dead patch firing forever
+                // (the documented second-culprit-removal slot would be unreachable).
+                // TryUnpatchOffendingPatches self-limits via the _unpatchAttempts cap,
+                // so the re-walk happens at most MaxUnpatchAttemptsPerMethod times.
+                if (UnpatchAttemptsExhausted(sigKey))
+                {
+                    CountSwallow(ex);
+                    LogThrottled("swallow|" + verdictKey,
+                        $"swallowed {ex.GetType().Name} from a patch on {sigKey}: {ex.Message}");
+                    return true;
+                }
             }
 
             // H4: only swallow when a NON-engine frame threw. These exception
@@ -358,6 +370,17 @@ public static class PatchShield
                 DiagLog.Log(Tag, $"{message} (seen {count} times this session)");
         }
         catch { /* logging shouldn't poison the shield */ }
+    }
+
+    /// <summary>True once this method's unpatch retries (MaxUnpatchAttemptsPerMethod)
+    /// are spent -- the signal that the cached-swallow branch may stop re-walking
+    /// the stack for further throws of the same kind on this method.</summary>
+    private static bool UnpatchAttemptsExhausted(string sigKey)
+    {
+        lock (_lock)
+        {
+            return _unpatchAttempts.TryGetValue(sigKey, out var a) && a >= MaxUnpatchAttemptsPerMethod;
+        }
     }
 
     // Phase 3 / H1 rework: unpatch ONLY the culprit assembly's patches.
