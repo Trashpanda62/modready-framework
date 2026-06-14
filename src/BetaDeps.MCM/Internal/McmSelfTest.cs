@@ -689,7 +689,7 @@ internal static class McmSelfTest
         try
         {
             // Live disk currently == originals (caller restored+saved before this).
-            if (!SettingsStorage.SavePreset(entry.Id, presetName))
+            if (!SettingsStorage.SavePreset(entry.Id, presetName, instance))
             {
                 DiagLog.Log(Tag, $"Preset test: SavePreset failed for {entry.Id}");
                 return false;
@@ -711,7 +711,7 @@ internal static class McmSelfTest
             // file over the live file; the UI's ExecutePresetApply reloads the
             // instance from disk afterward (then re-binds the grid). Mirror that
             // exact sequence so the in-memory instance reflects the applied preset.
-            if (!SettingsStorage.LoadPresetIntoLiveFile(entry.Id, presetName))
+            if (!SettingsStorage.LoadPresetIntoLiveFile(entry.Id, presetName, instance))
             {
                 DiagLog.Log(Tag, $"Preset test: apply failed for {entry.Id}");
                 return false;

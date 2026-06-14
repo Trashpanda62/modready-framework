@@ -1181,7 +1181,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                     try { MCM.Internal.SettingsStorage.Save(entry.Instance, settingsId); }
                     catch (System.Exception ex) { DiagLog.LogCaught(Tag, $"PromptSavePresetName/flush({settingsId})", ex); }
 
-                    var ok = MCM.Internal.SettingsStorage.SavePreset(settingsId, name);
+                    var ok = MCM.Internal.SettingsStorage.SavePreset(settingsId, name, entry.Instance);
                     if (ok)
                     {
                         // Refresh the cycle so the new preset name appears
@@ -1246,7 +1246,7 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
     {
         try
         {
-            if (!MCM.Internal.SettingsStorage.LoadPresetIntoLiveFile(settingsId, presetName))
+            if (!MCM.Internal.SettingsStorage.LoadPresetIntoLiveFile(settingsId, presetName, entry.Instance))
             {
                 ShowInfo("Load failed",
                          $"Could not load preset '{presetName}'. Check runtime.log for the error.");

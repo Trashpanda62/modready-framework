@@ -234,15 +234,19 @@ internal static class SettingsStorage
     }
 
     /// <summary>
-    /// Write the current Global\&lt;id&gt;.json out to a preset file with
-    /// the given name. Overwrites any existing preset of the same name.
-    /// Returns true on success.
+    /// Write the current live settings file out to a preset file with the
+    /// given name. Overwrites any existing preset of the same name.
+    /// Pass <paramref name="instance"/> so the scope-aware path is used
+    /// (PerSave/PerCampaign vs Global). Returns true on success.
     /// </summary>
-    public static bool SavePreset(string settingsId, string presetName)
+    public static bool SavePreset(string settingsId, string presetName, object? instance = null)
     {
         try
         {
-            var src = ResolvePath(settingsId);
+            // H10: use scope-aware path so PerSave/PerCampaign presets snapshot
+            // the right file. Without this, per-scope settings would always be
+            // snapshotted from the (possibly empty) Global path.
+            var src = instance != null ? ResolvePathFor(instance, settingsId) : ResolvePath(settingsId);
             if (!File.Exists(src))
             {
                 DiagLog.Log(Tag, $"SavePreset({settingsId},{presetName}): no live settings file at {src} -- nothing to snapshot");
@@ -259,12 +263,13 @@ internal static class SettingsStorage
     }
 
     /// <summary>
-    /// Replace the live Global\&lt;id&gt;.json with the contents of the named
-    /// preset file. Returns true on success. Caller is expected to re-run
-    /// Load() afterwards (or to recreate the settings singleton) so the
-    /// in-memory state reflects the new values.
+    /// Replace the live settings file with the contents of the named preset.
+    /// Pass <paramref name="instance"/> so the scope-aware destination is used
+    /// (PerSave/PerCampaign vs Global). Returns true on success. Caller is
+    /// expected to re-run Load() afterwards so in-memory state reflects the
+    /// new values.
     /// </summary>
-    public static bool LoadPresetIntoLiveFile(string settingsId, string presetName)
+    public static bool LoadPresetIntoLiveFile(string settingsId, string presetName, object? instance = null)
     {
         try
         {
@@ -274,7 +279,9 @@ internal static class SettingsStorage
                 DiagLog.Log(Tag, $"LoadPreset({settingsId},{presetName}): preset file not found at {src}");
                 return false;
             }
-            var dst = ResolvePath(settingsId);
+            // H10: use scope-aware destination so the file Load() will actually
+            // read (PerSave/PerCampaign) is the one we overwrite.
+            var dst = instance != null ? ResolvePathFor(instance, settingsId) : ResolvePath(settingsId);
             Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
             File.Copy(src, dst, overwrite: true);
             DiagLog.Log(Tag, $"LoadPreset: copied {src} -> {dst}");
