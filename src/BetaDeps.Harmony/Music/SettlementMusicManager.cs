@@ -51,19 +51,21 @@ public static class SettlementMusicManager
     // Active-playback state.
     private static MusicContext _currentContext = (MusicContext)(-1);
     private static int _channel = -1;
-    private static bool _armed;
+    private static bool _disabled;          // hard-off for the session (Engine.Music API missing / repeated start failures)
+    private static bool _sawPlaying;        // have we observed IsMusicPlaying==true since the current clip was issued?
+    private static int _ticksSinceStart;    // ticks since the current clip was issued (async-start grace window)
+    private static int _startFailures;      // consecutive failed clip starts
 
-    /// <summary>Wire the config in. Called from the SubModule once MusicConfig loads.</summary>
+    private const int StartGraceTicks = 60; // ~1s @60fps: wait this long for an async clip to start before advancing
+    private const int MaxStartFailures = 5; // give up settlement playback after this many consecutive start failures
+
+    /// <summary>Wire the config in. Called from the SubModule once MusicConfig loads.
+    /// Whether settlement music actually runs is decided LIVE each tick (see Pump),
+    /// not snapshotted here, so enabling a settlement context mid-session takes effect.</summary>
     public static void Install(MusicConfig cfg)
     {
         _config = cfg;
-        // Only worth running if at least one settlement context has tracks.
-        _armed = cfg != null && (
-            cfg.IsActive(MusicContext.SettlementTown) ||
-            cfg.IsActive(MusicContext.SettlementVillage) ||
-            cfg.IsActive(MusicContext.SettlementTavern));
-        if (_armed)
-            DiagLog.Log(Tag, "armed: BYO settlement tracks present; will manage the Engine.Music channel in settlements.");
+        DiagLog.Log(Tag, "installed; manages the Engine.Music channel whenever a settlement BYO context is enabled.");
     }
 
     /// <summary>
@@ -72,7 +74,21 @@ public static class SettlementMusicManager
     /// </summary>
     public static void Pump()
     {
-        if (!_armed || _config == null) return;
+        if (_config == null || _disabled) return;
+
+        // Cheap LIVE gate, re-evaluated every tick (so a mid-session Options toggle
+        // is honored): only do settlement work when at least one settlement context
+        // is enabled + non-empty. IsActive is a dictionary lookup -- no game reflection,
+        // so this is a negligible per-frame cost when the feature isn't in use.
+        bool anyActive = _config.IsActive(MusicContext.SettlementTown)
+                      || _config.IsActive(MusicContext.SettlementVillage)
+                      || _config.IsActive(MusicContext.SettlementTavern);
+        if (!anyActive)
+        {
+            if (_channel >= 0) ReleaseChannel();   // all settlement contexts disabled mid-visit
+            return;
+        }
+
         try
         {
             if (!ResolveReflection()) return;
@@ -91,10 +107,22 @@ public static class SettlementMusicManager
                 // Entered an active settlement context: grab a channel + start.
                 AcquireAndPlay(ctx);
             }
-            else if (!IsMusicPlaying(_channel))
+            else if (IsMusicPlaying(_channel))
             {
-                // Clip ended naturally -> advance to the next track in the pool.
-                PlayNext(ctx);
+                _sawPlaying = true;   // clip is up; now a later false transition means it truly ended
+            }
+            else if (_sawPlaying)
+            {
+                // We saw it playing and now it isn't -> clip ended naturally; advance.
+                if (!PlayNext(ctx)) { ReleaseChannel(); NoteStartFailure(ctx); }
+            }
+            else if (++_ticksSinceStart > StartGraceTicks)
+            {
+                // The clip we issued never reported playing within the grace window
+                // (async load is slow / failed). Advance rather than treating
+                // "not started yet" as "ended" and skipping a track every frame.
+                DiagLog.Log(Tag, $"{ctx}: clip did not start within grace; advancing.");
+                if (!PlayNext(ctx)) { ReleaseChannel(); NoteStartFailure(ctx); }
             }
         }
         catch (Exception ex)
@@ -195,26 +223,49 @@ public static class SettlementMusicManager
             }
             _channel = ch;
             _currentContext = ctx;
-            DiagLog.Log(Tag, $"entered {ctx}; acquired Engine.Music channel {ch}.");
-            PlayNext(ctx);
+            if (!PlayNext(ctx))
+            {
+                // Couldn't start the first track (engine threw) -> release the
+                // channel instead of holding it idle and spinning on it every tick.
+                ReleaseChannel();
+                NoteStartFailure(ctx);
+                return;
+            }
+            DiagLog.Log(Tag, $"entered {ctx}; playing BYO music on Engine.Music channel {ch}.");
         }
         catch (Exception ex) { DiagLog.LogCaught(Tag, $"AcquireAndPlay({ctx})", ex); }
     }
 
-    private static void PlayNext(MusicContext ctx)
+    /// <summary>Load + start the next pool track on the current channel. Returns true
+    /// on a successful start, false on an empty pool or an engine throw (caller decides
+    /// whether to release). Resets the async-start grace state on success.</summary>
+    private static bool PlayNext(MusicContext ctx)
     {
         try
         {
             var pool = _config!.PoolFor(ctx);
             var track = pool?.Next();
-            if (string.IsNullOrEmpty(track)) return;   // empty pool: leave vanilla bard
+            if (string.IsNullOrEmpty(track)) return false;   // empty pool: leave vanilla bard
 
             LoadClip(_channel, track!);
             var trim = _config.SettingsFor(ctx).VolumeTrim;
             SetVolume(_channel, trim);
             PlayMusic(_channel);
+            _sawPlaying = false;        // wait until we observe it playing before honoring an end-of-clip
+            _ticksSinceStart = 0;
+            _startFailures = 0;         // a successful start clears the consecutive-failure count
+            return true;
         }
-        catch (Exception ex) { DiagLog.LogCaught(Tag, $"PlayNext({ctx})", ex); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, $"PlayNext({ctx})", ex); return false; }
+    }
+
+    /// <summary>Count a failed clip start; after too many in a row, give up settlement
+    /// playback for the session rather than thrash the channel + flood the log.</summary>
+    private static void NoteStartFailure(MusicContext ctx)
+    {
+        if (++_startFailures < MaxStartFailures) return;
+        _disabled = true;
+        DiagLog.Log(Tag, $"settlement playback failed to start {_startFailures}x ({ctx}); disabling for this session.");
     }
 
     private static void ReleaseChannel()
@@ -233,6 +284,8 @@ public static class SettlementMusicManager
         {
             _channel = -1;
             _currentContext = (MusicContext)(-1);
+            _sawPlaying = false;
+            _ticksSinceStart = 0;
         }
     }
 
@@ -288,7 +341,7 @@ public static class SettlementMusicManager
                 _campaignCurrent == null || _settlementCurrent == null)
             {
                 DiagLog.Log(Tag, "Engine.Music / Settlement API surface incomplete; settlement music disabled this session.");
-                _armed = false;
+                _disabled = true;
                 return false;
             }
             DiagLog.Log(Tag, "Engine.Music + Settlement reflection resolved.");

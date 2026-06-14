@@ -103,4 +103,16 @@ public sealed class PlaybackPool
 
     /// <summary>Reset the cursor to the start of the current order.</summary>
     public void Reset() => _cursor = 0;
+
+    /// <summary>Switch play mode at runtime (the Options > Sound UI calls this so a
+    /// Shuffle/Sequential change takes effect on the next pick). Rebuilds the play
+    /// order and rewinds the cursor. No-op if the mode is unchanged. PSAI contexts
+    /// ignore this (their cursor is unused); it matters for the settlement path.</summary>
+    public void ApplyMode(PlaybackMode mode)
+    {
+        if (Mode == mode) return;
+        Mode = mode;
+        _order = BuildOrder();
+        _cursor = 0;
+    }
 }

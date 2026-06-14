@@ -87,10 +87,12 @@ public sealed class MusicConfig
             }
 
             cfg.ByoRoot = Path.Combine(cfg.ModuleDir, "Music", "BYO");
-            cfg.ScanAll();
+            var overlay = ReadSavedSettings();   // persisted per-context choices (empty if never saved)
+            cfg.ScanAll(overlay);
 
             DiagLog.Log(Tag, $"loaded BYO tree from '{cfg.ByoRoot}': " +
-                             $"{cfg.TotalTracks} track(s) across {cfg._pools.Count(kv => kv.Value.Count > 0)} active context(s).");
+                             $"{cfg.TotalTracks} track(s) across {cfg._pools.Count(kv => kv.Value.Count > 0)} active context(s)" +
+                             (overlay.Count > 0 ? $"; applied {overlay.Count} saved setting(s)." : "; defaults (no saved settings)."));
         }
         catch (Exception ex)
         {
@@ -110,19 +112,22 @@ public sealed class MusicConfig
         }
     }
 
-    private void ScanAll()
+    private void ScanAll(IReadOnlyDictionary<MusicContext, ContextSettings> overlay)
     {
         foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
         {
             var files = GatherTracks(ctx);
-            var settings = new ContextSettings
+            ContextSettings settings;
+            if (overlay != null && overlay.TryGetValue(ctx, out var saved))
             {
-                // Default: a context is on iff the user dropped tracks in. U1
-                // (MCM) will later override Enabled/Mode/VolumeTrim from storage.
-                Enabled = files.Count > 0,
-                Mode = PlaybackMode.Shuffle,
-                VolumeTrim = 1.0f,
-            };
+                // Persisted choice wins (the Options > Sound UI saved it on Done).
+                settings = new ContextSettings { Enabled = saved.Enabled, Mode = saved.Mode, VolumeTrim = saved.VolumeTrim };
+            }
+            else
+            {
+                // First run / never saved: a context is on iff the user dropped tracks in.
+                settings = new ContextSettings { Enabled = files.Count > 0, Mode = PlaybackMode.Shuffle, VolumeTrim = 1.0f };
+            }
             _settings[ctx] = settings;
             _pools[ctx] = new PlaybackPool(ctx, files, settings.Mode);
 
@@ -198,4 +203,124 @@ public sealed class MusicConfig
         var moduleDir = Path.GetDirectoryName(betaDepsBin);     // BetaDeps
         return string.IsNullOrEmpty(moduleDir) ? "" : moduleDir!;
     }
+
+    // ---- persistence -----------------------------------------------------------
+    // Settings live in the user's config tree (NOT the module dir, which can be
+    // read-only and is wiped on update):
+    //   Documents\Mount and Blade II Bannerlord\Configs\BetaDeps\byo-music.cfg
+    // Line format: <Context>=<enabled 0/1>|<Shuffle|Sequential>|<volume 0..1>.
+    // Hand-rolled (no JSON dependency in this assembly); tolerant of bad lines.
+
+    private const string SettingsFileName = "byo-music.cfg";
+
+    private static string? ResolveSettingsPath()
+    {
+        try
+        {
+            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrEmpty(docs)) return null;
+            return Path.Combine(docs, "Mount and Blade II Bannerlord", "Configs", "BetaDeps", SettingsFileName);
+        }
+        catch { return null; }
+    }
+
+    /// <summary>Persist the current per-context settings so they survive relaunch.
+    /// Called when the user clicks Done in Options &gt; Sound. Never throws.</summary>
+    public void SaveSettings()
+    {
+        try
+        {
+            var path = ResolveSettingsPath();
+            if (path == null) { DiagLog.Log(Tag, "SaveSettings: no Documents path; not saved."); return; }
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+            var sb = new System.Text.StringBuilder();
+            sb.Append("# BetaDeps BYO music settings -- auto-saved from Options > Sound. Delete to reset.\n");
+            sb.Append("# <Context>=<enabled 0/1>|<Shuffle|Sequential>|<volume 0..1>\n");
+            foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
+            {
+                var s = SettingsFor(ctx);
+                sb.Append(ctx).Append('=')
+                  .Append(s.Enabled ? '1' : '0').Append('|')
+                  .Append(s.Mode).Append('|')
+                  .Append(Clamp01(s.VolumeTrim).ToString("0.000", System.Globalization.CultureInfo.InvariantCulture))
+                  .Append('\n');
+            }
+            // Atomic write: a torn file (alt-F4 mid-write -- this fires on the
+            // Options "Done" click) must never silently drop the user's saved
+            // choices. Write a temp then swap it into place.
+            var tmp = path + ".tmp";
+            File.WriteAllText(tmp, sb.ToString());
+            if (File.Exists(path)) File.Replace(tmp, path, null);
+            else File.Move(tmp, path);
+            DiagLog.Log(Tag, $"SaveSettings: wrote {_settings.Count} context setting(s) to '{path}'.");
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "SaveSettings", ex); }
+    }
+
+    /// <summary>Re-apply persisted settings (or per-context defaults for entries not
+    /// in the file) over the live settings + pool play modes -- used to discard
+    /// unsaved edits when the user clicks Cancel. Never throws.</summary>
+    public void ReloadSettings()
+    {
+        try
+        {
+            var overlay = ReadSavedSettings();
+            foreach (MusicContext ctx in Enum.GetValues(typeof(MusicContext)))
+            {
+                var hasTracks = PoolFor(ctx) is { Count: > 0 };
+                ContextSettings target = overlay.TryGetValue(ctx, out var saved)
+                    ? saved
+                    : new ContextSettings { Enabled = hasTracks, Mode = PlaybackMode.Shuffle, VolumeTrim = 1.0f };
+
+                if (_settings.TryGetValue(ctx, out var live))
+                {
+                    live.Enabled = target.Enabled;
+                    live.Mode = target.Mode;
+                    live.VolumeTrim = target.VolumeTrim;
+                }
+                else _settings[ctx] = target;
+
+                PoolFor(ctx)?.ApplyMode(target.Mode);
+            }
+            DiagLog.Log(Tag, "ReloadSettings: reverted to persisted/default settings (Cancel).");
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "ReloadSettings", ex); }
+    }
+
+    /// <summary>Read the persisted settings file into a per-context map. Returns an
+    /// empty map when the file is absent or unreadable (=&gt; defaults apply).</summary>
+    private static Dictionary<MusicContext, ContextSettings> ReadSavedSettings()
+    {
+        var map = new Dictionary<MusicContext, ContextSettings>();
+        try
+        {
+            var path = ResolveSettingsPath();
+            if (path == null || !File.Exists(path)) return map;
+            foreach (var raw in File.ReadAllLines(path))
+            {
+                var line = raw.Trim();
+                if (line.Length == 0 || line[0] == '#') continue;
+                var eq = line.IndexOf('=');
+                if (eq <= 0) continue;
+                var key = line.Substring(0, eq).Trim();
+                var parts = line.Substring(eq + 1).Split('|');
+                if (parts.Length < 3) continue;
+                if (!Enum.TryParse<MusicContext>(key, ignoreCase: true, out var ctx)) continue;
+                if (!Enum.TryParse<PlaybackMode>(parts[1].Trim(), ignoreCase: true, out var mode)) mode = PlaybackMode.Shuffle;
+                if (!float.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Float,
+                                    System.Globalization.CultureInfo.InvariantCulture, out var vol)) vol = 1.0f;
+                map[ctx] = new ContextSettings
+                {
+                    Enabled = parts[0].Trim() == "1",
+                    Mode = mode,
+                    VolumeTrim = Clamp01(vol),
+                };
+            }
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "ReadSavedSettings", ex); }
+        return map;
+    }
+
+    private static float Clamp01(float v) => v < 0f ? 0f : (v > 1f ? 1f : v);
 }

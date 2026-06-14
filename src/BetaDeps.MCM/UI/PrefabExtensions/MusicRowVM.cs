@@ -52,9 +52,10 @@ public sealed class MusicRowVM : ViewModel
         get
         {
             var n = TrackCount;
-            return n == 0
-                ? "no tracks - drop .ogg/.wav in Music\\BYO\\" + _ctx.FolderRelativePath()
-                : (n == 1 ? "1 track" : n + " tracks");
+            if (n > 0) return n == 1 ? "1 track" : n + " tracks";
+            // Short, single-ish line; the .ogg/.wav + relaunch guidance lives in
+            // the section footer so rows stay compact and don't overlap.
+            return "(empty) BYO/" + _ctx.FolderRelativePath();
         }
     }
 
@@ -89,6 +90,9 @@ public sealed class MusicRowVM : ViewModel
                 var mode = value ? PlaybackMode.Sequential : PlaybackMode.Shuffle;
                 if (s.Mode == mode) return;
                 s.Mode = mode;
+                // Apply to the live pool so settlement playback honors the change
+                // immediately (PSAI contexts ignore mode -- their cursor is unused).
+                MusicConfig.Current?.PoolFor(_ctx)?.ApplyMode(mode);
                 OnPropertyChanged(nameof(SequentialValue));
                 OnPropertyChanged(nameof(ModeText));
             }

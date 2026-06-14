@@ -1,11 +1,26 @@
 // BetaDeps.MCM -- MusicOptionsPatch
 //
 // Injects the BYO music-picker panel into the native Options > Sound tab, below
-// the volume sliders. Target: the AudioOptionsPage node in the "Options" movie
-// (the same movie BetaDeps already patches for its Mod Config tab). Inserting as
-// a child of AudioOptionsPage places the panel after the audio options list
-// (i.e. below the Master/Music/Effects/Voice volume sliders), and -- because we
-// target only the AudioOptionsPage node -- it appears ONLY on the Sound tab.
+// the volume sliders.
+//
+// Target: the OptionsGroupedPage PREFAB definition -- inserted as the sibling
+// immediately AFTER the BaseOptions list (the volume sliders), NOT the
+// <OptionsGroupedPage> instance in the "Options" movie. We first injected as a
+// child of the AudioOptionsPage *instance*, but Gauntlet does not instantiate
+// children placed inside a prefab-instance tag -- the patch applied to the movie
+// XML yet the widgets were never created. Patching the prefab's OWN definition
+// fixed that.
+//
+// Then a second trap: OptionsInnerPanel (the prefab root) is a bare <Widget>,
+// which does NOT run a stack layout -- appending a section there made it overlap
+// the volume sliders. BaseOptions' parent <ListPanel Id="@Name"> DOES stack, so
+// we Append our section as BaseOptions' next sibling: it flows directly below the
+// sliders, above the (optional) grouped options.
+//
+// OptionsGroupedPage is shared by all four grouped pages (Video / Performance /
+// Audio / Gameplay), so the section is instantiated on every one -- but
+// @BetaDepsMusicVisible (reference-equality to the captured AudioOptions category)
+// resolves true ONLY on the audio page, hiding it everywhere else.
 //
 // The panel binds to MusicCategoryMixin (attached to the audio GroupedOptionCategoryVM):
 //   {BetaDepsMusicRows}    -> one MusicRowVM per context (enable/mode/volume/count)
@@ -18,11 +33,13 @@ using Bannerlord.UIExtenderEx.Prefabs2;
 
 namespace MCM.UI.PrefabExtensions;
 
-[PrefabExtension("Options", "descendant::OptionsGroupedPage[@Id='AudioOptionsPage']")]
+[PrefabExtension("OptionsGroupedPage", "descendant::NavigatableListPanel[@Id='BaseOptions']")]
 internal sealed class MusicOptionsPatch : PrefabExtensionInsertPatch
 {
-    // Append after the audio page's existing content (the volume options).
-    public override InsertType Type => InsertType.Child;
+    // Insert as the sibling immediately AFTER BaseOptions (inside the page's
+    // vertical ListPanel stack), so the section flows directly below the volume
+    // sliders. Append == sibling-after-target in this patcher.
+    public override InsertType Type => InsertType.Append;
 
     [PrefabExtensionText]
     public string XmlContent =>
@@ -34,7 +51,7 @@ internal sealed class MusicOptionsPatch : PrefabExtensionInsertPatch
         // ---- per-context rows ----
         + "    <ListPanel DataSource=\"{BetaDepsMusicRows}\" WidthSizePolicy=\"CoverChildren\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" StackLayout.LayoutMethod=\"VerticalTopToBottom\">\n"
         + "      <ItemTemplate>\n"
-        + "        <ListPanel IsVisible=\"@IsRowVisible\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" HeightSizePolicy=\"Fixed\" SuggestedHeight=\"48\" HorizontalAlignment=\"Center\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
+        + "        <ListPanel IsVisible=\"@IsRowVisible\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"1000\" HeightSizePolicy=\"CoverChildren\" MarginBottom=\"4\" HorizontalAlignment=\"Center\" StackLayout.LayoutMethod=\"HorizontalLeftToRight\">\n"
         + "          <Children>\n"
         // context name
         + "            <TextWidget DoNotAcceptEvents=\"true\" WidthSizePolicy=\"Fixed\" SuggestedWidth=\"270\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Left\" TextHorizontalAlignment=\"Left\" VerticalAlignment=\"Center\" Brush=\"SPOptions.OptionName.Text\" Text=\"@DisplayName\" />\n"
@@ -63,6 +80,8 @@ internal sealed class MusicOptionsPatch : PrefabExtensionInsertPatch
         + "        </ListPanel>\n"
         + "      </ItemTemplate>\n"
         + "    </ListPanel>\n"
+        // ---- footer hint (drop-files guidance, shown once) ----
+        + "    <RichTextWidget WidthSizePolicy=\"StretchToParent\" HeightSizePolicy=\"CoverChildren\" HorizontalAlignment=\"Center\" TextHorizontalAlignment=\"Center\" MarginTop=\"14\" Brush=\"SPOptions.Group.Title.Text\" Text=\"Drop .ogg or .wav files into the BYO folder shown for each empty row, then relaunch to load them.\" />\n"
         + "  </Children>\n"
         + "</ListPanel>";
 }

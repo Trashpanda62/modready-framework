@@ -310,6 +310,9 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             // C3: the settlement (Town/Village/Tavern) Engine.Music path. Inert
             // unless the player dropped BYO tracks in a settlement context.
             SettlementMusicManager.Install(_musicConfig);
+            // Persist Options > Sound music settings across launches (Done saves,
+            // Cancel reverts) by hooking the native OptionsVM close buttons.
+            MusicOptionsLifecycle.Install();
         }
         catch (Exception ex)
         {
