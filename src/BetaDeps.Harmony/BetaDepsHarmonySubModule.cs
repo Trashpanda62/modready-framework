@@ -36,6 +36,12 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     // v1.0 BYO music picker (workstream C2). Loaded once after the Harmony gate
     // opens; PsaiRedirectManager.TryLoadRuntime is then pumped from the tick
     // until PSAI is initialized and our soundtrack is merged in.
+    //
+    // SHELVED for the v1.0.0 ship: the picker is feature-complete + verified but held
+    // back as a future add-on. Flip this flag to true AND uncomment the
+    // [PrefabExtension]/[ViewModelMixin] attributes in
+    // src/BetaDeps.MCM/UI/PrefabExtensions/MusicOptions{Patch,Mixin}.cs to re-enable.
+    private static readonly bool EnableMusicPicker = false;
     private static MusicConfig? _musicConfig;
 
     // [ThreadStatic] guard so a recursive failure inside our own log writer
@@ -305,14 +311,17 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         // logged -- a music-feature fault must never take the game down.
         try
         {
-            _musicConfig = MusicConfig.Load();
-            PsaiRedirectManager.Install(_musicConfig);
-            // C3: the settlement (Town/Village/Tavern) Engine.Music path. Inert
-            // unless the player dropped BYO tracks in a settlement context.
-            SettlementMusicManager.Install(_musicConfig);
-            // Persist Options > Sound music settings across launches (Done saves,
-            // Cancel reverts) by hooking the native OptionsVM close buttons.
-            MusicOptionsLifecycle.Install();
+            if (EnableMusicPicker)
+            {
+                _musicConfig = MusicConfig.Load();
+                PsaiRedirectManager.Install(_musicConfig);
+                // C3: the settlement (Town/Village/Tavern) Engine.Music path. Inert
+                // unless the player dropped BYO tracks in a settlement context.
+                SettlementMusicManager.Install(_musicConfig);
+                // Persist Options > Sound music settings across launches (Done saves,
+                // Cancel reverts) by hooking the native OptionsVM close buttons.
+                MusicOptionsLifecycle.Install();
+            }
         }
         catch (Exception ex)
         {
@@ -330,8 +339,11 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
         // settlement music manager's clip-advance loop from here.
         try
         {
-            PsaiRedirectManager.Pump();
-            SettlementMusicManager.Pump();   // C3: settlement clip-advance loop
+            if (EnableMusicPicker)
+            {
+                PsaiRedirectManager.Pump();
+                SettlementMusicManager.Pump();   // C3: settlement clip-advance loop
+            }
         }
         catch (Exception ex)
         {
@@ -603,9 +615,21 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
             }
             catch (Exception)
             {
-                var stale = target + ".stale-" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                System.IO.File.Move(target, stale);
-                System.IO.File.Copy(f, target);
+                // Per-file guard: if the shunt rename ALSO fails (e.g. AV holds the
+                // target so even a rename is blocked), don't let it throw out and
+                // abort the rest of this folder's files -- skip just this one and
+                // log it. Without this, a single un-renamable DLL would stop every
+                // remaining file in the folder from refreshing.
+                try
+                {
+                    var stale = target + ".stale-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                    System.IO.File.Move(target, stale);
+                    System.IO.File.Copy(f, target);
+                }
+                catch (Exception shuntEx)
+                {
+                    DiagLog.LogCaught(Tag, $"RefreshDirectoryRecursive/shunt({System.IO.Path.GetFileName(f)})", shuntEx);
+                }
             }
         }
         foreach (var d in System.IO.Directory.GetDirectories(src))

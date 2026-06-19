@@ -1,18 +1,22 @@
 # BetaDeps All-in-One Installer
 
-The v2.0 distribution: one download that bundles **BLSE + the five BetaDeps
-modules** so a new user is modding-ready in a single step (then they just add the
-content mods they want). It does **not** replace BLSE — it bundles it, with
-permission (BLSE is MIT, © BUTR; see licensing below).
+The v2.0 distribution: one download that bundles **BLSE + the four BUTR
+dependency modules** (Bannerlord.Harmony, Bannerlord.UIExtenderEx,
+Bannerlord.ButterLib, Bannerlord.MBOptionScreen) so a new user is modding-ready
+in a single step (then they just add the content mods they want). The **BetaDeps
+framework module itself is not bundled** — this installer is the dependency stack
+only. It does **not** replace BLSE — it bundles it, with permission (BLSE is MIT,
+© BUTR; see licensing below).
 
 ## What the installer does
 
 - Auto-detects the Bannerlord install (Steam registry → common path → user browse),
   and validates the chosen folder actually contains `bin\Win64_Shipping_Client\Bannerlord.exe`.
-- Copies the five BetaDeps module folders into `Modules\`.
+- Copies the four BUTR dependency module folders into `Modules\` (no BetaDeps folder).
 - Copies BLSE's `bin\Win64_Shipping_Client\*` into the game's `bin\Win64_Shipping_Client\`
   (the documented BLSE install location).
-- Ships all license notices into `Modules\BetaDeps\licenses\`.
+- Ships all license notices into `Modules\Bannerlord.Harmony\licenses\` (the
+  BetaDeps folder isn't shipped, so notices live under the Harmony dependency).
 - Optional desktop shortcut to `Bannerlord.BLSE.LauncherEx.exe`, and an offer to
   launch it on finish.
 
@@ -46,7 +50,7 @@ Output: `dist\BetaDeps-AllInOne-v1.0.0.exe`.
 BLSE is redistributed under its **MIT license** (© 2021-2022 BUTR), which permits
 bundling provided its copyright + permission notice ships with the bundle — the
 build script copies BLSE's `LICENSE` into `payload\LICENSES\` and the installer
-lays it down under `Modules\BetaDeps\licenses\`. The Nexus page and in-app credits
+lays it down under `Modules\Bannerlord.Harmony\licenses\`. The Nexus page and in-app credits
 acknowledge BUTR as the creators of the BUTR stack and BLSE. Verified MIT on
 2026-06-08 — see the vault page **All-in-One BetaDeps Installer** for the full note.
 

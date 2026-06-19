@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-06-18T02:01:00Z",
+  "finished_at": "2026-06-18T02:01:07Z",
+  "backup_dir": "Configs/ModSettings/Global/SelfTestBackup-20260618_020100",
+  "mods": [
+    {
+      "mod_id": "BrokenMod",
+      "mod_display_name": "Broken Mod",
+      "done_passed": false,
+      "cancel_passed": true,
+      "ui_layer_passed": true,
+      "preset_passed": true,
+      "is_per_save": false,
+      "properties": [
+        {
+          "property_name": "Volume",
+          "kind": "float",
+          "round_trip_passed": false,
+          "failure_reason": "Expected 0.75 but got 0 after reload — setter discards fractional part"
+        }
+      ]
+    },
+    {
+      "mod_id": "FatalMod",
+      "mod_display_name": "Fatal Mod",
+      "done_passed": false,
+      "cancel_passed": false,
+      "ui_layer_passed": false,
+      "preset_passed": false,
+      "is_per_save": false,
+      "properties": [],
+      "fatal_error": "NullReferenceException in SettingsStorage.Load at line 142"
+    },
+    {
+      "mod_id": "DismembermentPlus",
+      "mod_display_name": "Dismemberment Plus",
+      "done_passed": true,
+      "cancel_passed": false,
+      "ui_layer_passed": true,
+      "preset_passed": true,
+      "is_per_save": false,
+      "properties": [
+        {
+          "property_name": "DismembermentChance",
+          "kind": "int",
+          "round_trip_passed": false,
+          "failure_reason": "Value clobbered by DismembermentRealism setter"
+        }
+      ]
+    }
+  ],
+  "visibility": [
+    {
+      "mod_folder": "BrokenMod",
+      "has_code": true,
+      "registered": true,
+      "registered_ids": ["BrokenMod.Settings"]
+    },
+    {
+      "mod_folder": "OrphanFolder",
+      "has_code": false,
+      "registered": false,
+      "registered_ids": []
+    }
+  ],
+  "duplicate_dlls": [
+    {
+      "dll_name": "Newtonsoft.Json.dll",
+      "copies": [
+        {"path": "Modules/BrokenMod/bin/Newtonsoft.Json.dll", "size": 696320, "version": "13.0.1"},
+        {"path": "Modules/FatalMod/bin/Newtonsoft.Json.dll", "size": 696320, "version": "13.0.1"}
+      ]
+    }
+  ]
+}

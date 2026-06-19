@@ -29,7 +29,7 @@
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="Bannerlord.Harmony" />
-  <Name value="Bannerlord.Harmony (provided by BetaDeps)" />
+  <Name value="Harmony" />
   <Version value="v2.4.99.0" />
   <DefaultModule value="false" />
   <SingleplayerModule value="true" />
@@ -70,6 +70,19 @@
         <Assembly value="MonoMod.Iced.dll" />
         <Assembly value="MonoMod.ILHelpers.dll" />
         <Assembly value="MonoMod.Utils.dll" />
+        <!-- BetaDeps.Harmony.dll (our shared Harmony helper layer, v0.9.0.0).
+             MCMv5.dll, Bannerlord.UIExtenderEx.dll and Bannerlord.ButterLib.dll
+             all carry a hard assembly reference to it. It used to resolve only
+             from the BetaDeps module's bin, so any install WITHOUT the BetaDeps
+             module (ModReady, or a Workshop sub to only the dependency items)
+             left that reference dangling -> BLSE's loader returned CriticalError
+             -> "MCM Submodule could not be loaded correctly due to a dependency
+             conflict". Seeding it HERE (the first module to load, same as
+             0Harmony) puts it in the AppDomain before those three modules
+             construct, so their references resolve by simple-name binding. It
+             depends only on Foundation + 0Harmony + MonoMod.Backports, all
+             listed above, so it loads cleanly. Last so its deps are already in. -->
+        <Assembly value="BetaDeps.Harmony.dll" />
       </Assemblies>
       <Tags />
     </SubModule>

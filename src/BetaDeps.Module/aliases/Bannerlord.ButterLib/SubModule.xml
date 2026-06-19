@@ -26,7 +26,7 @@
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="Bannerlord.ButterLib" />
-  <Name value="Bannerlord.ButterLib (provided by BetaDeps)" />
+  <Name value="ButterLib" />
   <Version value="v2.10.99.0" />
   <DefaultModule value="false" />
   <SingleplayerModule value="true" />

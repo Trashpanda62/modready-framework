@@ -126,10 +126,27 @@ public static class SafeBind
         }
     }
 
+    /// <summary>
+    /// Sentinel for SafeBind.Method's <c>expectedReturnType</c> /
+    /// <c>expectedParamTypes</c> meaning "match any type -- don't check this slot".
+    /// Use this instead of <c>typeof(object)</c>: object was previously abused as a
+    /// wildcard, but <c>typeof(object).IsAssignableFrom(typeof(void))</c> is true, so
+    /// it silently also matched a <c>void</c> overload -- exactly the signature drift
+    /// (e.g. a postfix taking <c>object __result</c> bound against a void method) that
+    /// can corrupt the native stack and which SafeBind exists to prevent.
+    /// </summary>
+    public static readonly Type Any = typeof(AnyTypeMarker);
+
+    private sealed class AnyTypeMarker { }
+
     private static bool TypeMatches(Type actual, Type expected)
     {
+        if (ReferenceEquals(expected, Any)) return true; // explicit wildcard
         if (actual == expected) return true;
         if (actual == null || expected == null) return false;
+        // Never let System.Void satisfy a non-void expectation (or vice versa).
+        // object.IsAssignableFrom(void) is true, which is the bug this guards.
+        if (actual == typeof(void) || expected == typeof(void)) return actual == expected;
         // Allow assignment-compatible matches so callers can specify
         // base types when they don't care about exact derived types.
         return expected.IsAssignableFrom(actual);

@@ -33,8 +33,13 @@ namespace BetaDeps.Foundation;
 public static class RuntimeLog
 {
     private static readonly object _gate = new();
-    private static string? _resolvedPath;
-    private static bool _headerWritten;
+    // volatile: the lock-free fast-path read in Path's getter (and EnsureHeader)
+    // can run on a different thread (finalizers fire on engine tick threads)
+    // than the thread that first assigns these under _gate. Without volatile,
+    // a weak memory model could publish a partially-initialized value and send
+    // the header / first lines to the cwd fallback path.
+    private static volatile string? _resolvedPath;
+    private static volatile bool _headerWritten;
 
     /// <summary>
     /// Absolute path to the runtime log file under Modules\BetaDeps\.
@@ -116,16 +121,23 @@ public static class RuntimeLog
         //   Modules\Bannerlord.UIExtenderEx\bin\Win64_Shipping_Client\
         //   Modules\Bannerlord.ButterLib\bin\Win64_Shipping_Client\
         //   Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\
-        // We want runtime.log to always live at Modules\BetaDeps\runtime.log
-        // regardless of which path the CLR loaded us from.
+        // We want runtime.log to live in a dependency module folder (preferring
+        // Modules\Bannerlord.Harmony\runtime.log) regardless of which path the CLR
+        // loaded us from -- and never inside / creating Modules\BetaDeps\.
         try
         {
             var asm = Assembly.GetExecutingAssembly();
             var asmPath = asm.Location;
             if (!string.IsNullOrEmpty(asmPath))
             {
-                // Walk up looking for a "Modules" folder; once found, drop
-                // into "Modules\BetaDeps\".
+                // Walk up looking for a "Modules" folder. When found, write
+                // runtime.log inside a DEPENDENCY MODULE folder -- deliberately
+                // NOT Modules\BetaDeps\. The ModReady installer ships no BetaDeps
+                // folder, and we must not recreate one on disk just to hold a log.
+                // Prefer Modules\Bannerlord.Harmony\ (a core dependency, always
+                // present -> deterministic, predictable log location); otherwise
+                // fall back to whichever module folder this assembly actually
+                // loaded from. BOTH already exist, so we never create a folder.
                 var dir = System.IO.Path.GetDirectoryName(asmPath);
                 while (!string.IsNullOrEmpty(dir))
                 {
@@ -133,11 +145,10 @@ public static class RuntimeLog
                     if (!string.IsNullOrEmpty(modulesFolder)
                         && string.Equals(System.IO.Path.GetFileName(modulesFolder), "Modules", StringComparison.OrdinalIgnoreCase))
                     {
-                        // dir is some Modules\<X>\..., modulesFolder is Modules\.
-                        // Land in Modules\BetaDeps\runtime.log
-                        var betaDeps = System.IO.Path.Combine(modulesFolder, "BetaDeps");
-                        try { if (!Directory.Exists(betaDeps)) Directory.CreateDirectory(betaDeps); } catch { }
-                        return System.IO.Path.Combine(betaDeps, "runtime.log");
+                        // dir is the module folder we loaded from (Modules\<X>).
+                        var harmonyDir = System.IO.Path.Combine(modulesFolder, "Bannerlord.Harmony");
+                        var home = Directory.Exists(harmonyDir) ? harmonyDir : dir;
+                        return System.IO.Path.Combine(home, "runtime.log");
                     }
                     dir = modulesFolder;
                 }
@@ -174,9 +185,16 @@ public static class RuntimeLog
     {
         if (_headerWritten) return;
         _headerWritten = true;
+        // Resolve the path ONCE here. The Path getter resolves + caches under
+        // _gate (which Write/WriteException already hold when calling us -- the
+        // lock is reentrant), so this both primes _resolvedPath and gives us a
+        // guaranteed-non-null path. (Do NOT use _resolvedPath! directly: on the
+        // very first log call _resolvedPath is still null and Path is what
+        // resolves it.)
+        var p = Path;
         try
         {
-            var dir = System.IO.Path.GetDirectoryName(_resolvedPath ?? Path);
+            var dir = System.IO.Path.GetDirectoryName(p);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
         }
@@ -185,7 +203,7 @@ public static class RuntimeLog
         {
             var header =
                 "==== BetaDeps runtime.log opened " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ====" + Environment.NewLine;
-            File.AppendAllText(_resolvedPath ?? Path, header, Encoding.UTF8);
+            File.AppendAllText(p, header, Encoding.UTF8);
         }
         catch { }
     }

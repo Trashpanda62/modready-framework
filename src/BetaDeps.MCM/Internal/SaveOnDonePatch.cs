@@ -2,16 +2,21 @@
 //
 // Options-screen lifecycle patch. Installs a Harmony postfix on
 // TaleWorlds.Library.ViewModel.ExecuteCommand that:
-//   - on "ExecuteDone"          -> flushes every MCM settings instance to disk
-//   - on "ExecuteCancelProcess" -> reloads every MCM settings instance from
+//   - on "ExecuteDone"   -> flushes every MCM settings instance to disk
+//   - on "ExecuteCancel" -> reloads every MCM settings instance from
 //     disk (discards any pending in-memory edits)
+//
+// NOTE on command names: the bottom Cancel button fires "ExecuteCancel"
+// (Options.xml CancelButtonAction). The TAB toggles fire "ExecuteCancelProcess"
+// for tab-switch cancellation -- a DIFFERENT event we deliberately ignore.
 //
 // In-memory writebacks from sliders/checkboxes update the underlying
 // BaseSettings object during the session. Done persists those edits;
 // Cancel undoes them. Both are scoped to the Options screen VM so we don't
-// trigger save/reload on unrelated ExecuteDone/ExecuteCancelProcess commands.
+// trigger save/reload on unrelated commands.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Reflection;
 
@@ -80,11 +85,31 @@ internal static class SaveOnDonePatch
                 // a different event we do NOT want to react to.
                 ReloadAll();
             }
+            else
+            {
+                // Diagnostic breadcrumb: if a future game build renames
+                // ExecuteDone/ExecuteCancel, Done/Cancel would silently stop
+                // persisting edits. Log each distinct OptionsVM command ONCE
+                // (bounded -- the screen fires only a handful) so the rename is
+                // visible in the log without spamming every command.
+                LogObservedCommandOnce(commandName);
+            }
         }
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, $"ExecuteCommandPostfix({commandName})", ex);
         }
+    }
+
+    private static readonly HashSet<string> _seenOptionsCommands = new(StringComparer.Ordinal);
+    private static void LogObservedCommandOnce(string commandName)
+    {
+        if (string.IsNullOrEmpty(commandName)) return;
+        lock (_seenOptionsCommands)
+        {
+            if (!_seenOptionsCommands.Add(commandName)) return;
+        }
+        DiagLog.Log(Tag, $"OptionsVM command observed (not Done/Cancel): '{commandName}' -- if Done/Cancel ever stop persisting, check whether the game renamed them.");
     }
 
     private static void SaveAll()

@@ -1,12 +1,17 @@
 ; ============================================================================
 ;  BetaDeps All-in-One Installer  (v2.0 goal)
-;  One download that bundles BLSE + the five BetaDeps modules so a new user is
-;  modding-ready in a single step.
+;  One download that bundles BLSE + the four BUTR dependency modules so a new
+;  user is modding-ready in a single step. (The BetaDeps framework module is NOT
+;  bundled -- this installer is the dependency stack only.)
 ;
 ;  Bundles, with permission:
 ;    - BLSE (Bannerlord Software Extender) -- MIT, (c) 2021-2022 BUTR.
-;      Its LICENSE ships in {app}\Modules\BetaDeps\licenses\.
-;    - The five BetaDeps modules (BetaDeps + the four BUTR-named dep modules).
+;      Its LICENSE ships in {app}\Modules\Bannerlord.Harmony\licenses\.
+;    - The FOUR BUTR dependency modules ONLY (Bannerlord.Harmony,
+;      Bannerlord.UIExtenderEx, Bannerlord.ButterLib, Bannerlord.MBOptionScreen).
+;      The BetaDeps framework module itself is NOT bundled (separate mod).
+;      BetaDeps.Foundation.dll still ships inside each dep's bin -- it is their
+;      shared resolve-hook shim and the four modules cannot load without it.
 ;
 ;  Build with installer\Build-Installer.ps1 (stages payload, then runs ISCC).
 ;  Requires Inno Setup 6 (ISCC.exe) and a staged BLSE copy -- see README.md.
@@ -37,7 +42,7 @@ OutputBaseFilename=BetaDeps-AllInOne-v{#AppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 ; BLSE's MIT license shown on the license page (satisfies the notice requirement
 ; up front; the file is also copied into the install).
 LicenseFile=payload\LICENSES\BLSE-LICENSE.txt
@@ -47,12 +52,17 @@ SetupLogging=yes
 Name: "desktopicon"; Description: "Create a desktop shortcut to the BLSE launcher"; GroupDescription: "Shortcuts:"
 
 [Files]
-; The five BetaDeps module folders (clean staging from dist\Modules).
+; The four BUTR dependency module folders only (clean staging from dist\Modules;
+; Build-Installer.ps1 copies only the 4 deps into payload\Modules -- the BetaDeps
+; module folder is deliberately excluded, so this wildcard never sees it).
 Source: "payload\Modules\*"; DestDir: "{app}\Modules"; Flags: recursesubdirs createallsubdirs ignoreversion
 ; BLSE binaries -> game bin (the documented BLSE install location).
 Source: "payload\BLSE\*"; DestDir: "{app}\bin\Win64_Shipping_Client"; Flags: recursesubdirs createallsubdirs ignoreversion
-; License notices (BLSE MIT, BetaDeps, third-party).
-Source: "payload\LICENSES\*"; DestDir: "{app}\Modules\BetaDeps\licenses"; Flags: recursesubdirs createallsubdirs ignoreversion
+; License notices (BLSE MIT, third-party MIT for Harmony/Cecil/MonoMod/Newtonsoft).
+; Installed under the Harmony dependency module (always present) -- the BetaDeps
+; module folder is intentionally NOT shipped by this installer, so we must NOT
+; target {app}\Modules\BetaDeps\ or it would recreate that folder on disk.
+Source: "payload\LICENSES\*"; DestDir: "{app}\Modules\Bannerlord.Harmony\licenses"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
 Name: "{autodesktop}\Bannerlord (BLSE)"; Filename: "{app}\bin\Win64_Shipping_Client\{#LauncherExe}"; WorkingDir: "{app}\bin\Win64_Shipping_Client"; Tasks: desktopicon

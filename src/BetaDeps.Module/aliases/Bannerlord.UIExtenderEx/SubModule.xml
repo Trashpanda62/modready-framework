@@ -31,7 +31,7 @@
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="Bannerlord.UIExtenderEx" />
-  <Name value="Bannerlord.UIExtenderEx (provided by BetaDeps)" />
+  <Name value="UIExtenderEx" />
   <Version value="v2.14.99.0" />
   <DefaultModule value="false" />
   <SingleplayerModule value="true" />

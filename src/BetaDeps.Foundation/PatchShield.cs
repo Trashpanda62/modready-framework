@@ -493,6 +493,12 @@ public static class PatchShield
                 var rt = mi.ReturnType;
                 if (rt != typeof(void) && rt.IsValueType)
                 {
+                    // Log LOUDLY: we are fabricating a default value-type return
+                    // because a foreign patch on this method threw and we swallowed
+                    // it -- the original body never ran. If the engine treats this
+                    // struct/bool/handle as meaningful, a later crash will surface
+                    // somewhere unrecognizable. This breadcrumb makes that traceable.
+                    DiagLog.Log(Tag, $"WARNING: synthesizing default {rt.Name} for swallowed throw in {mi.DeclaringType?.FullName}::{mi.Name} -- original body did NOT run; downstream behavior may be undefined.");
                     __result = Activator.CreateInstance(rt);
                 }
             }

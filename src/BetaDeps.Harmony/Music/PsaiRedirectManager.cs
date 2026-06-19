@@ -131,7 +131,7 @@ public static class PsaiRedirectManager
                 var target = SafeBind.Method(
                     _psaiCoreType!,
                     "TriggerMusicTheme",
-                    expectedReturnType: typeof(object),      // wildcard: matches PsaiResult
+                    expectedReturnType: SafeBind.Any,        // wildcard: matches PsaiResult (NOT void)
                     expectedParamCount: 2,
                     expectedParamTypes: new[] { typeof(int), typeof(float) });
                 if (target == null)
@@ -156,7 +156,7 @@ public static class PsaiRedirectManager
                 var menuTarget = SafeBind.Method(
                     _psaiCoreType!,
                     "MenuModeEnter",
-                    expectedReturnType: typeof(object),
+                    expectedReturnType: SafeBind.Any,        // wildcard (NOT void)
                     expectedParamCount: 2,
                     expectedParamTypes: new[] { typeof(int), typeof(float) });
                 if (menuTarget != null)
@@ -195,7 +195,12 @@ public static class PsaiRedirectManager
     /// </summary>
     private static void TryLoadRuntime()
     {
-        if (_runtimeLoaded || _config == null) return;
+        // Snapshot _config once: it's a mutable static that Pump/Install null out
+        // from other code paths on a bind failure, and the prefix runs on PSAI/
+        // engine threads (hence _enabled is volatile). Reading the field twice
+        // (guard here, deref at IsActive below) could see non-null then null.
+        var cfg = _config;
+        if (_runtimeLoaded || cfg == null) return;
         if (_loadSoundtrackMethod == null || _instanceProp == null) return;
 
         try
@@ -242,7 +247,7 @@ public static class PsaiRedirectManager
             // for a loose-file custom theme.
             bool isMenuTheme = (prevTheme == 5 || prevTheme == 10244);
             bool handled = false;
-            if (isMenuTheme && _config.IsActive(MusicContext.Menu)
+            if (isMenuTheme && cfg.IsActive(MusicContext.Menu)
                 && _menuModeEnterMethod != null && _menuModeLeaveMethod != null)
             {
                 try

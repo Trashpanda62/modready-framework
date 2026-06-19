@@ -69,18 +69,20 @@ internal static class MusicUiState
     }
 }
 
-[ViewModelMixin(
-    HandleDerived = true,
-    TargetTypeName = "TaleWorlds.MountAndBlade.ViewModelCollection.GameOptions.OptionsVM")]
+// v1.1 BYO music picker -- SHELVED for v1.0.0; see MusicOptionsPatch.cs to re-enable.
+// [ViewModelMixin(
+//     HandleDerived = true,
+//     TargetTypeName = "TaleWorlds.MountAndBlade.ViewModelCollection.GameOptions.OptionsVM")]
 internal sealed class MusicOptionsRootMixin : BaseViewModelMixin<ViewModel>
 {
     public MusicOptionsRootMixin(ViewModel vm) : base(vm) { MusicUiState.Capture(ViewModel); }
     public override void OnRefresh() => MusicUiState.Capture(ViewModel);
 }
 
-[ViewModelMixin(
-    HandleDerived = true,
-    TargetTypeName = "TaleWorlds.MountAndBlade.ViewModelCollection.GameOptions.GroupedOptionCategoryVM")]
+// v1.1 BYO music picker -- SHELVED for v1.0.0; see MusicOptionsPatch.cs to re-enable.
+// [ViewModelMixin(
+//     HandleDerived = true,
+//     TargetTypeName = "TaleWorlds.MountAndBlade.ViewModelCollection.GameOptions.GroupedOptionCategoryVM")]
 internal sealed class MusicCategoryMixin : BaseViewModelMixin<ViewModel>
 {
     private const string Tag = "MusicCategoryMixin";

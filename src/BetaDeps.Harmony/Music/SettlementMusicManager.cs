@@ -289,13 +289,16 @@ public static class SettlementMusicManager
         }
     }
 
-    // Thin reflection invokers (all guarded by ResolveReflection having run).
-    private static int GetFreeChannel() => Convert.ToInt32(_getFreeChannel!.Invoke(null, null) ?? -1);
-    private static void LoadClip(int ch, string path) => _loadClip!.Invoke(null, new object[] { ch, path });
-    private static bool IsMusicPlaying(int ch) => _isMusicPlaying!.Invoke(null, new object[] { ch }) is bool b && b;
-    private static void PlayMusic(int ch) => _playMusic!.Invoke(null, new object[] { ch });
-    private static void StopMusic(int ch) => _stopMusic!.Invoke(null, new object[] { ch });
-    private static void UnloadClip(int ch) => _unloadClip!.Invoke(null, new object[] { ch });
+    // Thin reflection invokers. ResolveReflection guarantees the required ones are
+    // non-null before Pump uses them, but that invariant lives in another method;
+    // these guard explicitly so a future caller that bypasses ResolveReflection
+    // degrades to a safe no-op/default instead of a NullReferenceException.
+    private static int GetFreeChannel() => _getFreeChannel == null ? -1 : Convert.ToInt32(_getFreeChannel.Invoke(null, null) ?? -1);
+    private static void LoadClip(int ch, string path) => _loadClip?.Invoke(null, new object[] { ch, path });
+    private static bool IsMusicPlaying(int ch) => _isMusicPlaying?.Invoke(null, new object[] { ch }) is bool b && b;
+    private static void PlayMusic(int ch) => _playMusic?.Invoke(null, new object[] { ch });
+    private static void StopMusic(int ch) => _stopMusic?.Invoke(null, new object[] { ch });
+    private static void UnloadClip(int ch) => _unloadClip?.Invoke(null, new object[] { ch });
     private static void SetVolume(int ch, float v)
     {
         try { _setVolume?.Invoke(null, new object[] { ch, v }); } catch { /* SetVolume is optional */ }

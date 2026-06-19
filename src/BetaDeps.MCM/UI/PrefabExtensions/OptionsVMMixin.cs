@@ -914,7 +914,23 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
             // persist the defaults the same way it persists any other edit.
 
             DiagLog.Log(Tag, $"ExecuteResetDefaults: reset {copied} property(ies) on {current.Id} (in-memory; persisted on Done)");
-            RebuildRowList();
+
+            // Full rebind, not a bare RebuildRowList(). Two things just went stale
+            // under the existing UI: (1) the row VMs were wrapping the pre-reset
+            // values, and (2) the preset selector still showed whatever preset the
+            // user had applied -- "I clicked reset to defaults but it stayed on
+            // preset 1" (Steve, 2026-06-15). SelectMod re-wraps the SAME in-memory
+            // instance (NO disk Load, so the in-memory reset survives -- unlike
+            // ApplyPresetLoad which intentionally reloads) in a fresh SettingsVM +
+            // row VMs that re-read the defaults, and its RebuildPresetCycle resets
+            // the selector back to "(Current settings)". Mirrors ApplyPresetLoad's
+            // known-good refresh path.
+            try { SelectMod(_currentModIndex); }
+            catch (System.Exception ex)
+            {
+                DiagLog.LogCaught(Tag, "ExecuteResetDefaults/refresh", ex);
+                RebuildRowList(); // fall back to at least repainting the rows
+            }
         }
         catch (System.Exception ex)
         {

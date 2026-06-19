@@ -122,11 +122,17 @@ public static class CollectAssemblyTypesShim
         int patchedAt = -1;
         for (int i = 0; i < list.Count - 4; i++)
         {
+            // The result-store at [i+4] was historically stloc.3, but the local
+            // slot the engine's compiler picks for the verdict can change across a
+            // game recompile -- pinning it to Stloc_3 would silently disable this
+            // whole dependency-conflict fix on a future build. The strong anchor is
+            // the catch-tail shape (ldarg.3 / ldnull / stind.ref / ldc.i4.2); accept
+            // ANY store-to-local for the 5th instruction (we leave it unchanged).
             if (list[i].opcode == OpCodes.Ldarg_3
                 && list[i + 1].opcode == OpCodes.Ldnull
                 && list[i + 2].opcode == OpCodes.Stind_Ref
                 && list[i + 3].opcode == OpCodes.Ldc_I4_2
-                && list[i + 4].opcode == OpCodes.Stloc_3)
+                && IsStoreLocal(list[i + 4].opcode))
             {
                 // Rewrite:
                 //   [i+0] ldarg.3       (unchanged -- address of out param)
@@ -153,6 +159,12 @@ public static class CollectAssemblyTypesShim
 
         return list;
     }
+
+    // True for any "store to local variable" opcode (stloc.0..3, stloc.s, stloc).
+    private static bool IsStoreLocal(OpCode op)
+        => op == OpCodes.Stloc_0 || op == OpCodes.Stloc_1
+        || op == OpCodes.Stloc_2 || op == OpCodes.Stloc_3
+        || op == OpCodes.Stloc_S || op == OpCodes.Stloc;
 
     /// <summary>
     /// Called from patched IL. Returns 0 (Success) only if the specific
