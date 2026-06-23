@@ -70,6 +70,17 @@
         <Assembly value="MonoMod.Iced.dll" />
         <Assembly value="MonoMod.ILHelpers.dll" />
         <Assembly value="MonoMod.Utils.dll" />
+        <!-- MonoMod.RuntimeDetour: 0Harmony's detour engine — the component
+             that emits the trampoline IL at the first Patch(). MUST be preloaded
+             from THIS module's platform bin like its siblings above. If it isn't,
+             the on-demand resolver can bind the net472 copy from
+             bin\Win64_Shipping_Client even inside a .NET 6 (Game Pass /
+             Microsoft Store) process, whose ILGenerator lacks the net472-only
+             MarkSequencePoint(ISymbolDocumentWriter,...) overload -> launch-time
+             MissingMethodException. Listing it here forces the correct
+             per-runtime copy (net6 on Gaming.Desktop, net472 on Win64). Steam
+             never hit this because its process is net472 either way. -->
+        <Assembly value="MonoMod.RuntimeDetour.dll" />
         <!-- BetaDeps.Harmony.dll (our shared Harmony helper layer, v0.9.0.0).
              MCMv5.dll, Bannerlord.UIExtenderEx.dll and Bannerlord.ButterLib.dll
              all carry a hard assembly reference to it. It used to resolve only
