@@ -50,6 +50,13 @@ public class SettingsVM : ViewModel
     {
         _groups.Clear();
 
+        // S3: built-in SubSystem settings page (no properties on the class itself).
+        if (Settings is MCM.Internal.SubSystemSettingsPage)
+        {
+            BuildGroupsForSubSystems();
+            return;
+        }
+
         // Fluent-builder path: settings were declared via ISettingsBuilder
         // chains (Diplomacy, ImprovedGarrisons, RTSCamera, BetterSmithing,
         // etc.). The settings object has no [SettingPropertyX]-decorated
@@ -60,24 +67,24 @@ public class SettingsVM : ViewModel
             return;
         }
 
-        // Phase 2.5 / finding M12: settings registered from a foreign MCM
-        // assembly arrive wrapped in ForeignSettingsAdapter. Reflecting over
-        // the ADAPTER finds zero [SettingProperty*] members, so the panel
-        // rendered blank while logs claimed success. Rendering a foreign
-        // instance properly needs SettingsPropertyVM to bind a non-BaseSettings
-        // owner (deferred -- rare dual-MCM-assembly case); until then the gap
-        // is REPORTED once per mod instead of silently shipping a blank page.
-        if (Settings is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter foreignAdapter)
-        {
-            BetaDeps.Foundation.CompatWarn.Once(
-                "MCM.ForeignSettings", "SettingsVM.BuildGroups",
-                foreignAdapter.Wrapped?.GetType().Assembly.GetName().Name,
-                $"'{Settings.Id}' registered via a foreign MCM assembly; its settings panel cannot be rendered yet and will appear empty");
-            return;
-        }
+        // S1: Foreign-MCM-assembly adapter — discover properties on the wrapped
+        // instance rather than the adapter shell (which has none). LiveGet /
+        // WriteBack detect ForeignSettingsAdapter on _owner and automatically
+        // use Wrapped for reflection, so passing Settings as owner is correct.
+        var reflectionType = Settings is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter fa
+            ? fa.Wrapped.GetType()
+            : Settings.GetType();
 
-        var grouped = new Dictionary<string, List<SettingsPropertyVM>>(StringComparer.Ordinal);
-        var groupOrders = new Dictionary<string, int>(StringComparer.Ordinal);
+        BuildGroupsReflection(reflectionType);
+    }
+
+    /// <summary>Core reflection-based group builder used by both the normal attribute
+    /// path and the S1 foreign-settings-adapter path.</summary>
+    private void BuildGroupsReflection(Type reflectionType)
+    {
+        var grouped      = new Dictionary<string, List<SettingsPropertyVM>>(StringComparer.Ordinal);
+        var groupOrders  = new Dictionary<string, int>(StringComparer.Ordinal);
+        var groupToggles = new Dictionary<string, SettingsPropertyVM>(StringComparer.Ordinal);
         // Tie-break groups with equal GroupOrder by FIRST-SEEN (declaration)
         // order, NOT alphabetically -- MCM preserves the order the author
         // declared groups in, so e.g. "Community & Support" stays at the bottom
@@ -85,7 +92,7 @@ public class SettingsVM : ViewModel
         var groupFirstSeen = new Dictionary<string, int>(StringComparer.Ordinal);
         int seenIndex = 0;
 
-        foreach (var p in Settings.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+        foreach (var p in reflectionType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
         {
             // GetCustomAttribute<T>(inherit:true) throws AmbiguousMatchException
             // when a property has multiple attributes of the same type. ChatAi
@@ -96,20 +103,66 @@ public class SettingsVM : ViewModel
             if (spa == null) continue;
             var groupAttr = p.GetCustomAttributes(inherit: true).OfType<SettingPropertyGroupAttribute>().FirstOrDefault();
             var groupName = TextHelper.StripLocalizationKeys(groupAttr?.GroupName ?? string.Empty);
+
+            // Ensure the group bucket exists before the IsMainToggle check so
+            // toggle-only groups (no other properties) still appear.
             if (!grouped.ContainsKey(groupName))
             {
                 grouped[groupName] = new List<SettingsPropertyVM>();
                 groupOrders[groupName] = groupAttr?.GroupOrder ?? 0;
                 groupFirstSeen[groupName] = seenIndex++;
             }
+
+            // S2: [SettingPropertyGroup(IsMainToggle=true)] marks the property
+            // that enables/disables the whole group. Pull it out of the child
+            // list and store it separately so the group VM can render it as a
+            // header toggle instead of a regular row.
+            if (groupAttr?.IsMainToggle == true && !groupToggles.ContainsKey(groupName))
+            {
+                groupToggles[groupName] = SettingsPropertyVM.Create(Settings, p, spa);
+                continue; // don't add to child list
+            }
+
             grouped[groupName].Add(SettingsPropertyVM.Create(Settings, p, spa));
         }
 
         foreach (var kv in grouped.OrderBy(kv => groupOrders[kv.Key]).ThenBy(kv => groupFirstSeen[kv.Key]))
         {
-            var gvm = new SettingsPropertyGroupVM(kv.Key, kv.Value.OrderBy(v => v.Order).ToList());
+            groupToggles.TryGetValue(kv.Key, out var toggleVm);
+            var gvm = new SettingsPropertyGroupVM(kv.Key, kv.Value.OrderBy(v => v.Order).ToList(), toggleVm);
             _groups.Add(gvm);
         }
+    }
+
+    /// <summary>S3: Build one group of bool toggles from the ButterLib subsystem roster.</summary>
+    private void BuildGroupsForSubSystems()
+    {
+        if (!BetaDeps.Foundation.SubSystemBridge.IsAvailable) return;
+
+        var all = BetaDeps.Foundation.SubSystemBridge.GetAll!();
+        if (all.Count == 0) return;
+
+        var rows = new List<SettingsPropertyVM>();
+        int order = 0;
+        foreach (var s in all)
+        {
+            var captured = s; // capture loop variable for closures
+            rows.Add(new SettingsPropertyVM(
+                owner:       Settings,
+                displayName: captured.Name,
+                hintText:    captured.Desc,
+                readFunc:    () => BetaDeps.Foundation.SubSystemBridge.GetEnabled?.Invoke(captured.Id) ?? captured.IsEnabled,
+                writeAction: v =>
+                {
+                    bool on = v is bool b && b;
+                    BetaDeps.Foundation.SubSystemBridge.SetEnabled?.Invoke(captured.Id, on);
+                    BetaDeps.Foundation.SubSystemBridge.Save?.Invoke();
+                },
+                order: order++));
+        }
+
+        if (rows.Count > 0)
+            _groups.Add(new SettingsPropertyGroupVM("Sub Systems", rows));
     }
 
     /// <summary>Reach into the fluent settings' internal builder, iterate

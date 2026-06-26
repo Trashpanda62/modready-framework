@@ -14,6 +14,10 @@ public class SettingsPropertyGroupVM : ViewModel
     private MBBindingList<SettingsPropertyVM> _properties = new();
     private bool _isExpanded = true;
 
+    // S2: optional group-level toggle (IsMainToggle = true property).
+    // When present its bool value enables/disables the entire group.
+    private readonly SettingsPropertyVM? _toggleVm;
+
     [DataSourceProperty]
     public string GroupName
     {
@@ -35,15 +39,55 @@ public class SettingsPropertyGroupVM : ViewModel
         set { _isExpanded = value; OnPropertyChangedWithValue(value, nameof(IsExpanded)); }
     }
 
-    public SettingsPropertyGroupVM(string groupName, IReadOnlyList<SettingsPropertyVM> properties)
+    // S2 ---- group toggle surface ----------------------------------------
+    /// <summary>True when a [SettingPropertyGroup(IsMainToggle=true)] property
+    /// was declared for this group; the prefab uses this to show the toggle
+    /// checkbox in the group header.</summary>
+    [DataSourceProperty]
+    public bool HasGroupToggle => _toggleVm != null;
+
+    /// <summary>Current value of the group's main toggle.</summary>
+    [DataSourceProperty]
+    public bool GroupToggleValue
+    {
+        get => _toggleVm?.BoolValue ?? true;
+        set
+        {
+            if (_toggleVm == null) return;
+            _toggleVm.BoolValue = value;
+            OnPropertyChangedWithValue(value, nameof(GroupToggleValue));
+            // Propagate enable/disable state to every child property row.
+            foreach (var p in _properties) p.IsVisible = value;
+        }
+    }
+
+    /// <summary>Flip the group toggle. Bound to the group header checkbox.</summary>
+    public void ExecuteToggleGroup() => GroupToggleValue = !GroupToggleValue;
+    // S2 ---- end group toggle surface ------------------------------------
+
+    /// <param name="toggleVm">Optional IsMainToggle property — removed from
+    /// <paramref name="properties"/> by the caller and passed separately.</param>
+    public SettingsPropertyGroupVM(string groupName, IReadOnlyList<SettingsPropertyVM> properties,
+        SettingsPropertyVM? toggleVm = null)
     {
         _groupName = groupName ?? string.Empty;
+        _toggleVm  = toggleVm;
         foreach (var p in properties) _properties.Add(p);
+        // Apply initial toggle state: if the toggle starts false, hide children.
+        if (_toggleVm != null && !_toggleVm.BoolValue)
+            foreach (var p in _properties) p.IsVisible = false;
     }
 
     public void RefreshVisibility(BaseSettings owner)
     {
-        foreach (var p in _properties) p.RefreshVisibility(owner);
+        // S2: group toggle off => force-hide all children regardless of the
+        // per-property hook; skip individual RefreshVisibility calls.
+        bool groupEnabled = _toggleVm == null || _toggleVm.BoolValue;
+        foreach (var p in _properties)
+        {
+            if (!groupEnabled) { p.IsVisible = false; continue; }
+            p.RefreshVisibility(owner);
+        }
     }
 
     /// <summary>Toggle the group's expansion state. Bound to the group header click handler.</summary>

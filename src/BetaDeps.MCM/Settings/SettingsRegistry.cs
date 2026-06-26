@@ -281,6 +281,21 @@ public static class SettingsRegistry
                 DiagLog.LogCaught(Tag, "DiscoverAll/FluentMerge", ex);
             }
 
+            // S3: If ButterLib wired the bridge, register a built-in page for subsystem toggles.
+            if (BetaDeps.Foundation.SubSystemBridge.IsAvailable)
+            {
+                const string ssId = "BetaDeps.ButterLib.SubSystems";
+                lock (_gate)
+                {
+                    if (!_byId.ContainsKey(ssId))
+                    {
+                        _byId[ssId] = new RegisteredSettings(new SubSystemSettingsPage());
+                        newlyRegistered++;
+                        DiagLog.Log(Tag, $"REGISTERED '{ssId}' (built-in subsystem settings page)");
+                    }
+                }
+            }
+
             if (!_discoverRan || newlyRegistered > 0)
                 DiagLog.Log(Tag, $"DiscoverAll: registered {newlyRegistered} new settings class(es) (total {_byId.Count})");
             _discoverRan = true;

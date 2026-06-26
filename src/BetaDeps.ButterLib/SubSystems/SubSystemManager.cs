@@ -18,6 +18,9 @@ public static class SubSystemManager
 
     private static readonly object _gate = new();
     private static readonly List<ISubSystem> _subSystems = new();
+    // S3: ids that SubSystemPersistence.Load() found saved as disabled.
+    // EnableAll() skips subsystems in this set so they never start up.
+    private static readonly HashSet<string> _deferredDisabled = new(StringComparer.Ordinal);
 
     /// <summary>All registered subsystems in registration order.</summary>
     public static IReadOnlyList<ISubSystem> All
@@ -50,11 +53,33 @@ public static class SubSystemManager
         }
     }
 
-    /// <summary>Enable every registered subsystem. Called by ButterLibSubModule.</summary>
+    /// <summary>
+    /// Mark a subsystem as deferred-disabled (or clear that mark). Called by
+    /// SubSystemPersistence.Load() before EnableAll() runs so the user's saved
+    /// toggle state is applied without racing against OnEnable().
+    /// </summary>
+    public static void SetDeferredEnabled(string id, bool enabled)
+    {
+        lock (_gate)
+        {
+            if (!enabled) _deferredDisabled.Add(id);
+            else _deferredDisabled.Remove(id);
+        }
+    }
+
+    /// <summary>Enable every registered subsystem that isn't deferred-disabled. Called by ButterLibSubModule.</summary>
     public static void EnableAll()
     {
         foreach (var s in All)
         {
+            lock (_gate)
+            {
+                if (_deferredDisabled.Contains(s.Id))
+                {
+                    DiagLog.Log(Tag, $"{s.Id} skipped (deferred-disabled by user preference)");
+                    continue;
+                }
+            }
             try { s.Enable(); }
             catch (Exception ex) { DiagLog.LogCaught(Tag, $"EnableAll/{s.Id}", ex); }
         }

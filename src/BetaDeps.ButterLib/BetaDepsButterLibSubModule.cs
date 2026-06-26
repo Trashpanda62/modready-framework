@@ -92,6 +92,33 @@ public class ButterLibSubModule : MBSubModuleBase
                 DiagLog.LogCaught(Tag, "DI bootstrap", ex);
             }
 
+            // S3: Wire the SubSystemBridge so MCM can build a Mod Config page
+            // for subsystem toggles without taking a direct reference to ButterLib.
+            try
+            {
+                SubSystemBridge.GetAll = () => SubSystemManager.All
+                    .Select(s => (s.Id, s.Name, s.Description, s.IsEnabled, s.CanBeDisabled))
+                    .ToArray();
+                SubSystemBridge.GetEnabled = id => SubSystemManager.Get(id)?.IsEnabled ?? false;
+                SubSystemBridge.SetEnabled  = (id, on) =>
+                {
+                    var s = SubSystemManager.Get(id);
+                    if (s == null) return;
+                    if (on) s.Enable(); else s.Disable();
+                };
+                SubSystemBridge.Save = SubSystemPersistence.Save;
+                DiagLog.Log(Tag, "SubSystemBridge wired");
+            }
+            catch (Exception ex)
+            {
+                DiagLog.LogCaught(Tag, "SubSystemBridge wire-up", ex);
+            }
+
+            // S3: Load saved enabled/disabled state BEFORE EnableAll so user
+            // preferences are applied on first Enable() call, not reversed after.
+            try { SubSystemPersistence.Load(); }
+            catch (Exception ex) { DiagLog.LogCaught(Tag, "SubSystemPersistence.Load", ex); }
+
             // Enable every registered subsystem. SubSystemManager is empty by
             // default; ButterLib subsystems we ship + consumer mods register
             // their own before this point via static initializers or DI.

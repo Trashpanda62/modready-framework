@@ -39,6 +39,15 @@ public class SettingsPropertyVM : ViewModel
     private readonly PropertyInfo? _property;
     private readonly SettingPropertyAttribute? _attribute;
 
+    // S3: synthetic-property delegates (subsystem toggles, etc.) — both set
+    // together and checked first in LiveGet / WriteBack so they short-circuit
+    // before any PropertyInfo / fluent lookup.
+    private readonly Func<object?>? _readFunc;
+    private readonly Action<object?>? _writeAction;
+    // Stable sort order for synthetic properties (attribute/fluent paths use
+    // the attribute's or builder's own Order value).
+    private readonly int _syntheticOrder;
+
     // Fluent-builder backing (only set when this VM was constructed from a
     // FluentGlobalSettings + FluentProperty instead of reflection+attribute).
     // When _fluentProp != null, reads/writes go through MCM.Abstractions.
@@ -57,7 +66,7 @@ public class SettingsPropertyVM : ViewModel
     private double _minValue;
     private double _maxValue = 100;
 
-    public int Order => _attribute?.Order ?? _fluentProp?.Order ?? 0;
+    public int Order => _attribute?.Order ?? _fluentProp?.Order ?? _syntheticOrder;
     public string Name => _property?.Name ?? _fluentProp?.Id ?? string.Empty;
     public string TypeKind { get; }
 
@@ -152,9 +161,13 @@ public class SettingsPropertyVM : ViewModel
 
     /// <summary>Read the current value from whichever backing store this VM
     /// uses — PropertyInfo for attribute-based settings, fluent dictionary
-    /// for FluentGlobalSettings. Returns null on any failure.</summary>
+    /// for FluentGlobalSettings, or delegate for synthetic S3 properties.
+    /// Returns null on any failure.</summary>
     private object? LiveGet()
     {
+        // S3: synthetic property (subsystem toggles, etc.)
+        if (_readFunc != null) return _readFunc();
+
         if (_fluentProp != null && _fluentOwner != null)
         {
             // The fluent dictionary stores by id; Get<object> returns the raw
@@ -163,7 +176,12 @@ public class SettingsPropertyVM : ViewModel
         }
         if (_property != null)
         {
-            return _property.GetValue(_owner);
+            // S1: foreign-settings adapter -- reflect over the wrapped instance
+            // instead of the adapter shell (which has no [SettingProperty*] members).
+            var reflTarget = _owner is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter fa
+                ? fa.Wrapped
+                : (object)_owner;
+            return _property.GetValue(reflTarget);
         }
         return null;
     }
@@ -478,6 +496,25 @@ public class SettingsPropertyVM : ViewModel
         ReadFromProperty();
     }
 
+    /// <summary>
+    /// S3: synthetic bool property backed by delegate pair instead of a PropertyInfo.
+    /// Used for the ButterLib SubSystem toggles page where each row represents an
+    /// ISubSystem rather than a C# property.
+    /// </summary>
+    internal SettingsPropertyVM(BaseSettings owner, string displayName, string hintText,
+        Func<object?> readFunc, Action<object?> writeAction, int order = 0)
+    {
+        _owner         = owner;
+        _readFunc      = readFunc;
+        _writeAction   = writeAction;
+        _syntheticOrder = order;
+        TypeKind       = "bool";
+        _displayName   = displayName;
+        _hintText      = hintText;
+        // Snapshot initial state without going through the setter (no binding attached yet).
+        _boolValue     = readFunc() is bool b && b;
+    }
+
     /// <summary>Factory that selects the right variant based on the attribute type.</summary>
     public static SettingsPropertyVM Create(BaseSettings owner, PropertyInfo property, SettingPropertyAttribute attribute)
     {
@@ -559,6 +596,14 @@ public class SettingsPropertyVM : ViewModel
 
     private void WriteBack(object value)
     {
+        // S3: synthetic property -- delegate handles the write entirely.
+        if (_writeAction != null)
+        {
+            try { _writeAction(value); }
+            catch (Exception ex) { DiagLog.LogCaught("SettingsPropertyVM", $"WriteBack(synthetic {_displayName})", ex); }
+            return;
+        }
+
         // Fluent path — write into the FluentGlobalSettings dictionary by id.
         if (_fluentProp != null && _fluentOwner != null)
         {
@@ -569,8 +614,14 @@ public class SettingsPropertyVM : ViewModel
             }
             return;
         }
-        // Reflection path. Several defensive guards before touching the property:
+
+        // Reflection path. Several defensive guards before touching the property.
         if (_property == null || !_property.CanWrite) return;
+
+        // S1: foreign-settings adapter -- reflect over the wrapped instance.
+        var reflTarget = _owner is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter fa
+            ? fa.Wrapped
+            : (object)_owner;
 
         var targetType = _property.PropertyType;
 
@@ -588,7 +639,7 @@ public class SettingsPropertyVM : ViewModel
         //    expects -- common case, fast path.
         if (value != null && targetType.IsInstanceOfType(value))
         {
-            try { _property.SetValue(_owner, value); }
+            try { _property.SetValue(reflTarget, value); }
             catch (Exception ex)
             {
                 DiagLog.LogCaught("SettingsPropertyVM", $"WriteBack({_owner.Id}.{_property.Name})", ex);
@@ -605,7 +656,7 @@ public class SettingsPropertyVM : ViewModel
         try
         {
             var coerced = value == null ? null : Convert.ChangeType(value, targetType);
-            _property.SetValue(_owner, coerced);
+            _property.SetValue(reflTarget, coerced);
         }
         catch (Exception ex)
         {
