@@ -48,7 +48,21 @@
     <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
     <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
     <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.10.99.0" />
+  
+    <DependedModuleMetadata id="Native" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="Sandbox" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="StoryMode" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
   </DependedModuleMetadatas>
+
+  <ModulesToLoadAfterThis>
+    <Module Id="Native" />
+    <Module Id="SandBoxCore" />
+    <Module Id="Sandbox" />
+    <Module Id="StoryMode" />
+    <Module Id="CustomBattle" />
+  </ModulesToLoadAfterThis>
 
   <SubModules>
     <SubModule>
