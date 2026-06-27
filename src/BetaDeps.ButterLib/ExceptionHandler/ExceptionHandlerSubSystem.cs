@@ -17,13 +17,14 @@ using BetaDeps.Foundation;
 
 namespace Bannerlord.ButterLib.ExceptionHandler;
 
-public sealed class ExceptionHandlerSubSystem
+public sealed class ExceptionHandlerSubSystem : Bannerlord.ButterLib.SubSystems.ISubSystem
 {
     private const string Tag = "ExceptionHandlerSubSystem";
 
     public static ExceptionHandlerSubSystem? Instance { get; private set; }
 
     public string Id => "ExceptionHandler";
+    public string Name => "Exception Handler";
     public string Description => "Stub: BetaDeps doesn't host the BUTR crash reporter, so Enable/Disable are no-ops.";
     public bool IsEnabled { get; private set; }
     public bool CanBeDisabled => true;

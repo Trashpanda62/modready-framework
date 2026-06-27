@@ -38,6 +38,7 @@ internal static class GeneratedPrefabGate
     private const string Tag = "GeneratedPrefabGate";
     private const string HarmonyId = "betadeps.uiextenderex.genprefabgate";
     private static int _installed;
+    private static bool _anyPrefabPatch;
 
     public static void Install()
     {
@@ -67,6 +68,26 @@ internal static class GeneratedPrefabGate
             var harmony = new HarmonyLib.Harmony(HarmonyId);
             harmony.Patch(load, prefix: new HarmonyMethod(typeof(GeneratedPrefabGate), nameof(LoadPrefix)));
             DiagLog.Log(Tag, "installed prefix on GauntletMovie.Load (forces XML path so prefab patches reach generated prefabs)");
+
+            // S4 fix: also force the engine-global generated-prefab switch so
+            // NESTED generated sub-prefabs (e.g. the clan/party screens' injected
+            // widgets) load from XML too. The Load argument alone only covers the
+            // top-level movie; nested prefabs read this global getter directly,
+            // which is the lever upstream UIExtenderEx pulls ("disable AutoGens
+            // globally"). Getter confirmed: TaleWorlds.Engine.NativeConfig
+            // .GetUIDoNotUseGeneratedPrefabs (static bool property).
+            var cfgType = ReflectionUtils.ResolveTypeByFullName("TaleWorlds.Engine.NativeConfig");
+            var cfgGetter = cfgType?.GetProperty("GetUIDoNotUseGeneratedPrefabs",
+                                BindingFlags.Public | BindingFlags.Static)?.GetGetMethod(true);
+            if (cfgGetter != null)
+            {
+                harmony.Patch(cfgGetter, postfix: new HarmonyMethod(typeof(GeneratedPrefabGate), nameof(ConfigPostfix)));
+                DiagLog.Log(Tag, "installed postfix on NativeConfig.GetUIDoNotUseGeneratedPrefabs (covers nested generated prefabs)");
+            }
+            else
+            {
+                DiagLog.Log(Tag, "NativeConfig.GetUIDoNotUseGeneratedPrefabs not found; nested generated prefabs may bypass patches");
+            }
         }
         catch (Exception ex)
         {
@@ -89,5 +110,28 @@ internal static class GeneratedPrefabGate
                 doNotUseGeneratedPrefabs = true;
         }
         catch { /* never break movie loading */ }
+    }
+
+    /// <summary>
+    /// Postfix on the engine-global NativeConfig.GetUIDoNotUseGeneratedPrefabs
+    /// getter. The Load-argument prefix only forces the TOP-LEVEL movie onto the
+    /// XML path; nested generated sub-prefabs (the clan/party screens' injected
+    /// widgets) read this global switch directly. Forcing it true whenever any
+    /// module registered a prefab patch routes those through XML too, where
+    /// WidgetPrefabHook can inject. Cached after the first true (a registered
+    /// patch never un-registers) so this hot getter stays a single bool check.
+    /// </summary>
+    public static void ConfigPostfix(ref bool __result)
+    {
+        try
+        {
+            if (__result) return;
+            if (_anyPrefabPatch || UIExtenderEngine.Enabled.Any(r => r.Prefabs.Count > 0))
+            {
+                _anyPrefabPatch = true;
+                __result = true;
+            }
+        }
+        catch { /* never break prefab loading */ }
     }
 }

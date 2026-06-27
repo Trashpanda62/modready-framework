@@ -55,6 +55,21 @@ public class ButterLibSubModule : MBSubModuleBase
                 DiagLog.LogCaught(Tag, "ExceptionHandlerSubSystem._BindEarly", ex);
             }
 
+            // S3: register the ExceptionHandler subsystem so the "Sub Systems"
+            // MCM page lists at least the canonical toggle (real BUTR ButterLib
+            // always shows Exception Handler). MUST run before the
+            // SubSystemPersistence.Load()/EnableAll() flow below so saved state
+            // applies to a non-empty roster.
+            try
+            {
+                if (ExceptionHandlerSubSystem.Instance is ISubSystem ehs)
+                    SubSystemManager.Register(ehs);
+            }
+            catch (Exception ex)
+            {
+                DiagLog.LogCaught(Tag, "SubSystemManager.Register(ExceptionHandler)", ex);
+            }
+
             // Install the default IHotKeyManagerStatic so HotKeyManager.Create /
             // CreateWithOwnCategory return a usable manager. Without this, FCL's
             // OnBeforeInitialModuleScreenSetAsRoot calls HotKeyManager.CreateWithOwnCategory(...)
