@@ -484,30 +484,58 @@ internal static class PrefabPatcher
             var moduleDir = Path.GetDirectoryName(Path.GetDirectoryName(asmDir));
             if (string.IsNullOrEmpty(moduleDir)) return false;
             var withExt = fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) ? fileName : fileName + ".xml";
+
+            bool TryAdd(string p)
+            {
+                try
+                {
+                    var doc = new XmlDocument();
+                    doc.Load(p);
+                    if (doc.DocumentElement != null) { fragments.Add(doc.DocumentElement); return true; }
+                }
+                catch { }
+                return false;
+            }
+
             var candidates = new[]
             {
-                // Upstream UIExtenderEx's standard folder for file-based prefab
-                // content -- the most common v2 layout in the wild, so it goes
-                // first (H11).
+                // Upstream UIExtenderEx's standard folder for file-based prefab content.
                 Path.Combine(moduleDir, "GUI", "PrefabExtensions", withExt),
+                // GUI\Prefabs\ is what most consumer mods actually ship (e.g. Clan
+                // Control: GUI\Prefabs\ClanControlMember.xml + ClanControlProfitLossGraph.xml).
+                // Missing this path was why [PrefabExtensionFileName] inserts silently
+                // no-op'd -- the content file resolved to nothing, so 0 patches applied
+                // and the injected widgets never appeared.
+                Path.Combine(moduleDir, "GUI", "Prefabs", withExt),
                 Path.Combine(moduleDir, "GUI", "Prefabs2", withExt),
                 Path.Combine(moduleDir, "GUI", withExt),
                 Path.Combine(moduleDir, withExt),
             };
             foreach (var path in candidates)
+                if (File.Exists(path) && TryAdd(path)) return true;
+
+            // Fallback: recursively search the module's GUI tree by file name.
+            // Consumer mods drop prefab XML in arbitrary GUI subfolders and the
+            // game's own ResourceDepot indexes GUI\ recursively, so match that
+            // instead of hard-coding every possible subfolder.
+            try
             {
-                if (File.Exists(path))
+                var guiRoot = Path.Combine(moduleDir, "GUI");
+                if (Directory.Exists(guiRoot))
                 {
-                    var doc = new XmlDocument();
-                    doc.Load(path);
-                    if (doc.DocumentElement != null)
+                    foreach (var found in Directory.EnumerateFiles(guiRoot, withExt, SearchOption.AllDirectories))
                     {
-                        fragments.Add(doc.DocumentElement);
-                        return true;
+                        if (TryAdd(found))
+                        {
+                            DiagLog.Log(Tag, $"{patchType.FullName}: resolved '{withExt}' via recursive GUI search -> {found}");
+                            return true;
+                        }
                     }
                 }
             }
-            DiagLog.Log(Tag, $"{patchType.FullName}: prefab content file '{withExt}' not found in any of {candidates.Length} candidate paths");
+            catch (Exception exRec) { DiagLog.LogCaught(Tag, $"TryLoadFromFile/recursive({withExt})", exRec); }
+
+            DiagLog.Log(Tag, $"{patchType.FullName}: prefab content file '{withExt}' not found in {candidates.Length} candidate paths or under GUI\\");
             return false;
         }
         catch (Exception ex)

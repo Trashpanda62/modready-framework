@@ -532,6 +532,11 @@ public class SettingsPropertyVM : ViewModel
             case SettingPropertyTextAttribute:
                 return new SettingsPropertyVM(owner, property, attribute, "text");
             case SettingPropertyButtonAttribute:
+                // S2 diag: log every button-typed row so we can confirm whether
+                // foreign mods (the Artem suite etc.) genuinely declare
+                // [SettingPropertyButton] or are being mis-classified (the source
+                // of the wrong "Run" fallback label).
+                DiagLog.Log("SettingsPropertyVM", $"button row: {owner.Id}.{property.Name} attr={attribute.GetType().FullName}");
                 return new SettingsPropertyVM(owner, property, attribute, "button");
         }
 
