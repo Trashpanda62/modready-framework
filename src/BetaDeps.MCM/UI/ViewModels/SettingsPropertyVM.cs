@@ -118,7 +118,12 @@ public class SettingsPropertyVM : ViewModel
             // Attribute button — read [SettingPropertyButton(Content="...")].
             if (_attribute is SettingPropertyButtonAttribute bAttr && !string.IsNullOrEmpty(bAttr.Content))
                 return MCM.Internal.TextHelper.StripLocalizationKeys(bAttr.Content);
-            return "Run";
+            // No explicit button Content: fall back to the row's display name
+            // (a meaningful label like "Reset Mod" / "Master Strikes") instead of
+            // the literal "Run". Several foreign-MCM mods (Cinematic Combat, Lively
+            // Animations, Transmog) use the one-arg [SettingPropertyButton(name)]
+            // form and leave Content unset, which previously surfaced as "Run".
+            return string.IsNullOrEmpty(_displayName) ? "Done" : _displayName;
         }
     }
 
@@ -532,11 +537,6 @@ public class SettingsPropertyVM : ViewModel
             case SettingPropertyTextAttribute:
                 return new SettingsPropertyVM(owner, property, attribute, "text");
             case SettingPropertyButtonAttribute:
-                // S2 diag: log every button-typed row so we can confirm whether
-                // foreign mods (the Artem suite etc.) genuinely declare
-                // [SettingPropertyButton] or are being mis-classified (the source
-                // of the wrong "Run" fallback label).
-                DiagLog.Log("SettingsPropertyVM", $"button row: {owner.Id}.{property.Name} attr={attribute.GetType().FullName}");
                 return new SettingsPropertyVM(owner, property, attribute, "button");
         }
 
