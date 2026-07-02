@@ -36,7 +36,7 @@
   <MultiplayerModule value="true" />
   <Official value="false" />
   <ModuleCategory value="Singleplayer" />
-  <ModuleType value="Community" />
+  <ModuleType value="OfficialOptional" />
   <Url value="" />
 
   <DependedModules />
@@ -63,50 +63,21 @@
       <DLLName value="Bannerlord.Harmony.dll" />
       <SubModuleClassType value="Bannerlord.Harmony.BannerlordHarmonySubModule" />
       <Assemblies>
-        <!-- BetaDeps.Foundation.dll FIRST so its [ModuleInitializer] is
-             primed before any Harmony reflection runs. The host SubModule
-             logs via DiagLog which lives in Foundation. -->
-        <Assembly value="BetaDeps.Foundation.dll" />
-        <!-- Andreas Pardeike's Harmony, MIT, unmodified NuGet artifact. -->
-        <Assembly value="0Harmony.dll" />
-        <!-- Harmony 2.4.x transitive dependencies. Listed so the launcher
-             preloads them in this module's AppDomain pass before any
-             dependent module (BetaDeps + every consumer mod that DependedModule
-             us) constructs. All MIT-licensed; copyright JB Evain (Cecil)
-             and 0x0ade et al (MonoMod). -->
+        <!-- Assemblies in strict DEPENDENCY order (leaf deps first). REQUIRED for
+             Game Pass / Microsoft Store (.NET 6): CoreCLR's Assembly.LoadFrom does
+             NOT auto-probe this folder for a dependency the way .NET Framework
+             (Steam/GOG) does, so the launcher's per-assembly preload fails with
+             "could not be loaded correctly due to a dependency conflict" if a
+             dependent is listed before its dependency. Do not reorder casually. -->
         <Assembly value="Mono.Cecil.dll" />
-        <!-- Mono.Cecil.Mdb/Pdb/Rocks intentionally NOT shipped. They're symbol-
-             reader / syntactic-sugar layers that Harmony's hot path doesn't
-             touch. Saves ~160 KB on the public zip; if a future consumer mod
-             needs them, re-add locally. -->
-        <Assembly value="MonoMod.Backports.dll" />
-        <Assembly value="MonoMod.Core.dll" />
-        <Assembly value="MonoMod.Iced.dll" />
         <Assembly value="MonoMod.ILHelpers.dll" />
+        <Assembly value="MonoMod.Backports.dll" />
+        <Assembly value="MonoMod.Iced.dll" />
         <Assembly value="MonoMod.Utils.dll" />
-        <!-- MonoMod.RuntimeDetour: 0Harmony's detour engine — the component
-             that emits the trampoline IL at the first Patch(). MUST be preloaded
-             from THIS module's platform bin like its siblings above. If it isn't,
-             the on-demand resolver can bind the net472 copy from
-             bin\Win64_Shipping_Client even inside a .NET 6 (Game Pass /
-             Microsoft Store) process, whose ILGenerator lacks the net472-only
-             MarkSequencePoint(ISymbolDocumentWriter,...) overload -> launch-time
-             MissingMethodException. Listing it here forces the correct
-             per-runtime copy (net6 on Gaming.Desktop, net472 on Win64). Steam
-             never hit this because its process is net472 either way. -->
+        <Assembly value="MonoMod.Core.dll" />
         <Assembly value="MonoMod.RuntimeDetour.dll" />
-        <!-- BetaDeps.Harmony.dll (our shared Harmony helper layer, v0.9.0.0).
-             MCMv5.dll, Bannerlord.UIExtenderEx.dll and Bannerlord.ButterLib.dll
-             all carry a hard assembly reference to it. It used to resolve only
-             from the BetaDeps module's bin, so any install WITHOUT the BetaDeps
-             module (ModReady, or a Workshop sub to only the dependency items)
-             left that reference dangling -> BLSE's loader returned CriticalError
-             -> "MCM Submodule could not be loaded correctly due to a dependency
-             conflict". Seeding it HERE (the first module to load, same as
-             0Harmony) puts it in the AppDomain before those three modules
-             construct, so their references resolve by simple-name binding. It
-             depends only on Foundation + 0Harmony + MonoMod.Backports, all
-             listed above, so it loads cleanly. Last so its deps are already in. -->
+        <Assembly value="0Harmony.dll" />
+        <Assembly value="BetaDeps.Foundation.dll" />
         <Assembly value="BetaDeps.Harmony.dll" />
       </Assemblies>
       <Tags />

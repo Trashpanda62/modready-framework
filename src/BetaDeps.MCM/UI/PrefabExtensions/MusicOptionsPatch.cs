@@ -37,7 +37,7 @@ namespace MCM.UI.PrefabExtensions;
 // held back as a future add-on). Re-enable by uncommenting this attribute, the two
 // [ViewModelMixin] attributes in MusicOptionsMixin.cs, and flipping EnableMusicPicker
 // in BetaDepsHarmonySubModule.cs (plus $IncludeMusicPicker in scripts\Build-Phase1.ps1).
-// [PrefabExtension("OptionsGroupedPage", "descendant::NavigatableListPanel[@Id='BaseOptions']")]
+[PrefabExtension("OptionsGroupedPage", "descendant::NavigatableListPanel[@Id='BaseOptions']")]
 internal sealed class MusicOptionsPatch : PrefabExtensionInsertPatch
 {
     // Insert as the sibling immediately AFTER BaseOptions (inside the page's

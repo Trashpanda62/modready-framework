@@ -38,7 +38,7 @@
   <MultiplayerModule value="true" />
   <Official value="false" />
   <ModuleCategory value="Singleplayer" />
-  <ModuleType value="Community" />
+  <ModuleType value="OfficialOptional" />
   <Url value="" />
 
   <DependedModules>

@@ -41,7 +41,7 @@ public class BetaDepsHarmonySubModule : MBSubModuleBase
     // back as a future add-on. Flip this flag to true AND uncomment the
     // [PrefabExtension]/[ViewModelMixin] attributes in
     // src/BetaDeps.MCM/UI/PrefabExtensions/MusicOptions{Patch,Mixin}.cs to re-enable.
-    private static readonly bool EnableMusicPicker = false;
+    private static readonly bool EnableMusicPicker = true;
     private static MusicConfig? _musicConfig;
 
     // [ThreadStatic] guard so a recursive failure inside our own log writer

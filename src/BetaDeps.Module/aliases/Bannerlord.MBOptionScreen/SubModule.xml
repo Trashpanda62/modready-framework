@@ -35,7 +35,7 @@
   <MultiplayerModule value="true" />
   <Official value="false" />
   <ModuleCategory value="Singleplayer" />
-  <ModuleType value="Community" />
+  <ModuleType value="OfficialOptional" />
   <Url value="" />
 
   <DependedModules>
@@ -70,14 +70,15 @@
       <DLLName value="MCMv5.dll" />
       <SubModuleClassType value="MCM.MCMSubModule" />
       <Assemblies>
-        <!-- Foundation FIRST so [ModuleInitializer] resolve hook is primed
-             before any MCM type JIT'd. -->
+        <!-- Assemblies in strict DEPENDENCY order (leaf deps first). REQUIRED for
+             Game Pass / Microsoft Store (.NET 6): CoreCLR's Assembly.LoadFrom does
+             NOT auto-probe this folder for a dependency the way .NET Framework
+             (Steam/GOG) does, so the launcher's per-assembly preload fails with
+             "could not be loaded correctly due to a dependency conflict" if a
+             dependent is listed before its dependency. Do not reorder casually. -->
         <Assembly value="BetaDeps.Foundation.dll" />
-        <Assembly value="MCMv5.dll" />
-        <!-- Newtonsoft.Json: SettingsStorage uses this for JSON round-trip
-             of every registered settings instance. Must be in the AppDomain
-             before MCMSubModule.OnSubModuleLoad fires. -->
         <Assembly value="Newtonsoft.Json.dll" />
+        <Assembly value="MCMv5.dll" />
       </Assemblies>
       <Tags />
     </SubModule>

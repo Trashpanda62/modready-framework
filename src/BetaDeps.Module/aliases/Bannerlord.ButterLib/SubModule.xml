@@ -33,7 +33,7 @@
   <MultiplayerModule value="true" />
   <Official value="false" />
   <ModuleCategory value="Singleplayer" />
-  <ModuleType value="Community" />
+  <ModuleType value="OfficialOptional" />
   <Url value="" />
 
   <DependedModules>
@@ -66,28 +66,22 @@
       <DLLName value="Bannerlord.ButterLib.dll" />
       <SubModuleClassType value="Bannerlord.ButterLib.ButterLibSubModule" />
       <Assemblies>
-        <!-- BetaDeps.Foundation FIRST so its [ModuleInitializer] resolve hook
-             is primed before any ButterLib type JIT'd. -->
+        <!-- Assemblies in strict DEPENDENCY order (leaf deps first). REQUIRED for
+             Game Pass / Microsoft Store (.NET 6): CoreCLR's Assembly.LoadFrom does
+             NOT auto-probe this folder for a dependency the way .NET Framework
+             (Steam/GOG) does, so the launcher's per-assembly preload fails with
+             "could not be loaded correctly due to a dependency conflict" if a
+             dependent is listed before its dependency. Do not reorder casually. -->
+        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
+        <Assembly value="Serilog.dll" />
+        <Assembly value="Microsoft.Extensions.Primitives.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.Options.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.dll" />
         <Assembly value="BetaDeps.Foundation.dll" />
         <Assembly value="Bannerlord.ButterLib.dll" />
-        <!-- DI runtime stack ButterLibSubModule.OnSubModuleLoad needs available
-             in the AppDomain by the time it builds the container. All MIT-
-             licensed Microsoft Foundation Libraries. -->
-        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
-        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
-        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
-        <Assembly value="Microsoft.Extensions.Logging.dll" />
-        <Assembly value="Microsoft.Extensions.Options.dll" />
-        <Assembly value="Microsoft.Extensions.Primitives.dll" />
-        <!-- System.Runtime.CompilerServices.Unsafe ships in BCL via type
-             forwarders but listing explicitly keeps the launcher's preload
-             deterministic on edge .NET 4.7.2 patch levels. -->
-        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
-        <!-- Serilog: ship our v2.10.0 so consumer mods compiled against
-             arbitrary Serilog versions resolve to our copy via
-             AssemblyVersionShim, matching the Action<Serilog.LoggerConfiguration>
-             parameter type in our AddSerilogLoggerProvider overloads. -->
-        <Assembly value="Serilog.dll" />
       </Assemblies>
       <Tags />
     </SubModule>
