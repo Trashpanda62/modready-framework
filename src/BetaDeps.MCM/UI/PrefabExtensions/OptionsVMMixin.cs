@@ -727,6 +727,17 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                             _presentation.Add((groupName, null));
                             lastGroup = groupName;
                         }
+                        // A [SettingPropertyGroup(IsMainToggle=true)] property is pulled
+                        // out of SettingProperties into the group's toggle slot. The live
+                        // flat-row UI has no header-toggle prefab (that lives in the unused
+                        // ModOptionsVM), so render the master toggle as the group's first
+                        // row -- otherwise it has no row anywhere and the user can't turn
+                        // the feature back on once it's off.
+                        if (g.GroupToggleProperty is { } groupToggle)
+                        {
+                            _currentFlatProps.Add(groupToggle);
+                            _presentation.Add((string.Empty, groupToggle));
+                        }
                         foreach (var p in g.SettingProperties)
                         {
                             _currentFlatProps.Add(p);
@@ -752,6 +763,8 @@ internal sealed partial class OptionsVMMixin : BaseViewModelMixin<ViewModel>
                         var gn = MCM.Internal.TextHelper.StripLocalizationKeys(g.GroupName ?? string.Empty);
                         if (!string.IsNullOrEmpty(gn) && !string.Equals(gn, lastG, System.StringComparison.Ordinal))
                         { _presentation.Add((gn, null)); lastG = gn; }
+                        if (g.GroupToggleProperty is { } gToggle)
+                        { _currentFlatProps.Add(gToggle); _presentation.Add((string.Empty, gToggle)); }
                         foreach (var p in g.SettingProperties) { _currentFlatProps.Add(p); _presentation.Add((string.Empty, p)); }
                     }
                 }

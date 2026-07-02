@@ -249,6 +249,19 @@ public static class SubModuleConstructionGuard
     ///      cascading disable could starve the MCM tab of supporting state,
     ///      and the recovery toggle lives ON the missing tab. Now: we hard-
     ///      refuse to disable ourselves under any circumstances.
+    ///   3. (B11 fix) Any modId the user has CURRENTLY re-enabled/selected in
+    ///      LauncherData.xml is NEVER honored as a block target either. The
+    ///      log is append-only and nothing rewrites/clears an entry when the
+    ///      user re-enables a mod in BLSE LauncherEx -- that's the documented
+    ///      "standard reversal path" (see IncompatibleModDetector). A
+    ///      launcher-disabled mod is never constructed by the engine anyway,
+    ///      so the disabled-log's only real cross-session effect is on
+    ///      RE-ENABLED mods: without this check, LoadSubModulePrefix would
+    ///      keep silently skipping construction of a mod the user just asked
+    ///      the launcher to load, for up to the full 7-day TTL. Checking
+    ///      current launcher state lets a re-enable take effect immediately
+    ///      while still honoring the TTL for mods that are genuinely still
+    ///      disabled.
     /// </summary>
     private static readonly TimeSpan DisableLogTtl = TimeSpan.FromDays(7);
 
@@ -262,8 +275,16 @@ public static class SubModuleConstructionGuard
             var path = Path.Combine(modulesRoot!, "BetaDeps", "betadeps-disabled-mods.log");
             if (!File.Exists(path)) return;
 
+            // B11: current launcher-enabled set, so we can skip re-enabled
+            // mods below. Fail-open (empty set) if LauncherData.xml is
+            // missing/unparseable -- GetEnabledModsFromLauncherData already
+            // handles that, and an empty set here just means this specific
+            // skip doesn't fire, falling back to prior (TTL-only) behavior.
+            var currentlyEnabled = IncompatibleModDetector.GetEnabledModsFromLauncherData();
+
             int forgivenAge = 0;
             int forgivenOwn = 0;
+            int forgivenReEnabled = 0;
             int kept = 0;
 
             foreach (var rawLine in File.ReadAllLines(path))
@@ -313,11 +334,22 @@ public static class SubModuleConstructionGuard
                     continue;
                 }
 
+                // B11: the user has re-enabled this mod in the launcher since
+                // the log entry was written -- that's the standard reversal
+                // path (see IncompatibleModDetector), so don't let a stale
+                // log line keep blocking construction. Skip it here; a fresh
+                // crash on this launch would append a new log entry anyway.
+                if (currentlyEnabled.Contains(modId))
+                {
+                    forgivenReEnabled++;
+                    continue;
+                }
+
                 _disabledModuleIds.Add(modId);
                 kept++;
             }
 
-            DiagLog.Log(Tag, $"LoadDisabledList: {kept} active block(s); forgiven {forgivenAge} aged-out + {forgivenOwn} self-owned.");
+            DiagLog.Log(Tag, $"LoadDisabledList: {kept} active block(s); forgiven {forgivenAge} aged-out + {forgivenOwn} self-owned + {forgivenReEnabled} re-enabled-in-launcher.");
         }
         catch (Exception ex)
         {

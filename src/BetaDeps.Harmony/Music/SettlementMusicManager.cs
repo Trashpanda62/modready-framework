@@ -231,6 +231,9 @@ public static class SettlementMusicManager
                 NoteStartFailure(ctx);
                 return;
             }
+            // Silence the PSAI campaign/menu theme so it doesn't play UNDER the settlement
+            // track (the "you hear both" overlap bug).
+            PsaiRedirectManager.SetSettlementSuspended(true);
             DiagLog.Log(Tag, $"entered {ctx}; playing BYO music on Engine.Music channel {ch}.");
         }
         catch (Exception ex) { DiagLog.LogCaught(Tag, $"AcquireAndPlay({ctx})", ex); }
@@ -272,6 +275,9 @@ public static class SettlementMusicManager
     {
         try
         {
+            // Restore PSAI's volume (undo the settlement mute) before we let go of the
+            // channel, so the campaign/menu theme comes back at its previous level.
+            PsaiRedirectManager.SetSettlementSuspended(false);
             if (_channel >= 0)
             {
                 StopMusic(_channel);

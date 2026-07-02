@@ -53,16 +53,51 @@ public static class ModuleInfoHelper
     public static IEnumerable<ModuleInfo> GetLoadedModules()
     {
         var list = new List<ModuleInfo>();
+
+        // Plan A: TaleWorlds.ModuleManager.ModuleHelper.GetModules(...) (newer game).
+        // BUG FIX (B12): on the current game the only overload is the static
+        // `GetModules(Func<ModuleInfoExtended, bool>)` predicate form -- there is
+        // no parameterless overload. AccessTools2.Method(helperType, "GetModules")
+        // with no parameter types still resolves that 1-param MethodInfo (it's the
+        // sole match), so the old code's `m.Invoke(null, null)` threw
+        // TargetParameterCountException. Worse, Plan B lived in the SAME try block,
+        // so that exception jumped straight to the catch and Plan B never ran --
+        // GetLoadedModules() always returned empty. Fix: build an all-true
+        // predicate delegate matching the resolved method's actual parameter type
+        // via reflection (so this keeps working even if the delegate's generic
+        // argument changes across game versions), and give Plan A its own
+        // try/catch so a Plan A failure still falls through to Plan B.
         try
         {
-            // Plan A: TaleWorlds.ModuleManager.ModuleHelper.GetModules() (newer game)
             var helperType = AccessTools2.TypeByName("TaleWorlds.ModuleManager.ModuleHelper");
             if (helperType != null)
             {
                 var m = AccessTools2.Method(helperType, "GetModules");
                 if (m != null)
                 {
-                    if (m.Invoke(null, null) is System.Collections.IEnumerable seq)
+                    var parameters = m.GetParameters();
+                    object?[]? invokeArgs = null;
+                    if (parameters.Length == 0)
+                    {
+                        invokeArgs = null;
+                    }
+                    else if (parameters.Length == 1 && typeof(Delegate).IsAssignableFrom(parameters[0].ParameterType))
+                    {
+                        var predicate = BuildAllTruePredicate(parameters[0].ParameterType);
+                        if (predicate == null)
+                        {
+                            throw new InvalidOperationException(
+                                $"GetModules predicate parameter type {parameters[0].ParameterType} is not a supported Func<T, bool> shape.");
+                        }
+                        invokeArgs = new object?[] { predicate };
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"GetModules has an unexpected signature ({parameters.Length} params).");
+                    }
+
+                    if (m.Invoke(null, invokeArgs) is System.Collections.IEnumerable seq)
                     {
                         foreach (var moduleObj in seq)
                         {
@@ -73,8 +108,16 @@ public static class ModuleInfoHelper
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "GetLoadedModules:PlanA", ex);
+        }
 
-            // Plan B: TaleWorlds.MountAndBlade.Module.CurrentModule + ModuleInfos
+        // Plan B: TaleWorlds.MountAndBlade.Module.CurrentModule + ModuleInfos.
+        // Own try/catch so it still runs even when Plan A throws above.
+        try
+        {
             var moduleType = AccessTools2.TypeByName("TaleWorlds.MountAndBlade.Module");
             if (moduleType != null)
             {
@@ -96,7 +139,7 @@ public static class ModuleInfoHelper
         }
         catch (Exception ex)
         {
-            DiagLog.LogCaught(Tag, "GetLoadedModules", ex);
+            DiagLog.LogCaught(Tag, "GetLoadedModules:PlanB", ex);
         }
         return list;
     }
@@ -132,6 +175,32 @@ public static class ModuleInfoHelper
         }
         return null;
     }
+
+    /// <summary>
+    /// Builds an all-true predicate delegate matching <paramref name="delegateType"/>,
+    /// e.g. `Func&lt;ModuleInfoExtended, bool&gt;`. Used to satisfy
+    /// ModuleHelper.GetModules(Func&lt;T, bool&gt;) via reflection without hard-coding T
+    /// (see B12 fix note in GetLoadedModules above). Returns null if delegateType
+    /// isn't a one-arg-returning-bool delegate shape.
+    /// </summary>
+    private static Delegate? BuildAllTruePredicate(Type delegateType)
+    {
+        try
+        {
+            var invoke = delegateType.GetMethod("Invoke");
+            if (invoke == null || invoke.ReturnType != typeof(bool)) return null;
+            var invokeParams = invoke.GetParameters();
+            if (invokeParams.Length != 1) return null;
+
+            var trueFuncMethod = typeof(ModuleInfoHelper)
+                .GetMethod(nameof(AlwaysTrue), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(invokeParams[0].ParameterType);
+            return Delegate.CreateDelegate(delegateType, trueFuncMethod);
+        }
+        catch { return null; }
+    }
+
+    private static bool AlwaysTrue<T>(T _) => true;
 
     private static ModuleInfo? ExtractModuleInfo(object moduleObj)
     {

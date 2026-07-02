@@ -63,6 +63,13 @@ public class SettingsPropertyGroupVM : ViewModel
 
     /// <summary>Flip the group toggle. Bound to the group header checkbox.</summary>
     public void ExecuteToggleGroup() => GroupToggleValue = !GroupToggleValue;
+
+    /// <summary>The IsMainToggle property VM, or null if this group has none.
+    /// The header-toggle bindings above are only wired in the (unused) ModOptionsVM
+    /// prefab; the LIVE Mod Config tab (OptionsVMMixin) flattens groups into a flat
+    /// row list and needs this so the master enable/disable setting still renders as
+    /// a row instead of vanishing from the UI entirely.</summary>
+    public SettingsPropertyVM? GroupToggleProperty => _toggleVm;
     // S2 ---- end group toggle surface ------------------------------------
 
     /// <param name="toggleVm">Optional IsMainToggle property — removed from

@@ -544,54 +544,70 @@ internal static class McmSelfTest
             .ToList();
         if (rows.Count == 0) return true; // nothing to drive (e.g. button-only mod)
 
-        var originals = new Dictionary<string, object?>(StringComparer.Ordinal);
-        var expected  = new Dictionary<string, object?>(StringComparer.Ordinal);
+        // B15 fix: keyed by SettingsPropertyVM.Name originally, but the
+        // built-in SubSystemSettingsPage builds every row via the synthetic
+        // delegate ctor, where Name => _property?.Name ?? _fluentProp?.Id ??
+        // string.Empty resolves to "" for ALL rows (no PropertyInfo/FluentProperty
+        // backs a subsystem toggle). That collapsed originals/expected to a single
+        // ""-keyed entry, so the restore pass below only ever restored ONE
+        // subsystem (to the LAST row's original value) while every other flipped
+        // subsystem stayed mutated and got persisted to subsystems.json via
+        // SubSystemBridge.SetEnabled/Save -- surviving a restart.
+        // Fix: key by the row's POSITION in `rows` instead of Name. `rows` and
+        // `rows2` below are both built by the identical deterministic
+        // enumeration (SettingPropertyGroups -> SelectMany -> Where) over the
+        // same reloaded instance, so index i always refers to the same
+        // logical row across the mutate pass and the verify/restore pass --
+        // unique and stable even when Name is empty for every row.
+        var originals = new Dictionary<int, object?>();
+        var expected  = new Dictionary<int, object?>();
 
-        foreach (var p in rows)
+        for (int i = 0; i < rows.Count; i++)
         {
+            var p = rows[i];
             try
             {
                 switch (p.TypeKind)
                 {
                     case "bool":
-                        originals[p.Name] = p.BoolValue;
+                        originals[i] = p.BoolValue;
                         p.BoolValue = !p.BoolValue;
-                        expected[p.Name] = p.BoolValue;
+                        expected[i] = p.BoolValue;
                         break;
                     case "int":
                     {
-                        originals[p.Name] = p.IntValue;
+                        originals[i] = p.IntValue;
                         int min = (int)Math.Round(p.MinValue), max = (int)Math.Round(p.MaxValue);
                         int cur = p.IntValue;
                         int next = cur < max ? cur + 1 : (cur > min ? cur - 1 : cur);
                         p.IntValue = next;
-                        expected[p.Name] = p.IntValue; // re-read: the setter may clamp
+                        expected[i] = p.IntValue; // re-read: the setter may clamp
                         break;
                     }
                     case "float":
                     {
-                        originals[p.Name] = p.FloatValue;
+                        originals[i] = p.FloatValue;
                         float min = (float)p.MinValue, max = (float)p.MaxValue;
                         float cur = p.FloatValue;
                         float step = (max > min) ? (max - min) * 0.1f : 1f;
                         float next = (cur + step <= max) ? cur + step : (cur - step >= min ? cur - step : cur);
                         p.FloatValue = next;
-                        expected[p.Name] = p.FloatValue;
+                        expected[i] = p.FloatValue;
                         break;
                     }
                     case "text":
-                        originals[p.Name] = p.TextValue;
+                        originals[i] = p.TextValue;
                         p.TextValue = (p.TextValue ?? string.Empty) + "_uitest";
-                        expected[p.Name] = p.TextValue;
+                        expected[i] = p.TextValue;
                         break;
                     case "dropdown":
-                        originals[p.Name] = p.DropdownDisplayText;
+                        originals[i] = p.DropdownDisplayText;
                         p.CycleDropdownNext();
-                        expected[p.Name] = p.DropdownDisplayText;
+                        expected[i] = p.DropdownDisplayText;
                         break;
                 }
             }
-            catch (Exception ex) { DiagLog.LogCaught(Tag, $"UiLayer/mutate({entry.Id}.{p.Name})", ex); }
+            catch (Exception ex) { DiagLog.LogCaught(Tag, $"UiLayer/mutate({entry.Id}.{p.Name}[{i}])", ex); }
         }
 
         bool ok = true;
@@ -600,15 +616,20 @@ internal static class McmSelfTest
             SettingsStorage.Save(instance, entry.Id);   // WriteBack already updated the backing store
             SettingsStorage.Load(instance, entry.Id);
             var vm2 = new SettingsVM(instance);
+            // Index-keyed like `rows` above (B15 fix) -- same deterministic
+            // enumeration over the same reloaded instance, so position i in
+            // rows2 is the same logical row as position i in rows, even when
+            // Name is empty (synthetic subsystem rows) or when multiple rows
+            // legitimately share a Name.
             var rows2 = vm2.SettingPropertyGroups
                 .SelectMany(g => g.SettingProperties)
                 .Where(p => p.TypeKind != "button")
-                .GroupBy(p => p.Name, StringComparer.Ordinal)
-                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+                .ToList();
 
             foreach (var kv in expected)
             {
-                if (!rows2.TryGetValue(kv.Key, out var p2)) continue;
+                if (kv.Key >= rows2.Count) continue;
+                var p2 = rows2[kv.Key];
                 object? actual = p2.TypeKind switch
                 {
                     "bool"     => p2.BoolValue,
@@ -621,14 +642,15 @@ internal static class McmSelfTest
                 if (!UiValueEqual(p2.TypeKind, actual, kv.Value))
                 {
                     ok = false;
-                    DiagLog.Log(Tag, $"UI-layer fail on {entry.Id}.{kv.Key}: expected {Repr(kv.Value)}, got {Repr(actual)}");
+                    DiagLog.Log(Tag, $"UI-layer fail on {entry.Id}.{p2.Name}[{kv.Key}]: expected {Repr(kv.Value)}, got {Repr(actual)}");
                 }
             }
 
             // Restore originals through the VM path (covers fluent too).
-            foreach (var p in rows2.Values)
+            for (int i = 0; i < rows2.Count; i++)
             {
-                if (!originals.TryGetValue(p.Name, out var orig)) continue;
+                if (!originals.TryGetValue(i, out var orig)) continue;
+                var p = rows2[i];
                 try
                 {
                     switch (p.TypeKind)
@@ -640,7 +662,7 @@ internal static class McmSelfTest
                         case "dropdown":
                             // best-effort: cycle until the display text matches the
                             // original (bounded so a missing match can't spin forever).
-                            for (int i = 0; i < 64 && !string.Equals(p.DropdownDisplayText, orig as string, StringComparison.Ordinal); i++)
+                            for (int c = 0; c < 64 && !string.Equals(p.DropdownDisplayText, orig as string, StringComparison.Ordinal); c++)
                                 p.CycleDropdownNext();
                             break;
                     }

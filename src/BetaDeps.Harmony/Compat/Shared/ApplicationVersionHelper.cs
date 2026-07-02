@@ -20,23 +20,50 @@ public static class ApplicationVersionHelper
     /// <summary>
     /// Returns the running game's ApplicationVersion, boxed as object so
     /// callers don't take a compile-time dep on TaleWorlds.Library.
-    /// Returns null if the game's ModuleHelper isn't reachable.
+    /// Returns null if no probe below resolves.
     /// </summary>
+    /// <remarks>
+    /// BUG FIX (B19): the old Plan A/B here probed for a static
+    /// "GameVersion" method on TaleWorlds.ModuleManager.ModuleHelper and on
+    /// a TaleWorlds.ModuleManager.ApplicationVersionHelper type. Neither
+    /// exists on the current game -- ModuleHelper has no GameVersion member
+    /// (confirmed against every decompiled call site: GetModules,
+    /// GetActiveModules, GetModuleFullPath, GetXmlPath, IsModuleActive,
+    /// etc., never GameVersion), and ApplicationVersionHelper doesn't exist
+    /// in TaleWorlds.ModuleManager at all. Both probes always missed, so
+    /// this unconditionally returned null. The real surface (also what
+    /// TaleWorlds.Core.CurrentVersion uses internally, and what
+    /// BetaDeps.Foundation.VersionProbe already relies on as its Plan A) is
+    /// TaleWorlds.Library.ApplicationVersion.FromParametersFile().
+    /// </remarks>
     public static object? GameVersion()
     {
         try
         {
-            var moduleHelperType = AccessTools2.TypeByName("TaleWorlds.ModuleManager.ModuleHelper");
-            if (moduleHelperType != null)
+            // Plan A: TaleWorlds.Library.ApplicationVersion.FromParametersFile()
+            // -- the real, decomp-verified way the engine itself resolves the
+            // running game's version.
+            var appVerType = AccessTools2.TypeByName("TaleWorlds.Library.ApplicationVersion");
+            if (appVerType != null)
             {
-                var m = AccessTools2.Method(moduleHelperType, "GameVersion");
+                var m = AccessTools2.Method(appVerType, "FromParametersFile", Array.Empty<Type>());
                 if (m != null) return m.Invoke(null, null);
             }
-            var versionHelperType = AccessTools2.TypeByName("TaleWorlds.ModuleManager.ApplicationVersionHelper");
-            if (versionHelperType != null)
+
+            // Plan B: TaleWorlds.MountAndBlade.Module.CurrentModule.Version,
+            // in case FromParametersFile isn't reachable this early.
+            var moduleType = AccessTools2.TypeByName("TaleWorlds.MountAndBlade.Module");
+            if (moduleType != null)
             {
-                var m = AccessTools2.Method(versionHelperType, "GameVersion");
-                if (m != null) return m.Invoke(null, null);
+                var currentProp = AccessTools2.Property(moduleType, "CurrentModule");
+                var current = currentProp?.GetValue(null);
+                if (current != null)
+                {
+                    var verProp = AccessTools2.Property(current.GetType(), "Version")
+                               ?? AccessTools2.Property(current.GetType(), "ModuleVersion");
+                    var v = verProp?.GetValue(current);
+                    if (v != null) return v;
+                }
             }
         }
         catch (Exception ex)

@@ -39,6 +39,14 @@ public sealed class SoundtrackGenResult
     public int ThemeCount { get; set; }
     public int SegmentCount { get; set; }
     public string OutputPath { get; set; } = "";
+    /// <summary>Effective PSAI theme ids (CustomThemeId(), i.e. 9000N) that were
+    /// ACTUALLY emitted into soundtrack.xml -- one per context that had at least one
+    /// successfully-staged .ogg. The redirect must gate on THIS set, not on
+    /// MusicConfig.IsActive: a context can be active yet have no emitted theme (only
+    /// .wav tracks, or a staging failure), in which case rewriting its vanilla id to a
+    /// never-generated 9000N id makes PSAI return unknown_theme and the context goes
+    /// permanently silent instead of falling back to vanilla.</summary>
+    public List<int> EmittedThemeIds { get; set; } = new();
 }
 
 public static class SoundtrackXmlGenerator
@@ -69,6 +77,7 @@ public static class SoundtrackXmlGenerator
             int groupId = GroupIdBase;
             int segId = SegmentIdBase;
             int themeCount = 0, segCount = 0;
+            var emittedThemeIds = new List<int>();
 
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
@@ -122,6 +131,7 @@ public static class SoundtrackXmlGenerator
                 AppendTheme(sb, ctx, segmentsXml.ToString());
                 themeCount++;
                 segCount += ctxSegments;
+                emittedThemeIds.Add(ctx.CustomThemeId());
                 DiagLog.Log(Tag, $"  theme {ctx.CustomThemeId()} ({ctx}): {ctxSegments} segment(s)");
             }
 
@@ -143,6 +153,7 @@ public static class SoundtrackXmlGenerator
                 ThemeCount = themeCount,
                 SegmentCount = segCount,
                 OutputPath = outPath,
+                EmittedThemeIds = emittedThemeIds,
             };
         }
         catch (Exception ex)

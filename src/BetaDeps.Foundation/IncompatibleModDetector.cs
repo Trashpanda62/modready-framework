@@ -711,6 +711,19 @@ public static class IncompatibleModDetector
                     continue;
                 }
 
+                // Content-only mods (pure XML / asset packs -- very common in Bannerlord)
+                // never load an assembly, so they can NEVER appear in the AppDomain-derived
+                // `loaded` set. Flagging them as "submodule failed to construct" is a false
+                // positive that lands in incompatible-mods.log (telling the user to disable an
+                // innocent pack) and in Report-a-Bug issue bodies. Mirror the suspect scan's
+                // FolderHasDll skip: only a mod that ships a DLL can meaningfully fail to load.
+                // (Guarded on a resolved modulesRoot so `folder` is a real absolute path.)
+                if (!string.IsNullOrEmpty(modulesRoot) && !FolderHasDll(folder))
+                {
+                    DiagLog.Log(Tag, $"  [SKIP] {modId} -- content-only mod (no DLL); not a load failure");
+                    continue;
+                }
+
                 var reason = DiagnoseReason(folder);
 
                 findings.Add(new IncompatibleModFinding

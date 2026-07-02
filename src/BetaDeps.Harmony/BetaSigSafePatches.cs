@@ -83,11 +83,16 @@ internal static class BetaSigSafePatches
             return false;
         }
 
+        // Signature on the current target (verified against decomp + installed 1.4.6):
+        //   public void TickAgentsAndTeamsImp(float dt, bool tickPaused)  -- TWO params.
+        // The old expectedParamCount:1 never matched, so SafeBind logged "signature
+        // drift" and this flagship CTD finalizer was silently never applied.
         var target = SafeBind.Method(
             missionType,
             "TickAgentsAndTeamsImp",
             expectedReturnType: typeof(void),
-            expectedParamCount: 1);
+            expectedParamCount: 2,
+            expectedParamTypes: new[] { typeof(float), typeof(bool) });
         if (target == null) return false;
 
         var finalizer = new HarmonyMethod(typeof(BetaSigSafePatches), nameof(SwallowEngineException));

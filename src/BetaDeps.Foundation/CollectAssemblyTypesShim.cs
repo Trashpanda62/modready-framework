@@ -29,8 +29,9 @@
 //        class itself is broken would just crash AddSubModule's
 //        constructor invoke and surface as an unhandled exception.
 //     3. If the SubModule type loaded cleanly, populates the types
-//        dictionary with all MBSubModuleBase-derived types from the
-//        partial load and returns Success.
+//        dictionary with the ManagedObject/DotNetObject-derived types from
+//        the partial load (matching the engine's own filter/key -- see the
+//        B10 fix note on PopulateAndValidate below) and returns Success.
 //
 //   Result: mods like Character Development Editor (SubModule class is
 //   fine, only OTHER types reference missing API) load normally.
@@ -58,6 +59,16 @@ public static class CollectAssemblyTypesShim
     private static int _installed;
 
     private static Type? _mbSubModuleBaseType;
+    // B10 fix: the dict this shim builds must mirror what the engine's own
+    // Module.CollectModuleAssemblyTypes loop puts in `types` (see decomp
+    // TaleWorlds.MountAndBlade.decompiled.cs ~line 99933-99941), which keys
+    // ManagedObject/DotNetObject-derived types by simple Name -- NOT
+    // MBSubModuleBase types keyed by FullName. That dict is handed to
+    // Managed.AddTypes for native DotNetObject script-type resolution by
+    // simple name; AddSubModule never consults it (it resolves the
+    // SubModule class via subModuleAssembly.GetType() instead).
+    private static Type? _managedObjectType;
+    private static Type? _dotNetObjectType;
 
     public static void Install()
     {
@@ -78,6 +89,18 @@ public static class CollectAssemblyTypesShim
                 DiagLog.Log(Tag, "TaleWorlds.MountAndBlade.MBSubModuleBase type not found; patch not installed.");
                 return;
             }
+
+            // B10: resolve the two types the engine actually filters on for the
+            // types dict (ManagedObject / DotNetObject). Not fatal if missing --
+            // PopulateAndValidate guards against null and just skips that filter,
+            // matching engine behavior of an empty/partial dict rather than
+            // refusing to install the whole patch over it.
+            _managedObjectType = AccessTools.TypeByName("TaleWorlds.ObjectSystem.ManagedObject");
+            _dotNetObjectType = AccessTools.TypeByName("TaleWorlds.DotNet.DotNetObject");
+            if (_managedObjectType == null)
+                DiagLog.Log(Tag, "TaleWorlds.ObjectSystem.ManagedObject type not found; types dict will skip ManagedObject filter.");
+            if (_dotNetObjectType == null)
+                DiagLog.Log(Tag, "TaleWorlds.DotNet.DotNetObject type not found; types dict will skip DotNetObject filter.");
 
             const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             var collectMethod = moduleType
@@ -280,40 +303,32 @@ public static class CollectAssemblyTypesShim
                 return 2;
             }
 
-            // 5. SubModule class is usable. Populate the types dictionary
-            //    with all MBSubModuleBase-derived types and return Success.
-            if (_mbSubModuleBaseType == null)
-            {
-                types = null;
-                return 2;
-            }
-
+            // 5. SubModule class is usable. Populate the types dictionary to
+            //    MATCH THE ENGINE'S OWN LOOP (decomp TaleWorlds.MountAndBlade
+            //    ~line 99933-99941): key by simple type.Name, filtered to
+            //    ManagedObject/DotNetObject-derived types. This dict is what
+            //    Module hands to Managed.AddTypes for native DotNetObject
+            //    script-type resolution by simple name.
+            //
+            //    B10 FIX: this used to fill the dict with MBSubModuleBase
+            //    types keyed by FullName -- the exact opposite of what the
+            //    engine does. That starved AddTypes of every DotNetObject/
+            //    ManagedObject type in the assembly (native script-type
+            //    lookups by Name would fail) while stuffing in SubModule
+            //    entries nothing downstream reads: AddSubModule resolves the
+            //    SubModule class via subModuleAssembly.GetType(), never via
+            //    this dict. MBSubModuleBase types never belonged in here.
             var dict = new Dictionary<string, Type>(StringComparer.Ordinal);
             foreach (var t in loadedTypes)
             {
                 if (t == null) continue;
                 try
                 {
-                    // Critical: skip abstract types and open-generic types.
-                    // The engine's downstream AddTypes / construction code
-                    // hits "Instances of abstract classes cannot be created"
-                    // if we include them. Only concrete instantiable types
-                    // belong in this dictionary.
-                    if (t.IsAbstract) continue;
-                    if (t.IsGenericTypeDefinition) continue;
-                    if (t.IsInterface) continue;
-                    if (!_mbSubModuleBaseType.IsAssignableFrom(t)) continue;
+                    bool isManaged = _managedObjectType != null && _managedObjectType.IsAssignableFrom(t);
+                    bool isDotNet = _dotNetObjectType != null && _dotNetObjectType.IsAssignableFrom(t);
+                    if (!isManaged && !isDotNet) continue;
 
-                    // Also verify the type has a public parameterless ctor;
-                    // anything without one will crash downstream Invoke.
-                    var pubCtor = t.GetConstructor(
-                        BindingFlags.Public | BindingFlags.Instance,
-                        binder: null,
-                        types: Type.EmptyTypes,
-                        modifiers: null);
-                    if (pubCtor == null) continue;
-
-                    var key = t.FullName ?? t.Name;
+                    var key = t.Name;
                     if (!string.IsNullOrEmpty(key) && !dict.ContainsKey(key))
                         dict[key] = t;
                 }
@@ -321,7 +336,7 @@ public static class CollectAssemblyTypesShim
             }
 
             types = dict;
-            DiagLog.Log(Tag, $"'{asmName}': SubModule class '{subModuleClassName}' validated, {dict.Count} types stored -- override CriticalError->Success.");
+            DiagLog.Log(Tag, $"'{asmName}': SubModule class '{subModuleClassName}' validated, {dict.Count} ManagedObject/DotNetObject types stored -- override CriticalError->Success.");
             return 0;
         }
         catch (Exception ex)

@@ -49,6 +49,17 @@ public static class PsaiRedirectManager
     private static volatile bool _enabled;          // prefix redirects only when true
     private static int _lastRedirectContext = -999;  // log throttle
 
+    // The set of custom 9000N theme ids ACTUALLY emitted into soundtrack.xml (one per
+    // context that had a successfully-staged .ogg at generation time). The redirect gates
+    // on this, NOT on MusicConfig.IsActive: a context can be active yet have no emitted
+    // theme (only .wav tracks, or a staging failure, or it was enabled in Options AFTER
+    // generation with no live regenerate on this build). Rewriting a vanilla id to a
+    // never-generated 9000N id makes PSAI return unknown_theme and swallow the request, so
+    // the context would go permanently silent instead of falling back to vanilla. Assigned
+    // once in Install (fresh set) before _enabled is armed; read on the PSAI thread -> the
+    // volatile reference publishes the fully-built set.
+    private static volatile HashSet<int> _emittedThemes = new();
+
     // Cached reflection surface (resolved in Install).
     private static Type? _psaiCoreType;
     private static PropertyInfo? _instanceProp;
@@ -58,6 +69,16 @@ public static class PsaiRedirectManager
     private static MethodInfo? _triggerMethod;
     private static MethodInfo? _menuModeEnterMethod;
     private static MethodInfo? _menuModeLeaveMethod;
+    private static MethodInfo? _getVolumeMethod;     // PsaiCore.GetVolume() -> float (master)
+    private static MethodInfo? _setVolumeMethod;     // PsaiCore.SetVolume(float) (master)
+
+    // Settlement coordination: while the Engine.Music settlement channel plays its own
+    // loose-file track, PSAI's campaign/menu theme is muted so the two don't play on top
+    // of each other (the "you hear both" overlap). SettlementMusicManager toggles this on
+    // channel acquire / release.
+    private static volatile bool _settlementSuspended;
+    private static bool _suspendActive;
+    private static float _savedMaster = 1f;
 
     /// <summary>
     /// Generate the soundtrack from the BYO tree now (it doesn't need PSAI), so
@@ -88,6 +109,10 @@ public static class PsaiRedirectManager
                 _config = null;
                 return;
             }
+
+            // Publish the exact set of themes that made it into soundtrack.xml so the
+            // redirect only rewrites ids PSAI will actually be able to resolve.
+            _emittedThemes = new HashSet<int>(gen.EmittedThemeIds);
 
             DiagLog.Log(Tag, $"{gen.ThemeCount} theme(s) staged on disk; waiting for PSAI to load before patching.");
         }
@@ -280,6 +305,45 @@ public static class PsaiRedirectManager
 
     public static bool IsArmed => _enabled;
 
+    /// <summary>
+    /// Settlement (Engine.Music) music is taking over: mute the PSAI campaign/menu theme
+    /// so the two don't play on top of each other, then restore PSAI's volume on exit.
+    /// Called by SettlementMusicManager when it starts/stops a settlement track. No-op
+    /// until PSAI volume reflection is resolved (so a settlement-only / no-PSAI setup just
+    /// plays its track with nothing to mute). Never throws out.
+    /// </summary>
+    public static void SetSettlementSuspended(bool suspend)
+    {
+        if (suspend == _settlementSuspended) return;
+        _settlementSuspended = suspend;
+        try
+        {
+            if (_setVolumeMethod == null || _getVolumeMethod == null || _instanceProp == null) return;
+            var instance = _instanceProp.GetValue(null);
+            if (instance == null) return;
+
+            if (suspend)
+            {
+                // Capture the live PSAI master once so we can restore it exactly on exit.
+                if (!_suspendActive)
+                {
+                    var v = _getVolumeMethod.Invoke(instance, null);
+                    _savedMaster = (v is float f) ? f : 1f;
+                    _suspendActive = true;
+                }
+                _setVolumeMethod.Invoke(instance, new object[] { 0f });
+                DiagLog.Log(Tag, "settlement active -> PSAI music muted (no overlap).");
+            }
+            else if (_suspendActive)
+            {
+                _setVolumeMethod.Invoke(instance, new object[] { _savedMaster });
+                _suspendActive = false;
+                DiagLog.Log(Tag, $"settlement ended -> PSAI music restored ({_savedMaster:0.00}).");
+            }
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "SetSettlementSuspended", ex); }
+    }
+
     // ---- the redirect prefix ------------------------------------------
 
     /// <summary>
@@ -300,6 +364,10 @@ public static class PsaiRedirectManager
 
             int custom = ctx.CustomThemeId();
             if (custom < 0) return true;
+            // Only redirect to a theme PSAI actually loaded. A context can be active yet
+            // have no emitted 9000N theme (only .wav, staging failure, or enabled post-gen);
+            // rewriting to it would return unknown_theme and silence the context. Play vanilla.
+            if (!_emittedThemes.Contains(custom)) return true;
 
             if ((int)ctx != _lastRedirectContext)
             {
@@ -330,6 +398,8 @@ public static class PsaiRedirectManager
             if (!_config.IsActive(MusicContext.Menu)) return true;
 
             int custom = MusicContext.Menu.CustomThemeId();
+            // Only redirect if the Menu theme was actually generated (see the prefix above).
+            if (!_emittedThemes.Contains(custom)) return true;
             DiagLog.Log(Tag, $"menu redirect: vanilla theme {menuThemeId} -> Menu (custom {custom}).");
             menuThemeId = custom;
             return true;
@@ -420,6 +490,8 @@ public static class PsaiRedirectManager
         _triggerMethod = _psaiCoreType.GetMethod("TriggerMusicTheme", pubInst, null, new[] { typeof(int), typeof(float) }, null);
         _menuModeEnterMethod = _psaiCoreType.GetMethod("MenuModeEnter", pubInst, null, new[] { typeof(int), typeof(float) }, null);
         _menuModeLeaveMethod = _psaiCoreType.GetMethod("MenuModeLeave", pubInst, null, Type.EmptyTypes, null);
+        _getVolumeMethod = _psaiCoreType.GetMethod("GetVolume", pubInst, null, Type.EmptyTypes, null);
+        _setVolumeMethod = _psaiCoreType.GetMethod("SetVolume", pubInst, null, new[] { typeof(float) }, null);
 
         // Instance + LoadSoundtrack are the must-haves; the readiness probes are
         // best-effort (we degrade to "assume ready once Instance is non-null").

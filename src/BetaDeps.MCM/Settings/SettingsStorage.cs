@@ -436,6 +436,29 @@ internal static class SettingsStorage
                     {
                         var token = kv.Value;
                         if (token == null) continue;
+
+                        // Dropdown values persist as {"SelectedIndex":N,"SelectedValue":"repr"}
+                        // (DropdownConverter.WriteJson). Route those through the converter
+                        // against the EXISTING Dropdown<T> instance so the selection is
+                        // restored on the live dropdown -- exactly like the attribute path
+                        // below. The old default: branch handed the raw JObject to Set(),
+                        // which (a) replaced the consumer's Dropdown<T> in _values with a
+                        // JObject and (b) made WriteThrough's hard (T) cast throw, so the
+                        // saved selection was never applied AND every later Save re-serialized
+                        // the stale JObject -- fluent dropdowns reverted to their compiled
+                        // default on every launch and new selections never persisted.
+                        object? existingDropdown = null;
+                        try { existingDropdown = fluent.Get<object>(kv.Key); }
+                        catch (Exception gex) { DiagLog.LogCaught(Tag, $"Load({settingsId}).{kv.Key} (fluent dropdown probe)", gex); }
+                        if (token.Type == JTokenType.Object && existingDropdown != null
+                            && _dropdownConverter.CanConvert(existingDropdown.GetType()))
+                        {
+                            using var jr = token.CreateReader();
+                            var restored = _dropdownConverter.ReadJson(jr, existingDropdown.GetType(), existingDropdown, _serializer);
+                            fluent.Set(kv.Key, restored ?? existingDropdown);
+                            continue;
+                        }
+
                         object? value;
                         switch (token.Type)
                         {
@@ -517,6 +540,21 @@ internal static class SettingsStorage
         if (!BeginSave(__id)) return;
         try
         {
+            // A ForeignSettingsAdapter has NO [SettingProperty] attributes of its own --
+            // the real settings live on the wrapped foreign instance, which the mod's OWN
+            // MCM assembly persists to the same Global\<Id>.json. Enumerating the adapter
+            // shell below produced an empty JObject and WriteAtomic then overwrote the mod's
+            // live file with "{}", wiping the user's tuned values (only one .bak survives).
+            // The UI paths that hand an adapter straight to Save (SettingsVM.Apply,
+            // PromptSavePresetName's flush, ProfileManager.CaptureAll) bypass the guard
+            // SaveOnDonePatch already applies -- so skip adapters here too and leave the
+            // foreign mod's real saved values intact.
+            if (instance is MCM.Internal.SettingsRegistry.ForeignSettingsAdapter)
+            {
+                DiagLog.Log(Tag, $"Save('{settingsId}'): foreign settings adapter -- skipped (owned by the mod's own MCM; not overwriting its file).");
+                return;
+            }
+
             var path = ResolvePathFor(instance, __id); // H5: scope-aware
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
