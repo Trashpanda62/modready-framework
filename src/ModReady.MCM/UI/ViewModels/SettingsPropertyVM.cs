@@ -545,6 +545,13 @@ public class SettingsPropertyVM : ViewModel
         if (attribute is MCM.Abstractions.Attributes.v1.SettingPropertyAttribute v1)
         {
             var pt = property.PropertyType;
+            // MCM v1 used ONE generic [SettingProperty] for every widget, so a v1
+            // dropdown is that attribute on a Dropdown<T>/DropdownDefault<T> property.
+            // Check it FIRST -- Dropdown<string> is not typeof(string), so without this
+            // it fell through to the "bool" fallback below and rendered as a checkbox
+            // (and the UI-layer WriteBack tried to coerce Boolean -> Dropdown<T>, throwing).
+            if (IsDropdownType(pt))
+                return new SettingsPropertyVM(owner, property, attribute, "dropdown");
             if (pt == typeof(bool))
                 return new SettingsPropertyVM(owner, property, attribute, "bool");
             if (pt == typeof(int) || pt == typeof(long) || pt == typeof(short) || pt == typeof(byte))
@@ -555,8 +562,28 @@ public class SettingsPropertyVM : ViewModel
                 return new SettingsPropertyVM(owner, property, attribute, "text");
         }
 
-        // Fallback for unknown attribute shapes.
+        // Fallback for unknown attribute shapes: a Dropdown property must still be a
+        // dropdown (never mis-typed as bool), otherwise default to bool.
+        if (IsDropdownType(property.PropertyType))
+            return new SettingsPropertyVM(owner, property, attribute, "dropdown");
         return new SettingsPropertyVM(owner, property, attribute, "bool");
+    }
+
+    /// <summary>True if the type is (or derives from) Dropdown&lt;T&gt; / DropdownDefault&lt;T&gt;.
+    /// Mirrors MCM.Common.DropdownConverter.CanConvert so widget-type classification and
+    /// JSON round-tripping agree on what a dropdown is.</summary>
+    private static bool IsDropdownType(Type? t)
+    {
+        while (t != null && t != typeof(object))
+        {
+            if (t.IsGenericType)
+            {
+                var d = t.GetGenericTypeDefinition();
+                if (d == typeof(MCM.Common.Dropdown<>) || d == typeof(MCM.Common.DropdownDefault<>)) return true;
+            }
+            t = t.BaseType;
+        }
+        return false;
     }
 
     private void ReadFromProperty()
