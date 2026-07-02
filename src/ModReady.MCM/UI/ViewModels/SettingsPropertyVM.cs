@@ -527,6 +527,14 @@ public class SettingsPropertyVM : ViewModel
         switch (attribute)
         {
             case SettingPropertyBoolAttribute:
+                // Trust the property TYPE over the attribute: MCM's v1->v2 adaptation
+                // can report a Bool attribute for a Dropdown<T> property, which would
+                // render it as a checkbox and throw coercing Boolean -> Dropdown<T> on
+                // write. A Dropdown property is always a dropdown regardless of attribute.
+                if (IsDropdownType(property.PropertyType))
+                    return new SettingsPropertyVM(owner, property, attribute, "dropdown");
+                if (property.PropertyType != typeof(bool))
+                    DiagLog.Log("SettingsPropertyVM", $"Create: {owner.Id}.{property.Name} Bool-attr on non-bool propType={property.PropertyType.FullName} -> bool");
                 return new SettingsPropertyVM(owner, property, attribute, "bool");
             case SettingPropertyIntegerAttribute i:
                 return new SettingsPropertyVM(owner, property, attribute, "int") { _minValue = i.MinValue, _maxValue = i.MaxValue, _valueFormat = i.ValueFormat };
