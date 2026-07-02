@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+
+    <!-- IMPORTANT: assembly name matches the upstream BUTR name so consumer
+         mods compiled against Bannerlord.UIExtenderEx.dll resolve transparently.
+         The project itself is ModReady.UIExtenderEx; only the output filename
+         and root namespace use the Bannerlord.* prefix that consumer mods need. -->
+    <AssemblyName>Bannerlord.UIExtenderEx</AssemblyName>
+    <RootNamespace>Bannerlord.UIExtenderEx</RootNamespace>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <Company>Maxfield Management Group</Company>
+    <Authors>Steve / Maxfield Management Group</Authors>
+    <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
+    <Description>ModReady clean-room implementation of the Bannerlord UIExtenderEx public API surface. Provides GauntletUI prefab patching and ViewModel mixins for community mods.</Description>
+    <Product>Bannerlord Beta Dependencies</Product>
+
+    <!-- AssemblyVersion impersonates upstream BUTR UIExtenderEx so mods
+         compiled against Bannerlord.UIExtenderEx v2.x bind to ours.
+         M19 (Phase 4.1): all three version surfaces agree on the advertised
+         line (AssemblyVersion == FileVersion == alias SubModule.xml ==
+         v2.14.99.0) so mods gating on Assembly.GetName().Version and mods
+         gating on the module version see the same answer. Policy:
+         docs/VERSION-POLICY.md. -->
+    <AssemblyVersion>2.14.99.0</AssemblyVersion>
+    <FileVersion>2.14.99.0</FileVersion>
+    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Harmony for the runtime patches that drive prefab + VM mixin engines.
+         Marked PrivateAssets so we don't double-ship 0Harmony.dll; ModReady.Harmony
+         is the canonical source of that file in the module tree. -->
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
+
+    <!-- TaleWorlds reference assemblies for the Gauntlet / ViewModel / Mission types
+         we need to interop with. Private so they don't copy. -->
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModReady.Foundation\ModReady.Foundation.csproj" />
+    <ProjectReference Include="..\ModReady.Harmony\ModReady.Harmony.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -19,12 +19,12 @@ When a mod like CREST, HeraldMarshal, or any community mod is compiled against t
    - `Bannerlord.UIExtenderEx.*` types -> live in `Bannerlord.UIExtenderEx.dll`
    - `MCMv5.*` types -> live in `MCMv5.dll`
 
-## How BetaDeps satisfies each layer
+## How ModReady satisfies each layer
 
 ### Module-level (handled by SubModule.xml only -- no shim DLL needed)
 
 We ship "alias" SubModule.xml files in tiny stub module folders:
-- `Modules\Bannerlord.Harmony\SubModule.xml` (empty SubModuleAssemblies list, declares dependency on BetaDeps)
+- `Modules\Bannerlord.Harmony\SubModule.xml` (empty SubModuleAssemblies list, declares dependency on ModReady)
 - `Modules\Bannerlord.ButterLib\SubModule.xml` (same pattern)
 - `Modules\Bannerlord.UIExtenderEx\SubModule.xml`
 - `Modules\Bannerlord.MBOptionScreen\SubModule.xml`
@@ -35,24 +35,24 @@ This is identical to what CREST already does on the user's machine via `CrestEns
 
 ### Assembly-level
 
-- **`0Harmony.dll`** - we ship the unmodified Pardeike NuGet artifact under `Modules\BetaDeps\bin\Win64_Shipping_Client\`. Any consumer mod's `HarmonyLib.*` references resolve transparently.
-- **`Bannerlord.ButterLib.dll`** / **`Bannerlord.UIExtenderEx.dll`** / **`MCMv5.dll`** - in Phase 1 we don't ship these yet. Phase 2 ships type-forwarding shims that redirect the upstream namespaces to BetaDeps's rebuilt implementations.
+- **`0Harmony.dll`** - we ship the unmodified Pardeike NuGet artifact under `Modules\ModReady\bin\Win64_Shipping_Client\`. Any consumer mod's `HarmonyLib.*` references resolve transparently.
+- **`Bannerlord.ButterLib.dll`** / **`Bannerlord.UIExtenderEx.dll`** / **`MCMv5.dll`** - in Phase 1 we don't ship these yet. Phase 2 ships type-forwarding shims that redirect the upstream namespaces to ModReady's rebuilt implementations.
 
 ## Why we don't ship a `Bannerlord.Harmony.dll` type-forwarder
 
-The CREST source kit ships a tiny `Bannerlord.Harmony.dll` shim that type-forwards a few BUTR-extension types. Those types are BUTR-authored (`HarmonyLib.BUTR.Extensions.AccessTools2`, etc.) and we deliberately do NOT use them in BetaDeps. So there's nothing to forward at the assembly level for Harmony.
+The CREST source kit ships a tiny `Bannerlord.Harmony.dll` shim that type-forwards a few BUTR-extension types. Those types are BUTR-authored (`HarmonyLib.BUTR.Extensions.AccessTools2`, etc.) and we deliberately do NOT use them in ModReady. So there's nothing to forward at the assembly level for Harmony.
 
-Consumer mods that were built against BUTR's `HarmonyLib.BUTR.Extensions.AccessTools2` will fail to resolve that type under BetaDeps. The mitigation for those mods is the same as on any other Harmony loader: they need their author's BUTR-extensions reference upgraded or replaced. We can't paper over an Aragas-authored type with a clean-room shim that re-implements its behavior, because that would put Aragas-derived API behavior back into our distribution.
+Consumer mods that were built against BUTR's `HarmonyLib.BUTR.Extensions.AccessTools2` will fail to resolve that type under ModReady. The mitigation for those mods is the same as on any other Harmony loader: they need their author's BUTR-extensions reference upgraded or replaced. We can't paper over an Aragas-authored type with a clean-room shim that re-implements its behavior, because that would put Aragas-derived API behavior back into our distribution.
 
 ## Where the alias SubModule.xml files live
 
 ```
 dist/Modules/
-  BetaDeps/
+  ModReady/
     SubModule.xml                  # the real module
     bin/Win64_Shipping_Client/
-      BetaDeps.Foundation.dll
-      BetaDeps.Harmony.dll
+      ModReady.Foundation.dll
+      ModReady.Harmony.dll
       0Harmony.dll
   Bannerlord.Harmony/
     SubModule.xml                  # alias only, no bin/
@@ -64,4 +64,4 @@ dist/Modules/
     SubModule.xml                  # alias only
 ```
 
-The ship zip extracts all five module folders. The user sees one "BetaDeps" entry plus four tiny aliases in the launcher; they enable all of them once and forget about it.
+The ship zip extracts all five module folders. The user sees one "ModReady" entry plus four tiny aliases in the launcher; they enable all of them once and forget about it.

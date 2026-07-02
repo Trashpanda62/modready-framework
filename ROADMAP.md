@@ -1,4 +1,4 @@
-# BetaDeps roadmap
+# ModReady roadmap
 
 Hour estimates are rough — each item assumes a focused-attention session, not idle research time. Numbers in parentheses are wall-clock hours.
 
@@ -6,7 +6,7 @@ Hour estimates are rough — each item assumes a focused-attention session, not 
 
 ## Where we are now (2026-06-08, v0.9.1 shipped)
 
-The compatibility layer is **done and shipped**. BetaDeps is a working dependency framework on Nexus (mod 11274): additive Harmony/UIExtenderEx/ButterLib/MCM stack, Mod Config screen with int+float sliders, PatchShield/SaveShield safety, IncompatibleModDetector, MO2 support. The v0.5 → v0.9 arc closed out every original Phase-1 compatibility item — search/filter, tooltips, wide-fleet testing, docs, GitHub repo, the lot. **Realm of Thrones is dropped** (no longer our concern), which retires the last open consumer-mod incompatibility.
+The compatibility layer is **done and shipped**. ModReady is a working dependency framework on Nexus (mod 11274): additive Harmony/UIExtenderEx/ButterLib/MCM stack, Mod Config screen with int+float sliders, PatchShield/SaveShield safety, IncompatibleModDetector, MO2 support. The v0.5 → v0.9 arc closed out every original Phase-1 compatibility item — search/filter, tooltips, wide-fleet testing, docs, GitHub repo, the lot. **Realm of Thrones is dropped** (no longer our concern), which retires the last open consumer-mod incompatibility.
 
 With the framework solid, **v1.0 pivots from "polish the compatibility layer" to a headline player-facing feature**: the non-destructive music picker. The old Phase-1 compatibility punch-list is retired/maintenance; the remaining unshipped items move to "ongoing maintenance" below.
 
@@ -14,7 +14,7 @@ With the framework solid, **v1.0 pivots from "polish the compatibility layer" to
 
 ## Phase 1 — v1.0 Non-Destructive Music Picker (headline) (~46–71 h)
 
-The flagship feature that makes BetaDeps worth installing for its own sake: choose your own music per game context (campaign, battle, siege, settlement, naval) **without overwriting any vanilla audio file**. Both core primitives are spike-proven (PSAI redirect + Engine.Music loose-file, 2026-06-08). **Full plan: [`docs/V1.0-MUSIC-PICKER-PLAN.md`](docs/V1.0-MUSIC-PICKER-PLAN.md).**
+The flagship feature that makes ModReady worth installing for its own sake: choose your own music per game context (campaign, battle, siege, settlement, naval) **without overwriting any vanilla audio file**. Both core primitives are spike-proven (PSAI redirect + Engine.Music loose-file, 2026-06-08). **Full plan: [`docs/V1.0-MUSIC-PICKER-PLAN.md`](docs/V1.0-MUSIC-PICKER-PLAN.md).**
 
 | Item | Hours | Notes |
 |---|---|---|
@@ -52,8 +52,8 @@ Lower the bar to author a Bannerlord mod.
 
 | Item | Hours | Notes |
 |---|---|---|
-| ✅ **JSON/YAML settings declaration** | 8–12 | DONE (2026-06-13) — `mod.json` → Mod Config menu + persistence with zero C#. `BetaDeps.Framework.ModJsonParser`/`ModJsonLoader`; auto-discovered at MCM load. 26 self-test assertions. |
-| ✅ **Mod templates** — `betadeps new-mod` | 8–12 | DONE (2026-06-13) — `BetaDeps.Framework.ModScaffolder.Generate` (SettingsOnly / HarmonyTweak / Full templates → SubModule.xml + mod.json/csproj/SubModule.cs). Standalone CLI wrapper still TODO. 14 self-test assertions. |
+| ✅ **JSON/YAML settings declaration** | 8–12 | DONE (2026-06-13) — `mod.json` → Mod Config menu + persistence with zero C#. `ModReady.Framework.ModJsonParser`/`ModJsonLoader`; auto-discovered at MCM load. 26 self-test assertions. |
+| ✅ **Mod templates** — `modready new-mod` | 8–12 | DONE (2026-06-13) — `ModReady.Framework.ModScaffolder.Generate` (SettingsOnly / HarmonyTweak / Full templates → SubModule.xml + mod.json/csproj/SubModule.cs). Standalone CLI wrapper still TODO. 14 self-test assertions. |
 | **Hot reload** of settings + content | 4–8 | File-watcher on `mod.json`, refresh Mod Config without restart. Real engine integration is the hard part. |
 | **Debug overlay** — in-game F12 panel | 8–12 | Shows Harmony patches grouped by target, mixin attachments, live settings state, recent exceptions. Invaluable for mod authors. |
 | **Localization fallback** | 4–6 | Automatic language-string lookup; mod authors stop needing to ship 24 XMLs for one menu label |
@@ -63,14 +63,14 @@ Lower the bar to author a Bannerlord mod.
 
 ## Phase 3 — v2.0 modding framework (100–200 h, aspirational)
 
-Turn BetaDeps from a dependency mod into the recommended foundation for new mods. Each line item below is its own multi-week project.
+Turn ModReady from a dependency mod into the recommended foundation for new mods. Each line item below is its own multi-week project.
 
 ### Framework-core — SHIPPED as the v1.0.0 release (2026-06-13)
 
 The developer-framework primitives — the parts that compile + are unit-verified
 off-engine — landed together and the module ships as **v1.0.0** (Steve's call to
 brand the framework launch v1.0; tested in-game 2026-06-13). New public surface
-under the `BetaDeps.Framework` namespace (see `docs/BETADEPS-NATIVE-API.md`
+under the `ModReady.Framework` namespace (see `docs/MODREADY-NATIVE-API.md`
 Module 7). All five below verified by the `tools/framework-selftest` harness
 (55 assertions, runs without the game):
 
@@ -105,9 +105,9 @@ megafeatures — each still its own multi-week project needing live-game work.
 
 ## Non-coder accessibility
 
-Honest scope: BetaDeps cannot make Bannerlord modding fully accessible to people who don't write code, and v2.0 doesn't try. TaleWorlds' engine isn't designed for it.
+Honest scope: ModReady cannot make Bannerlord modding fully accessible to people who don't write code, and v2.0 doesn't try. TaleWorlds' engine isn't designed for it.
 
-What BetaDeps *can* offer non-coders:
+What ModReady *can* offer non-coders:
 - **Tweak** what coders ship via the Mod Config menu (today)
 - **Mix and match** prebuilt behaviors via JSON config files for simple "change a number" mods (v1.5)
 - **See** which two mods are fighting via the conflict detector (v2.0)

@@ -33,7 +33,7 @@ SettingPropertyVM           <-  per-property: name, group, value, type-aware wid
 Two prefab patches against `Options.xml`:
 
 1. **Add tab toggle.** XPath: `descendant::ListPanel[@Id='TabToggleList']/Children/OptionsTabToggle[5]`. Insert a sibling toggle button with our tab's Id.
-2. **Add tab content panel.** XPath: `descendant::TabControl[@Id='TabControl']/Children/*[5]`. Insert a new tab content widget pointing at our content prefab (loaded from `Modules\BetaDeps\GUI\Prefabs2\MCMModsTab.xml`).
+2. **Add tab content panel.** XPath: `descendant::TabControl[@Id='TabControl']/Children/*[5]`. Insert a new tab content widget pointing at our content prefab (loaded from `Modules\ModReady\GUI\Prefabs2\MCMModsTab.xml`).
 
 Both XPaths match the CREST.MCM.UI patterns we observed in `OptionsPrefabExtensions.cs`.
 
@@ -62,7 +62,7 @@ These are all CREST-extra features absent on first ship.
 ## Files we'll add
 
 ```
-src/BetaDeps.MCM/
+src/ModReady.MCM/
   UI/
     MCMScreenVM.cs                       # screen-level VM
     OptionsVMMixin.cs                    # [ViewModelMixin] on OptionsVM

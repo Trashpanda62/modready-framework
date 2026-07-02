@@ -1,16 +1,16 @@
 <#
 .SYNOPSIS
-  Deploy BetaDeps.MCM to the live Bannerlord install AND the dist staging folder.
+  Deploy ModReady.MCM to the live Bannerlord install AND the dist staging folder.
 
 .DESCRIPTION
   The MCM mod ships as TWO artifacts that live in DIFFERENT modules:
     1. MCMv5.dll            -> Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\
-    2. GUI resources        -> Modules\BetaDeps\GUI\ (Brushes\BetaDeps.xml, Prefabs\*.xml)
+    2. GUI resources        -> Modules\ModReady\GUI\ (Brushes\ModReady.xml, Prefabs\*.xml)
        (compiled prefab templates live IN the DLL; runtime BRUSHES + standalone
-        prefab XML live as loose GUI files in the BetaDeps module)
+        prefab XML live as loose GUI files in the ModReady module)
 
   History: a manual deploy loop that copied only the DLL left the brush file 3 days
-  stale in-game, so every BetaDeps.* brush change silently never took effect (the
+  stale in-game, so every ModReady.* brush change silently never took effect (the
   v0.9.2 row-hover bug). This script copies BOTH artifacts to BOTH targets so the
   two never drift again.
 
@@ -27,15 +27,15 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repo     = "C:\dev\modready\framework"
-$proj     = "$repo\src\BetaDeps.MCM\BetaDeps.MCM.csproj"
-$dllOut   = "$repo\src\BetaDeps.MCM\bin\Release\net472\MCMv5.dll"
-$guiSrc   = "$repo\src\BetaDeps.MCM\GUI"
+$proj     = "$repo\src\ModReady.MCM\ModReady.MCM.csproj"
+$dllOut   = "$repo\src\ModReady.MCM\bin\Release\net472\MCMv5.dll"
+$guiSrc   = "$repo\src\ModReady.MCM\GUI"
 $blRoot   = "C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules"
 
-# (label, DLL target dir, BetaDeps-module GUI target dir)
+# (label, DLL target dir, ModReady-module GUI target dir)
 $targets = @(
-    @{ Name = "live"; Dll = "$blRoot\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client";          Gui = "$blRoot\BetaDeps\GUI" },
-    @{ Name = "dist"; Dll = "$repo\dist\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client"; Gui = "$repo\dist\Modules\BetaDeps\GUI" }
+    @{ Name = "live"; Dll = "$blRoot\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client";          Gui = "$blRoot\ModReady\GUI" },
+    @{ Name = "dist"; Dll = "$repo\dist\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client"; Gui = "$repo\dist\Modules\ModReady\GUI" }
 )
 
 if ($Build) {

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- BetaDeps v2.0 framework self-test harness.
+  <!-- ModReady v2.0 framework self-test harness.
        A plain net472 console that exercises the engine-free framework
        primitives (EventBus, ModConflictDetector, PerfProfiler) with real
        assertions so they can be verified on a dev box WITHOUT launching
@@ -15,19 +15,19 @@
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>FrameworkSelfTest</AssemblyName>
-    <RootNamespace>BetaDeps.FrameworkSelfTest</RootNamespace>
+    <RootNamespace>ModReady.FrameworkSelfTest</RootNamespace>
     <Configurations>Debug;Release</Configurations>
     <!-- Keep this out of any dist/ship path. -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The framework primitives live in BetaDeps.Foundation. -->
-    <ProjectReference Include="..\..\src\BetaDeps.Foundation\BetaDeps.Foundation.csproj" />
+    <!-- The framework primitives live in ModReady.Foundation. -->
+    <ProjectReference Include="..\..\src\ModReady.Foundation\ModReady.Foundation.csproj" />
     <!-- mod.json declarative settings (ModJsonParser/ModJsonLoader) live in MCM.
          The parser is pure; the loader drives the fluent builder, which has no
          TaleWorlds dependency, so it runs off-engine here. -->
-    <ProjectReference Include="..\..\src\BetaDeps.MCM\BetaDeps.MCM.csproj" />
+    <ProjectReference Include="..\..\src\ModReady.MCM\ModReady.MCM.csproj" />
     <!-- Foundation marks Lib.Harmony PrivateAssets=all, so the console needs
          its own ref to load 0Harmony.dll at runtime for ConflictDetector /
          PerfProfiler. Same pinned version Foundation builds against. -->

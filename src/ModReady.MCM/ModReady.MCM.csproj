@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+
+    <!-- Output filename matches the upstream MCMv5 name so mods compiled
+         against MCMv5.dll resolve to ours. -->
+    <AssemblyName>MCMv5</AssemblyName>
+    <RootNamespace>MCM</RootNamespace>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <Company>Maxfield Management Group</Company>
+    <Authors>Steve / Maxfield Management Group</Authors>
+    <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
+    <Description>ModReady clean-room implementation of the MCM v5 settings declaration API. Provides AttributeGlobalSettings, the SettingProperty attribute family, and JSON persistence; the UI tab is in a separate package.</Description>
+    <Product>Bannerlord Beta Dependencies</Product>
+
+    <!-- AssemblyVersion impersonates upstream BUTR MCMv5. Bumped from
+         5.10.0.0 to 5.11.99.0 in v0.3.9: BSC and similar mods compiled
+         against MCMv5 v5.11.3 trigger a "dependency conflict" popup if the
+         on-disk DLL's AssemblyVersion is older than what they referenced,
+         because the launcher does a static metadata check before the CLR's
+         AssemblyResolve hook can intervene. 5.11.99 covers any consumer
+         compiled against 5.11.x. Older 5.10.x consumers still resolve via
+         AssemblyVersionShim. -->
+    <AssemblyVersion>5.11.99.0</AssemblyVersion>
+    <FileVersion>5.11.99.0</FileVersion>
+    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+
+    <!-- Newtonsoft.Json is a real runtime dep (SettingsStorage uses it) so we
+         need the NuGet transitives to land in bin. The PrivateAssets="all" on
+         Lib.Harmony and the TaleWorlds refs still suppresses those individually. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModReady.Foundation\ModReady.Foundation.csproj" />
+    <ProjectReference Include="..\ModReady.UIExtenderEx\ModReady.UIExtenderEx.csproj">
+      <!-- Private=false: ModReady.UIExtenderEx ships separately as
+           Bannerlord.UIExtenderEx.dll; we just need it for compile-time refs. -->
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

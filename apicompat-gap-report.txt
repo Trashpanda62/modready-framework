@@ -1,4 +1,4 @@
-ApiCompat gap report -- consumer-referenced BUTR surface missing from BetaDeps shims
+ApiCompat gap report -- consumer-referenced BUTR surface missing from ModReady shims
 audit: C:\dev\modready\framework\butr-api-audit.txt | bin: C:\dev\modready\framework\.apicompat-stage | refs checked: 984
 
 CLEAN -- every externally-referenced type and member is present.

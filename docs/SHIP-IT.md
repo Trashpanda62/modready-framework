@@ -1,4 +1,4 @@
-# BetaDeps — "Ship It" Release Process
+# ModReady — "Ship It" Release Process
 
 **Trigger:** Steve says **"ship it"** (optionally with a version, e.g. "ship it 0.9.3").
 This is the canonical release runbook. Follow it top to bottom.
@@ -16,14 +16,14 @@ There is no `v0.9.1` tag historically — tags start sparse; just go forward.
 
 1. `git diff <last-tag>` — read **every** change since the last release.
 2. Watch for: unintended side effects / scope creep (e.g. editing a *shared* brush
-   that also affects another feature — this bit us once with `BetaDeps.RowHover`),
+   that also affects another feature — this bit us once with `ModReady.RowHover`),
    dead code, stale comments, debug leftovers.
 3. **Version metadata in every `.csproj`:**
-   - Bump **`FileVersion`** + **`InformationalVersion`** → `X.Y.Z` / `BetaDeps X.Y.Z`.
+   - Bump **`FileVersion`** + **`InformationalVersion`** → `X.Y.Z` / `ModReady X.Y.Z`.
    - **DO NOT bump `AssemblyVersion`.** This is load-bearing:
      - Impersonation libs — MCM `5.11.99.0`, UIExtenderEx `2.13.2.0`,
        ButterLib `2.10.4.0` — **must mirror upstream BUTR** or consumer-mod
-       assembly binding resolves to the wrong copy and BetaDeps fails silently.
+       assembly binding resolves to the wrong copy and ModReady fails silently.
      - Own-assembly pins — Foundation / Harmony / HarmonyHost `0.9.0.0` — are
        **deliberately stable**; their own csproj comments warn that bumping them
        causes *CLR binding failures at game launch* on incremental builds.
@@ -32,7 +32,7 @@ There is no `v0.9.1` tag historically — tags start sparse; just go forward.
 
 ## Phase 3 — Version, commit, tag
 
-1. `src/BetaDeps.Module/SubModule.xml` → `<Version value="vX.Y.Z" />`.
+1. `src/ModReady.Module/SubModule.xml` → `<Version value="vX.Y.Z" />`.
    Leave `<Url value="" />` **empty** — it's a homepage field, **not** the Workshop
    item selector. A bare item-id there is malformed and ships to subscribers.
 2. Update `.gitignore` for any new dev scratch (reflection dumps, SDK artifacts).
@@ -51,7 +51,7 @@ There is no `v0.9.1` tag historically — tags start sparse; just go forward.
      - **XML lint** (catches `--` inside XML comments — illegal, Vortex-crash risk),
      - release validation (well-formed `SubModule.xml` + non-empty dependency
        versions — empty `DependentVersion` crashes Vortex's BUTR manager).
-   - Produces `dist\BetaDeps-vX.Y.Z.zip` (the 5-folder bundle).
+   - Produces `dist\ModReady-vX.Y.Z.zip` (the 5-folder bundle).
    - `-SkipDeploy` because the live install is already current from Phase 1 dev.
 2. `powershell scripts\Package-Optional-Deps.ps1 -Version X.Y.Z`
    - Slices the 4 standalone dependency zips (Harmony, UIExtenderEx, ButterLib,
@@ -78,10 +78,10 @@ The TaleWorlds uploader takes a **`WorkshopUpdate-*.xml`** task file
 Workshop page names & descriptions are preserved.
 
 1. In `C:\dev\bannerlord\workshop\`, set `<ChangeNotes>` for **only the modules
-   that actually changed** (usually `WorkshopUpdate-BetaDeps.xml` +
+   that actually changed** (usually `WorkshopUpdate-ModReady.xml` +
    `WorkshopUpdate-MCM.xml`; leave the 3 pure-dependency notes empty if unchanged).
 2. `<ModuleFolder>` already points at `C:\dev\modready\framework\dist\Modules\...` (current build).
-3. Item IDs: BetaDeps `3741426797` · Harmony `3741428196` · UIExtenderEx
+3. Item IDs: ModReady `3741426797` · Harmony `3741428196` · UIExtenderEx
    `3741428357` · ButterLib `3741428541` · MCM `3741428715`.
 
 ---

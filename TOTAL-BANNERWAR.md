@@ -1,8 +1,8 @@
 # Total Bannerwar — design notes
 
-Optional add-on mod that expands BetaDeps with a free-camera + RTS-style battle command system. Ships as a separate Nexus download (not part of BetaDeps core). Clean-room reimplementation — references RTSCamera's public surface for compatibility, writes its own implementation in entirely new code.
+Optional add-on mod that expands ModReady with a free-camera + RTS-style battle command system. Ships as a separate Nexus download (not part of ModReady core). Clean-room reimplementation — references RTSCamera's public surface for compatibility, writes its own implementation in entirely new code.
 
-Same legal/architecture model as BetaDeps to BUTR: original work, MIT, no source copied from upstream, API surface is not copyrightable (Google v. Oracle).
+Same legal/architecture model as ModReady to BUTR: original work, MIT, no source copied from upstream, API surface is not copyrightable (Google v. Oracle).
 
 ---
 
@@ -20,14 +20,14 @@ Same legal/architecture model as BetaDeps to BUTR: original work, MIT, no source
 - Volley orders: auto volley, manual volley, volley fire
 - Improved square/circle formation behavior (fixed unit placement bugs from base game)
 - Multiple-formation relative-position locking when moving multiple at once
-- Configurable hotkeys via BetaDeps Mod Config tab (no separate XML config file)
-- All settings persisted via BetaDeps's MCM (no separate `Documents\.../RTSCamera` directory)
+- Configurable hotkeys via ModReady Mod Config tab (no separate XML config file)
+- All settings persisted via ModReady's MCM (no separate `Documents\.../RTSCamera` directory)
 
 **New in Total Bannerwar (not in RTSCamera):**
 - **True pause-with-orders** — Total War style, time stops while issuing orders, resumes on confirm
 - **Total War-themed visual style** — Bannerwar-styled order indicators, selection rectangles, formation outlines
 - **Tactical preset** — one-click "play it like Total War" sensible defaults (so users don't have to configure 30 hotkeys)
-- **MCM integration** — uses BetaDeps's settings tab natively instead of a separate XML config
+- **MCM integration** — uses ModReady's settings tab natively instead of a separate XML config
 
 **Out of scope for v1.0:**
 - Multiplayer — single-player only, same as RTSCamera
@@ -42,7 +42,7 @@ Total Bannerwar ships as one or two assemblies in a separate Module:
 
 ```
 Modules/
-├── BetaDeps/                 # required dependency
+├── ModReady/                 # required dependency
 └── TotalBannerwar/
     ├── SubModule.xml
     └── bin/Win64_Shipping_Client/
@@ -51,7 +51,7 @@ Modules/
 ```
 
 `SubModule.xml`:
-- Dependency: BetaDeps (required) + Bannerlord.Harmony (provided by BetaDeps)
+- Dependency: ModReady (required) + Bannerlord.Harmony (provided by ModReady)
 - Single SubModuleClassType: `TotalBannerwar.TotalBannerwarSubModule`
 
 Key components (clean-room, our own implementation; names chosen to avoid collision with RTSCamera's):
@@ -65,10 +65,10 @@ Key components (clean-room, our own implementation; names chosen to avoid collis
 | `TimeControlLogic` | Pause / slow-motion / fast-forward on hotkey | Patches `Mission.SetMissionTimeSpeedSlower` / time-dilation |
 | `FormationOrderQueue` | Per-formation order queue (Shift-click chained orders) | Wraps `Formation.SetMovementOrder` calls with our queue manager |
 | `VolleyOrderSystem` | Auto / manual / fire volley | New `Formation.MovementOrder` extension that times unit aim + fire |
-| `TBHotKeyConfig` | Hotkey registration with BetaDeps's MCM — no per-mod XML config file | Implements `IHotKeyConfig` from BetaDeps framework |
+| `TBHotKeyConfig` | Hotkey registration with ModReady's MCM — no per-mod XML config file | Implements `IHotKeyConfig` from ModReady framework |
 | `TotalBannerwarSubModule` | Entry point, registers all logic into MissionStartingHandler | OnSubModuleLoad / OnMissionScreenInitialize |
 
-Settings storage: lives entirely in BetaDeps's `Documents\Mount and Blade II Bannerlord\Configs\ModSettings\Global\TotalBannerwar.json`. No separate config dir. Users see settings in Mod Config like every other mod.
+Settings storage: lives entirely in ModReady's `Documents\Mount and Blade II Bannerlord\Configs\ModSettings\Global\TotalBannerwar.json`. No separate config dir. Users see settings in Mod Config like every other mod.
 
 ---
 
@@ -79,8 +79,8 @@ RTSCamera is MIT-licensed and source-available at https://github.com/lzh-mb-mod/
 Key things their README teaches us about how Bannerlord exposes this stuff:
 - Free-cam uses Bannerlord's existing **spectator-camera infrastructure** (`MissionGauntletSpectatorControl`). The trick is unlocking the spectator-cam from spectator-only states so it works in active battle.
 - The base game's `OrderTroopPlacer` already handles drag-to-place orders; their command-system mod just patches it to expand the mouse-driven order set.
-- Hotkey config: they implement their own `HotKeyManager` because Bannerlord's input system is keyboard-first. We can do simpler — register our hotkeys through BetaDeps's framework once that's in v1.5.
-- Their config persists to two separate XML files (`RTSCameraConfig.xml`, `CommandSystemConfig.xml`) under `Documents\...\Configs\RTSCamera\`. We collapse this into BetaDeps's standard MCM JSON.
+- Hotkey config: they implement their own `HotKeyManager` because Bannerlord's input system is keyboard-first. We can do simpler — register our hotkeys through ModReady's framework once that's in v1.5.
+- Their config persists to two separate XML files (`RTSCameraConfig.xml`, `CommandSystemConfig.xml`) under `Documents\...\Configs\RTSCamera\`. We collapse this into ModReady's standard MCM JSON.
 
 Specific patches RTSCamera references (visible via strings analysis):
 - `Patch_MissionGauntletSpectatorControl` — unlocks spectator cam in active battle
@@ -105,8 +105,8 @@ Clean-room reimplementation, full feature parity + Total War extras.
 | TimeControlLogic (pause/slow/fast) | 5–10 |
 | FormationOrderQueue (Shift+chain) | 8–12 |
 | VolleyOrderSystem | 8–12 |
-| Hotkey config UI in BetaDeps MCM | 4–6 |
-| Settings integration (read/write via BetaDeps) | 2–4 |
+| Hotkey config UI in ModReady MCM | 4–6 |
+| Settings integration (read/write via ModReady) | 2–4 |
 | Total War extras (true pause, themed visuals, preset) | 8–15 |
 | Testing across battle types (field, siege, naval-skip, hideout) | 8–15 |
 | Documentation + Nexus listing + first release | 4–6 |
@@ -116,20 +116,20 @@ Realistic timeline: 3–6 months of part-time effort, depending on cadence.
 
 ---
 
-## Why a separate mod, not part of BetaDeps
+## Why a separate mod, not part of ModReady
 
-- **Single responsibility.** BetaDeps is a dependency framework. Adding a full RTS-control feature would make BetaDeps an opinionated content mod, which conflicts with the "drop-in dependency replacement" pitch.
-- **Optional opt-in.** Some users want the dependency stack but don't want overhead camera. Shipping Total Bannerwar separately means BetaDeps users aren't paying for code they don't use.
-- **Faster iteration on each.** BetaDeps and Total Bannerwar can ship independently. A BetaDeps polish release doesn't have to wait for Total Bannerwar testing.
-- **Showcases BetaDeps.** Total Bannerwar becomes the "look what's possible on the BetaDeps framework" demo. Helps justify other authors targeting BetaDeps.
+- **Single responsibility.** ModReady is a dependency framework. Adding a full RTS-control feature would make ModReady an opinionated content mod, which conflicts with the "drop-in dependency replacement" pitch.
+- **Optional opt-in.** Some users want the dependency stack but don't want overhead camera. Shipping Total Bannerwar separately means ModReady users aren't paying for code they don't use.
+- **Faster iteration on each.** ModReady and Total Bannerwar can ship independently. A ModReady polish release doesn't have to wait for Total Bannerwar testing.
+- **Showcases ModReady.** Total Bannerwar becomes the "look what's possible on the ModReady framework" demo. Helps justify other authors targeting ModReady.
 
 ---
 
 ## Phase ordering
 
-Don't start Total Bannerwar until BetaDeps v1.0 ships. v1.0 needs to be stable and documented before we ask anyone to build on top of it. After v1.0:
+Don't start Total Bannerwar until ModReady v1.0 ships. v1.0 needs to be stable and documented before we ask anyone to build on top of it. After v1.0:
 
-1. **v1.5 BetaDeps framework primitives ship first.** Total Bannerwar will lean on the hotkey manager, MCM integration, and overlay-drawing helpers we add to BetaDeps in v1.5. Building Total Bannerwar without those means duplicating that work in TB itself; better to invest in BetaDeps once and reuse.
+1. **v1.5 ModReady framework primitives ship first.** Total Bannerwar will lean on the hotkey manager, MCM integration, and overlay-drawing helpers we add to ModReady in v1.5. Building Total Bannerwar without those means duplicating that work in TB itself; better to invest in ModReady once and reuse.
 2. **Total Bannerwar v0.1 — alpha**, free-cam + basic commands only, ships as "preview" Nexus listing for feedback.
 3. **Total Bannerwar v0.5** — feature parity with RTSCamera.
 4. **Total Bannerwar v1.0** — Total War extras (true pause, themed UI), settings polished.

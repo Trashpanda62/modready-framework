@@ -1,4 +1,4 @@
-// BetaDeps v2.0 framework self-test harness. MIT, copyright 2026 Maxfield
+// ModReady v2.0 framework self-test harness. MIT, copyright 2026 Maxfield
 // Management Group. NOT shipped -- dev verification only.
 //
 // Exercises the engine-free framework primitives with real assertions so a
@@ -12,11 +12,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-using BetaDeps.Framework;
+using ModReady.Framework;
 
 using HarmonyLib;
 
-namespace BetaDeps.FrameworkSelfTest
+namespace ModReady.FrameworkSelfTest
 {
     internal static class Program
     {
@@ -26,7 +26,7 @@ namespace BetaDeps.FrameworkSelfTest
 
         private static int Main()
         {
-            Console.WriteLine("=== BetaDeps v2.0 framework self-test ===");
+            Console.WriteLine("=== ModReady v2.0 framework self-test ===");
             try
             {
                 EventBusTests.Run();
@@ -105,14 +105,14 @@ namespace BetaDeps.FrameworkSelfTest
 
             // named channel with no shared type
             string? seen = null;
-            var nsub = EventBus.Subscribe("BetaDeps.Test.Chan", o => seen = o as string);
-            EventBus.Publish("BetaDeps.Test.Chan", "hello");
+            var nsub = EventBus.Subscribe("ModReady.Test.Chan", o => seen = o as string);
+            EventBus.Publish("ModReady.Test.Chan", "hello");
             Program.Eq("named: payload delivered", "hello", seen);
 
             // null payload on a named channel -> handler sees String.Empty, never null
             object? nseen = "sentinel";
-            using (EventBus.Subscribe("BetaDeps.Test.Null", o => nseen = o))
-                EventBus.Publish("BetaDeps.Test.Null", null);
+            using (EventBus.Subscribe("ModReady.Test.Null", o => nseen = o))
+                EventBus.Publish("ModReady.Test.Null", null);
             Program.Check("named: null payload becomes empty string",
                 (nseen as string) == string.Empty);
             nsub.Dispose();
@@ -148,10 +148,10 @@ namespace BetaDeps.FrameworkSelfTest
             // throttle: second immediate delivery is suppressed
             EventBus.Reset();
             int tcount = 0;
-            using (EventBus.Subscribe("BetaDeps.Test.Throttle", _ => tcount++, minIntervalMs: 1000))
+            using (EventBus.Subscribe("ModReady.Test.Throttle", _ => tcount++, minIntervalMs: 1000))
             {
-                EventBus.Publish("BetaDeps.Test.Throttle", "a");
-                EventBus.Publish("BetaDeps.Test.Throttle", "b"); // within window -> dropped
+                EventBus.Publish("ModReady.Test.Throttle", "a");
+                EventBus.Publish("ModReady.Test.Throttle", "b"); // within window -> dropped
                 Program.Eq("throttle: only first delivered", 1, tcount);
             }
 
@@ -181,7 +181,7 @@ namespace BetaDeps.FrameworkSelfTest
 
         public static void PrefixA() { }
         public static void PrefixB() { }
-        public static void BetaDepsPrefix() { }
+        public static void ModReadyPrefix() { }
         public static IEnumerable<CodeInstruction> TranspileA(IEnumerable<CodeInstruction> i) => i;
         public static IEnumerable<CodeInstruction> TranspileB(IEnumerable<CodeInstruction> i) => i;
 
@@ -204,12 +204,12 @@ namespace BetaDeps.FrameworkSelfTest
             b.Patch(t.GetMethod(nameof(TargetHigh)),
                 transpiler: new HarmonyMethod(t.GetMethod(nameof(TranspileB))));
 
-            // Solo: one real owner + a BetaDeps owner -> must NOT count as a conflict
+            // Solo: one real owner + a ModReady owner -> must NOT count as a conflict
             a.Patch(t.GetMethod(nameof(TargetSolo)),
                 prefix: new HarmonyMethod(t.GetMethod(nameof(PrefixA))));
-            var bd = new HarmonyLib.Harmony("BetaDeps.Foundation.PatchShield");
+            var bd = new HarmonyLib.Harmony("ModReady.Foundation.PatchShield");
             bd.Patch(t.GetMethod(nameof(TargetSolo)),
-                prefix: new HarmonyMethod(t.GetMethod(nameof(BetaDepsPrefix))));
+                prefix: new HarmonyMethod(t.GetMethod(nameof(ModReadyPrefix))));
 
             var conflicts = ModConflictDetector.Scan();
 
@@ -229,7 +229,7 @@ namespace BetaDeps.FrameworkSelfTest
             if (high != null)
                 Program.Eq("conflict: TargetHigh severity High", ConflictSeverity.High, high.Severity);
 
-            Program.Check("conflict: BetaDeps owner excluded (TargetSolo not reported)",
+            Program.Check("conflict: ModReady owner excluded (TargetSolo not reported)",
                 conflicts.FirstOrDefaultByMethod(nameof(TargetSolo)) == null);
 
             // severity ordering: High sorts before Medium
@@ -246,7 +246,7 @@ namespace BetaDeps.FrameworkSelfTest
             // cleanup
             a.UnpatchAll("Test.ModA");
             b.UnpatchAll("Test.ModB");
-            bd.UnpatchAll("BetaDeps.Foundation.PatchShield");
+            bd.UnpatchAll("ModReady.Foundation.PatchShield");
         }
     }
 
@@ -270,29 +270,29 @@ namespace BetaDeps.FrameworkSelfTest
             {
                 // No NavalDLC folder + no naval assembly loaded -> not available.
                 Program.Check("naval: absent when no folder/assembly",
-                    !BetaDeps.Harmony.Music.NavalGate.IsAvailable(baseDir));
+                    !ModReady.Harmony.Music.NavalGate.IsAvailable(baseDir));
                 // Create the module folder -> available.
                 Directory.CreateDirectory(Path.Combine(baseDir, "NavalDLC"));
                 Program.Check("naval: detected via Modules\\NavalDLC folder",
-                    BetaDeps.Harmony.Music.NavalGate.IsAvailable(baseDir));
+                    ModReady.Harmony.Music.NavalGate.IsAvailable(baseDir));
                 // Null modules root falls back to assembly scan (none here) -> false.
                 Program.Check("naval: null root + no naval assembly -> false",
-                    !BetaDeps.Harmony.Music.NavalGate.IsAvailable(null));
+                    !ModReady.Harmony.Music.NavalGate.IsAvailable(null));
 
                 // SettlementMusicManager.ClassifySettlement (pure mapping)
-                var Town = BetaDeps.Harmony.Music.MusicContext.SettlementTown;
-                var Village = BetaDeps.Harmony.Music.MusicContext.SettlementVillage;
-                var Tavern = BetaDeps.Harmony.Music.MusicContext.SettlementTavern;
+                var Town = ModReady.Harmony.Music.MusicContext.SettlementTown;
+                var Village = ModReady.Harmony.Music.MusicContext.SettlementVillage;
+                var Tavern = ModReady.Harmony.Music.MusicContext.SettlementTavern;
                 Program.Check("settlement: town",
-                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, false) == Town);
+                    ModReady.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, false) == Town);
                 Program.Check("settlement: village",
-                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, false) == Village);
+                    ModReady.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, false) == Village);
                 Program.Check("settlement: tavern beats town",
-                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, true) == Tavern);
+                    ModReady.Harmony.Music.SettlementMusicManager.ClassifySettlement(true, false, true) == Tavern);
                 Program.Check("settlement: village+tavern stays village",
-                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, true) == Village);
+                    ModReady.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, true, true) == Village);
                 Program.Check("settlement: neither -> null",
-                    BetaDeps.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, false, false) == null);
+                    ModReady.Harmony.Music.SettlementMusicManager.ClassifySettlement(false, false, false) == null);
             }
             finally
             {
@@ -324,8 +324,8 @@ namespace BetaDeps.FrameworkSelfTest
                 Program.Check("scaffold: settings-only has no src/", !Directory.Exists(Path.Combine(modDir, "src")));
 
                 var subxml = File.ReadAllText(Path.Combine(modDir, "SubModule.xml"));
-                Program.Check("scaffold: SubModule.xml declares BetaDeps dependency",
-                    subxml.Contains("DependedModule Id=\"BetaDeps\"") && subxml.Contains("<Id value=\"MyTweak\""));
+                Program.Check("scaffold: SubModule.xml declares ModReady dependency",
+                    subxml.Contains("DependedModule Id=\"ModReady\"") && subxml.Contains("<Id value=\"MyTweak\""));
                 Program.Check("scaffold: settings-only SubModule.xml has empty SubModules",
                     subxml.Contains("<SubModules />"));
 

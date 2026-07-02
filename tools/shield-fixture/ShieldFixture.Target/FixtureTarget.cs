@@ -1,5 +1,5 @@
 // Synthetic fixture for the Phase 3 PatchShield gate (see plan 3.x
-// verification). This assembly deliberately has a NON-BetaDeps name so
+// verification). This assembly deliberately has a NON-ModReady name so
 // PatchShield treats its method as a shieldable consumer-mod target.
 //
 // MIT, copyright 2026 Maxfield Management Group.

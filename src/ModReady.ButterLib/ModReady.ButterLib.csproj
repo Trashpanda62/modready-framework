@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+
+    <!-- Output filename matches the upstream BUTR Bannerlord.ButterLib name
+         so consumer mods compiled against that DLL resolve to ours. -->
+    <AssemblyName>Bannerlord.ButterLib</AssemblyName>
+    <RootNamespace>Bannerlord.ButterLib</RootNamespace>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <Company>Maxfield Management Group</Company>
+    <Authors>Steve / Maxfield Management Group</Authors>
+    <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
+    <Description>ModReady clean-room implementation of the Bannerlord.ButterLib public API surface used by community mods on the beta branch.</Description>
+    <Product>Bannerlord Beta Dependencies</Product>
+
+    <!-- AssemblyVersion impersonates upstream BUTR ButterLib's release line so
+         existing mods compiled against Bannerlord.ButterLib v2.10.x.x have
+         their assembly references resolve to ours at load time. InformationalVersion
+         carries our actual ModReady build version for diagnostic purposes.
+         M19 (Phase 4.1): AssemblyVersion == FileVersion == alias SubModule.xml
+         (v2.10.99.0) so version-gating mods see one consistent line. Policy:
+         docs/VERSION-POLICY.md. -->
+    <AssemblyVersion>2.10.99.0</AssemblyVersion>
+    <FileVersion>2.10.99.0</FileVersion>
+    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+
+    <!-- Microsoft.Extensions.DependencyInjection and friends must land in bin
+         so the DI container is usable at runtime. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" PrivateAssets="all" />
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="1.4.5.115026" PrivateAssets="all" />
+    <!-- DI container. Microsoft's official package; ships into ModReady's bin
+         so the upstream BUTR.DependencyInjection.ButterLib API surface has a
+         backing implementation. -->
+    <!-- Microsoft.Extensions.* pinned to v2.0.0 (PackageReference) -> AssemblyVersion 2.0.0.0.
+         FCL and other consumer mods compiled against upstream BUTR ButterLib v2.7.x record
+         a strong-named reference to Microsoft.Extensions.DependencyInjection.Abstractions v2.0.0.0
+         and Microsoft.Extensions.Logging.Abstractions v2.0.0.0 (PublicKeyToken=adb9793829ddae60).
+         If our build references v6.0.0.0, the CLR's JIT signature comparison fails because
+         strong-named types are version-strict -> MissingMethodException on AddSerilogLoggerProvider.
+         v2.0.0 still ships full IServiceCollection / ILoggerProvider surface we need. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
+    <!-- Serilog is needed at compile time so our DependencyInjectionExtensions.AddSerilogLoggerProvider
+         can match upstream BUTR ButterLib's exact signature (Action<Serilog.LoggerConfiguration>).
+         At runtime AssemblyVersionShim redirects all Serilog requests to whichever copy a consumer
+         mod ships, so version differences here don't matter. NOTE: this reference is NOT
+         PrivateAssets=all; with CopyLocalLockFileAssemblies=true, Serilog.dll ships in our
+         bin. That's harmless: the shim binds every Serilog load to whichever copy wins the
+         AppDomain. -->
+    <PackageReference Include="Serilog" Version="2.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModReady.Foundation\ModReady.Foundation.csproj" />
+    <ProjectReference Include="..\ModReady.Harmony\ModReady.Harmony.csproj" />
+  </ItemGroup>
+
+</Project>

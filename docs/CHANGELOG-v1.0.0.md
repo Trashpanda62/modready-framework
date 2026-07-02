@@ -1,6 +1,6 @@
-# BetaDeps v1.0.0 — Framework launch
+# ModReady v1.0.0 — Framework launch
 
-**Built + tested in-game 2026-06-13.** BetaDeps graduates from a
+**Built + tested in-game 2026-06-13.** ModReady graduates from a
 compatibility/dependency mod to a **modding framework**. v1.0.0 lands the
 framework-*core* primitives — the developer-facing building blocks that compile
 and are verified off-engine. (This is the framework's 1.0 launch; the larger
@@ -12,7 +12,7 @@ console, **55 assertions**, runs without launching the game): `dotnet run -c
 Release --project tools/framework-selftest`. An independent verifier pass
 returned **SHIP** (0 blocker/high).
 
-## New: `BetaDeps.Framework` namespace
+## New: `ModReady.Framework` namespace
 
 | Primitive | Assembly | What it does |
 |---|---|---|
@@ -28,22 +28,22 @@ in v0.9.x (`PerCampaignSettings<T>` + `Configs\ModSettings\PerCampaign\<campaign
 ### Also in this build: declarative settings (`mod.json`)
 
 The v1.5 modder-layer headline, brought forward: a mod author drops a `mod.json`
-(or `*.betadeps.json`) in their module folder and BetaDeps builds an MCM settings
-page from it at load — **zero C#**. `BetaDeps.Framework.ModJsonParser` (pure
+(or `*.modready.json`) in their module folder and ModReady builds an MCM settings
+page from it at load — **zero C#**. `ModReady.Framework.ModJsonParser` (pure
 parse+validate → schema) and `ModJsonLoader` (build + register via the fluent
 pipeline); auto-discovered at MCM `OnBeforeInitialModuleScreenSetAsRoot`. Supports
 bool/int/float/text properties, groups, global/percampaign/persave scope, and
 validates missing-id / unknown-type / min>max / duplicate-id / out-of-range
 defaults. 26 self-test assertions cover parse + end-to-end build/read-back. See
-`docs/BETADEPS-NATIVE-API.md` → "Declarative settings (mod.json)".
+`docs/MODREADY-NATIVE-API.md` → "Declarative settings (mod.json)".
 
 ### Also in this build: `new-mod` scaffolding
 
-`BetaDeps.Framework.ModScaffolder.Generate(opts, targetRoot)` writes a ready-to-go
-starter mod that consumes BetaDeps, in three templates: **SettingsOnly** (just a
+`ModReady.Framework.ModScaffolder.Generate(opts, targetRoot)` writes a ready-to-go
+starter mod that consumes ModReady, in three templates: **SettingsOnly** (just a
 SubModule.xml + a sample mod.json — zero C#), **HarmonyTweak** (csproj + a starter
 `MBSubModuleBase` using `SafeBind`/`DiagLog`), and **Full** (adds an
-`AttributeGlobalSettings` class). Validates the mod id, declares the BetaDeps
+`AttributeGlobalSettings` class). Validates the mod id, declares the ModReady
 dependency, and the generated mod.json round-trips through `ModJsonParser`. Pure
 file-gen, engine-free; 14 self-test assertions. (Standalone CLI wrapper is TODO.)
 
@@ -92,7 +92,7 @@ the mixin attached and bound.
 
 ### All-in-One installer → v1.0.0
 
-`installer/` (Inno Setup bundle of BLSE + the five BetaDeps modules) bumped to
+`installer/` (Inno Setup bundle of BLSE + the five ModReady modules) bumped to
 **v1.0.0** (`Build-Installer.ps1` default, `.iss` `AppVersion`, README). It stages
 the current `dist\Modules`, so it ships the v1.0.0 modules. Compiling the `.exe`
 needs Inno Setup 6 + a BLSE download (`-BlseDir`).
@@ -100,29 +100,29 @@ needs Inno Setup 6 + a BLSE download (`-BlseDir`).
 ## In-game wiring
 
 `FrameworkBootstrap.RunLateInit` is called from the same late lifecycle hooks
-that re-install PatchShield/SaveShield (`BetaDepsHarmonySubModule.TryInstallPatchShield`):
+that re-install PatchShield/SaveShield (`ModReadyHarmonySubModule.TryInstallPatchShield`):
 
 - **Conflict scan** runs automatically and logs to `runtime.log`, re-logging only
   when the conflict count grows (so deferred-patch mods are still captured
   without spam).
 - **Perf auto-instrument** is OFF by default; drop an empty `perf-profiler.flag`
-  in `Modules\BetaDeps\` to enable it (same flag-file convention as the shields).
+  in `Modules\ModReady\` to enable it (same flag-file convention as the shields).
 
 Everything is wrapped so a framework fault can never crash module load.
 
 ## Versioning (per docs/VERSION-POLICY.md)
 
-- BetaDeps module `SubModule.xml`: → **`v1.0.0`**.
-- Internal assemblies (`BetaDeps.Foundation`, `BetaDeps.Harmony`): `FileVersion`
+- ModReady module `SubModule.xml`: → **`v1.0.0`**.
+- Internal assemblies (`ModReady.Foundation`, `ModReady.Harmony`): `FileVersion`
   → `1.0.0.0`; `AssemblyVersion` stays pinned `0.9.0.0` (dependents bind to it).
 - Impersonation assemblies (UIExtenderEx/ButterLib/MCMv5) and `Bannerlord.Harmony`:
-  Assembly/FileVersion unchanged; only `InformationalVersion` → `BetaDeps 1.0.0`.
-- `BetaDeps-v1.0.0.zip` produced; Aragas-string, XML-lint, and release-validation
+  Assembly/FileVersion unchanged; only `InformationalVersion` → `ModReady 1.0.0`.
+- `ModReady-v1.0.0.zip` produced; Aragas-string, XML-lint, and release-validation
   gates all pass.
 
 ## API docs
 
-Consumer guide: `docs/BETADEPS-NATIVE-API.md` → **Module 7: BetaDeps.Framework**.
+Consumer guide: `docs/MODREADY-NATIVE-API.md` → **Module 7: ModReady.Framework**.
 
 ## Bug-fix pass (2026-06-13)
 

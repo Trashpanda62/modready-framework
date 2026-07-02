@@ -1,6 +1,6 @@
-# Phase 3 — BetaDeps.ButterLib + BetaDeps.MCM rebuild scope
+# Phase 3 — ModReady.ButterLib + ModReady.MCM rebuild scope
 
-Goal: clean-room replacements for the two remaining Aragas-adjacent / BUTR foundation libraries so the BetaDeps bundle is fully self-contained, then a single Nexus zip.
+Goal: clean-room replacements for the two remaining Aragas-adjacent / BUTR foundation libraries so the ModReady bundle is fully self-contained, then a single Nexus zip.
 
 ## Scope finding (from task #18 catalog)
 
@@ -25,12 +25,12 @@ Goal: clean-room replacements for the two remaining Aragas-adjacent / BUTR found
 
 ## Implementation target
 
-### Phase 3a — BetaDeps.ButterLib (small, mostly mechanical)
+### Phase 3a — ModReady.ButterLib (small, mostly mechanical)
 
 ```
-src/BetaDeps.ButterLib/
-  BetaDeps.ButterLib.csproj
-  BetaDepsButterLibSubModule.cs       # MBSubModuleBase entry; calls BEWPatch.Enable()
+src/ModReady.ButterLib/
+  ModReady.ButterLib.csproj
+  ModReadyButterLibSubModule.cs       # MBSubModuleBase entry; calls BEWPatch.Enable()
   ExceptionHandler/
     BEWPatch.cs                       # finalizer install on the 5 tick methods
     Finalizer.cs                      # shared finalizer body that logs and swallows
@@ -38,11 +38,11 @@ src/BetaDeps.ButterLib/
 
 The finalizer logic is straightforward — accept the exception, write it to runtime.log, return null so Harmony swallows it. Already-validated approach from CREST's runtime.log.
 
-### Phase 3b — BetaDeps.MCM core (the declaration surface)
+### Phase 3b — ModReady.MCM core (the declaration surface)
 
 ```
-src/BetaDeps.MCM/
-  BetaDeps.MCM.csproj                 # AssemblyName=MCMv5.dll
+src/ModReady.MCM/
+  ModReady.MCM.csproj                 # AssemblyName=MCMv5.dll
   Attributes/
     SettingPropertyAttribute.cs       # base
     SettingPropertyBoolAttribute.cs
@@ -54,26 +54,26 @@ src/BetaDeps.MCM/
     BaseSettings.cs                   # base class for any settings VM
     AttributeGlobalSettings.cs        # generic singleton base mods inherit from
     SettingsStorage.cs                # JSON read/write to Documents folder
-  BetaDepsMCMSubModule.cs             # MBSubModuleBase entry
+  ModReadyMCMSubModule.cs             # MBSubModuleBase entry
 ```
 
 The runtime: when `AttributeGlobalSettings<T>` is instantiated, reflect over T's properties, find the `[SettingProperty*]` attributes, build a property table, load the JSON file (or write defaults), keep the in-memory state. Save on property changes.
 
 ### Phase 3c — MCM UI tab (heaviest, deferred)
 
-Task #22. The in-game Options panel tab that renders the loaded settings as widgets. Built on top of BetaDeps.UIExtenderEx (prefab patches into OptionsScreen.xml + ViewModelMixin on OptionsVM). This is non-trivial and gets its own iteration; without it, settings still persist to JSON correctly but the in-game viewer won't render.
+Task #22. The in-game Options panel tab that renders the loaded settings as widgets. Built on top of ModReady.UIExtenderEx (prefab patches into OptionsScreen.xml + ViewModelMixin on OptionsVM). This is non-trivial and gets its own iteration; without it, settings still persist to JSON correctly but the in-game viewer won't render.
 
 ## Build target
 
 After Phase 3 first-iteration ships:
 
 ```
-Modules/BetaDeps/bin/Win64_Shipping_Client/
+Modules/ModReady/bin/Win64_Shipping_Client/
   Bannerlord.ButterLib.dll    (NEW)
   MCMv5.dll                   (NEW -- assembly name matches upstream)
   Bannerlord.UIExtenderEx.dll (Phase 2)
-  BetaDeps.Harmony.dll        (Phase 1)
-  BetaDeps.Foundation.dll     (Phase 1)
+  ModReady.Harmony.dll        (Phase 1)
+  ModReady.Foundation.dll     (Phase 1)
   0Harmony.dll, Mono.Cecil.*, MonoMod.*
 
 Modules/Bannerlord.ButterLib/      (alias, structural payload only)
@@ -82,6 +82,6 @@ Modules/Bannerlord.MBOptionScreen/ (alias, structural payload only)
 
 ## License posture (Phase 3 update)
 
-- All BetaDeps.* DLLs original work, MIT, copyright Maxfield Management Group.
+- All ModReady.* DLLs original work, MIT, copyright Maxfield Management Group.
 - No Aragas / BUTR-derived source. The BEW finalizer install pattern is generic Harmony usage; finalizer behavior (eat exception + log) is industry-standard.
 - The MCM attribute API surface is dictated by consumer mods, but the implementation behind it is fresh code.

@@ -122,7 +122,7 @@ behaviors that adopt and re-emit the data.
 
 ## What ModReady now implements
 
-### BetaDeps.ButterLib (`Bannerlord.ButterLib.dll`)
+### ModReady.ButterLib (`Bannerlord.ButterLib.dll`)
 
 - `ButterLibSaveableTypeDefiner` — real public abstract
   `SaveableTypeDefiner`, base id 2002018000 + offset (was a non-derived
@@ -147,12 +147,12 @@ behaviors that adopt and re-emit the data.
   engine patches (not needed when using plain Dictionary and the guarded
   ConstructContainerDefinition).
 
-### BetaDeps.MCM (`MCMv5.dll`)
+### ModReady.MCM (`MCMv5.dll`)
 
 - `PerSaveCampaignBehavior : CampaignBehaviorBase` (internal,
   `MCM.Internal`), StringId
   `MCM.Internal.GameFeatures.PerSaveCampaignBehavior`, added in
-  `BetaDepsMCMSubModule.OnGameStart`. Bridges the save-file payload to
+  `ModReadyMCMSubModule.OnGameStart`. Bridges the save-file payload to
   ModReady's per-save JSON store (`Configs\ModSettings\PerSave\<campaignId>\`):
   - on load: every parseable payload entry is written through to
     `PerSave\<campaignId>\<Id>.json` (Id = last path segment of the payload

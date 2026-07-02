@@ -49,7 +49,7 @@ decouples MCM↔ButterLib; ButterLib wires the roster at load; `SubSystemSetting
 is auto-registered when the bridge is live; `subsystems.json` persists state;
 `SubSystemManager` defers-disables saved-off subsystems so they never start.
 Files: `SubSystemBridge.cs`, `SubSystemSettingsPage.cs`, `SubSystemPersistence.cs`,
-`SubSystemManager.cs`, `BetaDepsButterLibSubModule.cs`, `SettingsRegistry.cs`,
+`SubSystemManager.cs`, `ModReadyButterLibSubModule.cs`, `SettingsRegistry.cs`,
 `SettingsVM.cs`, `SettingsPropertyVM.cs`.
 
 ### R4 — UIExtenderEx mods lose features on 1.2+ (Party AI Controls, Clan Control)
@@ -68,7 +68,7 @@ button/panel was missing → "feature disabled / not working."
 movie (and its nested sub-prefabs) down the XML path where the hook injects. Same
 approach upstream UIExtenderEx takes. Cost = the per-movie XML parse the generated
 prefabs optimized away — how every UIExtenderEx-modded install has always run.
-Files: `GeneratedPrefabGate.cs`, `BetaDepsUIExtenderExSubModule.cs`.
+Files: `GeneratedPrefabGate.cs`, `ModReadyUIExtenderExSubModule.cs`.
 
 ## Bonus — MCM localization
 `{=key}` display strings now resolve through `TaleWorlds.Localization.TextObject`

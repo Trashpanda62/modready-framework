@@ -1,4 +1,4 @@
-# Phase 2 — BetaDeps.UIExtenderEx rewrite scope
+# Phase 2 — ModReady.UIExtenderEx rewrite scope
 
 Goal: a clean-room replacement for UIExtenderEx that's just enough to let MCM's in-game Options tab work, so CREST and any mod that depends on `Bannerlord.UIExtenderEx` loads cleanly on beta.
 
@@ -113,7 +113,7 @@ These are explicit non-goals — adding them later is straightforward but not re
 
 ## Phase 2 deliverable
 
-- `Bannerlord.UIExtenderEx.dll` shipped from `Modules\BetaDeps\bin\Win64_Shipping_Client\` (the actual assembly name; the project is `BetaDeps.UIExtenderEx` but the output filename matches the upstream name so consumer mods resolve)
+- `Bannerlord.UIExtenderEx.dll` shipped from `Modules\ModReady\bin\Win64_Shipping_Client\` (the actual assembly name; the project is `ModReady.UIExtenderEx` but the output filename matches the upstream name so consumer mods resolve)
 - A `Modules\Bannerlord.UIExtenderEx\` alias folder with the structural files BLSE requires
 - The build script extended to build, verify, and stage UIExtenderEx
 - Smoke test: re-enable CREST in the launcher, launch, confirm the MCM tab appears in the Options screen

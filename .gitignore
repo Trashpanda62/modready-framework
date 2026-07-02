@@ -47,7 +47,7 @@ shieldfixture-path.flag
 
 # Repo-root module staging folders (pre-dist workflow remnant, deleted Phase 4;
 # the canonical pipeline is src -> dist\Modules -> deploy/zip/installer) -------
-/BetaDeps/
+/ModReady/
 /Bannerlord.Harmony/
 /Bannerlord.UIExtenderEx/
 /Bannerlord.ButterLib/
