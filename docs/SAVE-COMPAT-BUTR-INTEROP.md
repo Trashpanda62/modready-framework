@@ -175,7 +175,7 @@ behaviors that adopt and re-emit the data.
 
 ## Verification recipe
 
-1. `python <scratchpad>/dump_save_ids.py <save.sav>` — dumps the type-id
+1. `python tools\dump_save_ids.py <save.sav>` — dumps the type-id
    table (the script parses the .sav container: `[int32 metaSize][JSON
    metadata][raw-deflate GameData]`, then the header archive). An
    upstream-created save must show the three ids above; a ModReady save made
