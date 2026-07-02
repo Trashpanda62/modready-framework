@@ -10,9 +10,13 @@
 //     prefixes on OnGameInitializationFinished)
 //   - zzCharacterCreation (CharacterDevelopmentEditor) for per-save state
 //
-// Per-save semantics: values are persisted with the save file itself, not
-// in a separate Configs\ModSettings JSON. The Instance singleton is reset
-// when a save loads / a new campaign starts so the data follows the save.
+// Per-save semantics: values live in Configs\ModSettings\PerSave\<campaignId>\
+// JSON on disk AND travel inside the save file itself -- the
+// MCM.Internal.PerSaveCampaignBehavior bridge (v1.0.1 save-compat) copies the
+// JSON values into the save's "_settings" payload on every save and writes
+// payloads found in loaded saves (including upstream-MCM-created ones) back
+// through to the JSON store. The Instance singleton is reset when a save
+// loads / a new campaign starts so the data follows the save.
 // Pattern mirrors GlobalSettings<TSelf>; differs only in storage scope.
 //
 // IMPORTANT (learned from the AIInfluence saga): consumer-mod assemblies

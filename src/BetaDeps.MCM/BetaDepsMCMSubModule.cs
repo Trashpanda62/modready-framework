@@ -139,6 +139,33 @@ public class MCMSubModule : MBSubModuleBase
         catch (Exception ex) { DiagLog.LogCaught(Tag, "OnGameInitializationFinished/ScopedReset", ex); }
     }
 
+    /// <summary>
+    /// Save-compat (v1.0.1, iOrNoTi report): register the per-save settings
+    /// bridge with every campaign. It keeps upstream MCM's "_settings"
+    /// payload alive across ModReady saves and syncs it with the per-save
+    /// JSON store in both directions. Its nested definer also guarantees the
+    /// Dictionary&lt;string,string&gt; container definition exists -- without
+    /// it, deserializing any save created with upstream MCM v5 fails.
+    /// See docs/SAVE-COMPAT-BUTR-INTEROP.md.
+    /// </summary>
+    protected override void OnGameStart(TaleWorlds.Core.Game game, TaleWorlds.Core.IGameStarter gameStarterObject)
+    {
+        base.OnGameStart(game, gameStarterObject);
+        try
+        {
+            if (game.GameType is TaleWorlds.CampaignSystem.Campaign
+                && gameStarterObject is TaleWorlds.CampaignSystem.CampaignGameStarter starter)
+            {
+                starter.AddBehavior(new PerSaveCampaignBehavior());
+                DiagLog.Log(Tag, "OnGameStart: PerSaveCampaignBehavior save-compat bridge registered");
+            }
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnGameStart/PerSaveCampaignBehavior", ex);
+        }
+    }
+
     public override void OnGameEnd(TaleWorlds.Core.Game game)
     {
         base.OnGameEnd(game);

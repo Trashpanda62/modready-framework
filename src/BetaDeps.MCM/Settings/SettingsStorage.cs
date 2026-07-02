@@ -177,6 +177,77 @@ internal static class SettingsStorage
         return "_NoCampaign";
     }
 
+    // ---------- Save-file per-save bridge (v1.0.1 save-compat) ----------
+    //
+    // Upstream MCM v5 persists per-save settings INSIDE the campaign save
+    // (behavior "MCM.Internal.GameFeatures.PerSaveCampaignBehavior", entry
+    // "_settings": Dictionary<string, string> of payload-key -> flat JSON).
+    // ModReady stores per-save settings as JSON files under
+    // Configs\ModSettings\PerSave\<campaignId>\. These helpers let
+    // PerSaveCampaignBehavior bridge the two: payloads found in a loaded
+    // save are written through to the JSON store (so the existing lazy
+    // PerSaveSettings<T>.Instance load path picks them up), and current JSON
+    // values are copied back into the save payload before each save.
+    // Both sides use the same flat {"<PropName>": value} value shape.
+    // See docs/SAVE-COMPAT-BUTR-INTEROP.md.
+
+    /// <summary>
+    /// Per-save JSON path for the CURRENT campaign -- same layout
+    /// ResolvePathFor produces for BasePerSaveSettings instances.
+    /// </summary>
+    internal static string ResolvePerSaveFilePath(string settingsId)
+    {
+        var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var dir = Path.Combine(docs, "Mount and Blade II Bannerlord", "Configs", "ModSettings",
+                               "PerSave", GetCampaignIdOrFallback());
+        return Path.Combine(dir, (settingsId ?? "Unnamed") + ".json");
+    }
+
+    /// <summary>
+    /// Write an upstream save-file per-save payload through to the current
+    /// campaign's per-save JSON file (last-writer-wins: the save file is the
+    /// source of truth at load time because the behavior also refreshes it
+    /// from the JSON store on every save). Returns false when the payload is
+    /// not parseable JSON.
+    /// </summary>
+    internal static bool ImportPerSavePayload(string settingsId, string jsonContent)
+    {
+        try
+        {
+            var jo = JObject.Parse(jsonContent); // validate; payloads are flat {"Prop": value}
+            var path = ResolvePerSaveFilePath(settingsId);
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            WriteAtomic(path, jo.ToString());
+            DiagLog.Log(Tag, $"per-save bridge: imported '{settingsId}' from save payload -> {path}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"ImportPerSavePayload({settingsId})", ex);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Current campaign's per-save JSON content for the given settings id,
+    /// or null when no file exists (or it can't be read).
+    /// </summary>
+    internal static string? ReadPerSaveFileContent(string settingsId)
+    {
+        try
+        {
+            var path = ResolvePerSaveFilePath(settingsId);
+            return File.Exists(path) ? File.ReadAllText(path) : null;
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, $"ReadPerSaveFileContent({settingsId})", ex);
+            return null;
+        }
+    }
+
     // ---------- Preset file-system layer (Suberfudge feature, v0.8.2) ----------
     //
     // Per-mod preset snapshots live at:

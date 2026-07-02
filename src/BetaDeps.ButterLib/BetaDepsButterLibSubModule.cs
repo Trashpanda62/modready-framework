@@ -172,6 +172,33 @@ public class ButterLibSubModule : MBSubModuleBase
     }
 
     /// <summary>
+    /// Save-compat (v1.0.1, iOrNoTi report): register the ObjectSystem
+    /// extension-data behavior with every campaign. It adopts the
+    /// "Vars"/"Flags" payload that upstream ButterLib writes into every
+    /// campaign save and re-emits it on save -- CampaignBehaviorManager
+    /// clears un-owned behavior data on every save, so without a live owner
+    /// the upstream payload would be destroyed the first time the user
+    /// saves under ModReady. See docs/SAVE-COMPAT-BUTR-INTEROP.md.
+    /// </summary>
+    protected override void OnGameStart(TaleWorlds.Core.Game game, TaleWorlds.Core.IGameStarter gameStarterObject)
+    {
+        base.OnGameStart(game, gameStarterObject);
+        try
+        {
+            if (game.GameType is TaleWorlds.CampaignSystem.Campaign
+                && gameStarterObject is TaleWorlds.CampaignSystem.CampaignGameStarter starter)
+            {
+                starter.AddBehavior(new ObjectSystem.MBObjectExtensionDataStore());
+                DiagLog.Log(Tag, "OnGameStart: MBObjectExtensionDataStore save-compat behavior registered");
+            }
+        }
+        catch (Exception ex)
+        {
+            DiagLog.LogCaught(Tag, "OnGameStart/MBObjectExtensionDataStore", ex);
+        }
+    }
+
+    /// <summary>
     /// Per-frame driver for the hotkey input wiring (Phase 2C / H14 real
     /// wiring). Runs on the main thread, where the TaleWorlds Input statics
     /// are valid. HotKeyTicker.Tick is allocation-free over an immutable
