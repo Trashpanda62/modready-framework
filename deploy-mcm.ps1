@@ -26,7 +26,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$repo     = "C:\dev\beta-deps"
+$repo     = "C:\dev\modready\framework"
 $proj     = "$repo\src\BetaDeps.MCM\BetaDeps.MCM.csproj"
 $dllOut   = "$repo\src\BetaDeps.MCM\bin\Release\net472\MCMv5.dll"
 $guiSrc   = "$repo\src\BetaDeps.MCM\GUI"

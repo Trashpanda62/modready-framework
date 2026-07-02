@@ -39,7 +39,7 @@ One-time prerequisites:
 Then build:
 
 ```
-cd C:\dev\beta-deps
+cd C:\dev\modready\framework
 .\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 1.0.0
 ```
 

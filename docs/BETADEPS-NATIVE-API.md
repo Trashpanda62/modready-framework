@@ -755,7 +755,7 @@ during testing.
 
 Reference implementations using these APIs live in:
 
-- `C:\dev\beta-deps\src\BetaDeps.Module\` — the BetaDeps own Mod Config
+- `C:\dev\modready\framework\src\BetaDeps.Module\` — the BetaDeps own Mod Config
   screen uses `UIExtender`, `OptionsVMMixin`, and the MCM fluent builder
   end-to-end.
 - `C:\dev\bannerlord\crest\` — CREST consumed an older API surface and

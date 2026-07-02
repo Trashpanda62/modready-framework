@@ -67,7 +67,7 @@ The build script produces `dist\Modules\BetaDeps\` (the deployable module tree) 
 For testing changes during development:
 
 ```powershell
-cd C:\dev\beta-deps
+cd C:\dev\modready\framework
 .\scripts\Quick-Test.ps1
 ```
 

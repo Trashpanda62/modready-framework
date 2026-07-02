@@ -18,7 +18,7 @@
     - dist\Modules must exist (run scripts\Build-Phase1.ps1 first if it doesn't).
 
   Usage:
-    cd C:\dev\beta-deps
+    cd C:\dev\modready\framework
     .\installer\Build-Installer.ps1 -BlseDir "C:\path\to\unzipped-BLSE" -Version 1.0.0
 #>
 

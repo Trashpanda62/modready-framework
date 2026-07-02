@@ -6,7 +6,7 @@ if %errorlevel% neq 0 (
     powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
-cd /d C:\dev\beta-deps
+cd /d C:\dev\modready\framework
 taskkill /F /T /IM "Bannerlord.exe" >nul 2>&1
 taskkill /F /T /IM "Bannerlord.BLSE.Standalone.exe" >nul 2>&1
 taskkill /F /T /IM "Bannerlord.BLSE.LauncherEx.exe" >nul 2>&1

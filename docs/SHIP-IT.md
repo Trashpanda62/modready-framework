@@ -80,7 +80,7 @@ Workshop page names & descriptions are preserved.
 1. In `C:\dev\bannerlord\workshop\`, set `<ChangeNotes>` for **only the modules
    that actually changed** (usually `WorkshopUpdate-BetaDeps.xml` +
    `WorkshopUpdate-MCM.xml`; leave the 3 pure-dependency notes empty if unchanged).
-2. `<ModuleFolder>` already points at `C:\dev\beta-deps\dist\Modules\...` (current build).
+2. `<ModuleFolder>` already points at `C:\dev\modready\framework\dist\Modules\...` (current build).
 3. Item IDs: BetaDeps `3741426797` · Harmony `3741428196` · UIExtenderEx
    `3741428357` · ButterLib `3741428541` · MCM `3741428715`.
 
@@ -91,7 +91,7 @@ Workshop page names & descriptions are preserved.
 - **Nexus:** upload the 5 zips from `dist\` via the website (1 main + 4 optional).
   Keep existing dependency-file names/descriptions as-is.
 - **Steam:** with Steam running + logged in, **double-click**
-  `C:\dev\beta-deps\UploadToWorkshop.bat` from File Explorer. Steam API injection
+  `C:\dev\modready\framework\UploadToWorkshop.bat` from File Explorer. Steam API injection
   requires a real double-click — it fails silently from any script/terminal.
 
 ---

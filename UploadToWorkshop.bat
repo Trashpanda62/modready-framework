@@ -7,7 +7,7 @@ REM  its API into the uploader. Steam MUST be running and logged in.
 REM
 REM  The TaleWorlds uploader takes a WorkshopUPDATE task XML (NOT a SubModule.xml).
 REM  Each WorkshopUpdate-*.xml carries the Workshop <ItemId>, the <ModuleFolder>
-REM  (-> C:\dev\beta-deps\dist\Modules\...), the <ChangeNotes>, tags and image.
+REM  (-> C:\dev\modready\framework\dist\Modules\...), the <ChangeNotes>, tags and image.
 REM  Run scripts\Build-Phase1.ps1 first so dist\ holds the current build.
 REM
 REM    BetaDeps      3741426797   UIExtenderEx  3741428357   MCM  3741428715
