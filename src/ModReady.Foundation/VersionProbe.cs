@@ -66,57 +66,52 @@ public static class VersionProbe
     {
         try
         {
-            // TaleWorlds.Library.ApplicationVersion exposes Major/Minor/Revision.
-            // We probe via reflection to avoid a hard compile-time link in case
-            // we ever target a build without TaleWorlds.Library in scope.
+            // The reliable game version comes from ApplicationVersion.FromParametersFile()
+            // (TaleWorlds.Library) -- the exact value TaleWorlds.Core.MBSaveLoad.CurrentVersion
+            // caches (decomp: `CurrentVersion { get; } = ApplicationVersion.FromParametersFile()`).
+            // The old probe RESOLVED appVerType but never used it: Plan A called
+            // TaleWorlds.ModuleManager.ApplicationVersionHelper.GameVersion() (a type that does
+            // NOT exist on the current game) and Plan B read Module.CurrentModule.Version (the
+            // MODULE's version, not the game's) -- so detection always returned Unknown.
             var appVerType = Type.GetType("TaleWorlds.Library.ApplicationVersion, TaleWorlds.Library", throwOnError: false)
                           ?? FindTypeAcrossLoadedAssemblies("TaleWorlds.Library.ApplicationVersion");
 
-            // The "current" version often lives on ApplicationVersionHelper or
-            // Module / Common. Try a few well-known surface points by reflection.
-            // First: TaleWorlds.MountAndBlade.Module.CurrentModule?.Version? -- too brittle.
-            // Better: a generic scan of any static method named "GameVersion" or
-            // a static property named "Version" on a type called ApplicationVersionHelper.
+            object? ver = null;
 
-            // Plan A: TaleWorlds.ModuleManager.ApplicationVersionHelper.GameVersion()
-            var helperType = Type.GetType("TaleWorlds.ModuleManager.ApplicationVersionHelper, TaleWorlds.ModuleManager", throwOnError: false)
-                          ?? FindTypeAcrossLoadedAssemblies("TaleWorlds.ModuleManager.ApplicationVersionHelper");
-            if (helperType != null)
+            // Plan A: ApplicationVersion.FromParametersFile() -- the game's own version source.
+            if (appVerType != null)
             {
-                var m = helperType.GetMethod("GameVersion", BindingFlags.Public | BindingFlags.Static);
-                if (m != null)
+                var fromParams = appVerType.GetMethod("FromParametersFile", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
+                if (fromParams != null) ver = fromParams.Invoke(null, null);
+            }
+
+            // Plan B: TaleWorlds.Core.MBSaveLoad.CurrentVersion (same value, already cached).
+            if (ver == null)
+            {
+                var saveLoadType = Type.GetType("TaleWorlds.Core.MBSaveLoad, TaleWorlds.Core", throwOnError: false)
+                                ?? FindTypeAcrossLoadedAssemblies("TaleWorlds.Core.MBSaveLoad");
+                ver = saveLoadType?.GetProperty("CurrentVersion", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+            }
+
+            // Plan C (last resort): Module.CurrentModule.Version -- the MODULE's version, only
+            // used if the two real game-version sources above are unavailable.
+            if (ver == null)
+            {
+                var moduleType = Type.GetType("TaleWorlds.MountAndBlade.Module, TaleWorlds.MountAndBlade", throwOnError: false)
+                              ?? FindTypeAcrossLoadedAssemblies("TaleWorlds.MountAndBlade.Module");
+                var current = moduleType?.GetProperty("CurrentModule", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                if (current != null)
                 {
-                    var v = m.Invoke(null, null);
-                    if (v != null && TryExtractMajorMinor(v, out var maj, out var min))
-                    {
-                        _cachedMajor = maj;
-                        _cachedMinor = min;
-                        return ClassifyBranch(maj, min);
-                    }
+                    var verProp = current.GetType().GetProperty("Version") ?? current.GetType().GetProperty("ModuleVersion");
+                    ver = verProp?.GetValue(current);
                 }
             }
 
-            // Plan B: TaleWorlds.MountAndBlade.Module.CurrentModule.Version
-            var moduleType = Type.GetType("TaleWorlds.MountAndBlade.Module, TaleWorlds.MountAndBlade", throwOnError: false)
-                          ?? FindTypeAcrossLoadedAssemblies("TaleWorlds.MountAndBlade.Module");
-            if (moduleType != null)
+            if (ver != null && TryExtractMajorMinor(ver, out var maj, out var min))
             {
-                var currentProp = moduleType.GetProperty("CurrentModule", BindingFlags.Public | BindingFlags.Static);
-                if (currentProp != null)
-                {
-                    var current = currentProp.GetValue(null);
-                    if (current != null)
-                    {
-                        var verProp = current.GetType().GetProperty("Version") ?? current.GetType().GetProperty("ModuleVersion");
-                        var v = verProp?.GetValue(current);
-                        if (v != null && TryExtractMajorMinor(v, out var maj, out var min))
-                        {
-                            _cachedMajor = maj;
-                            _cachedMinor = min;
-                            return ClassifyBranch(maj, min);
-                        }
-                    }
-                }
+                _cachedMajor = maj;
+                _cachedMinor = min;
+                return ClassifyBranch(ver, maj, min);
             }
         }
         catch (Exception ex)
@@ -167,11 +162,27 @@ public static class VersionProbe
         catch { return false; }
     }
 
-    private static GameBranch ClassifyBranch(int major, int minor)
+    private static GameBranch ClassifyBranch(object versionObj, int major, int minor)
     {
-        if (major < 1) return GameBranch.Unknown;
-        if (major == 1 && minor >= 4) return GameBranch.Beta;
-        if (major == 1) return GameBranch.Public;
-        return GameBranch.Beta; // future majors -> beta side until told otherwise
+        // Branch is decided by ApplicationVersion's version TYPE, NOT the minor number.
+        // 1.4.x used to be the beta line but is now the PUBLIC/stable line, so the old
+        // "minor >= 4 => Beta" rule misreported public 1.4.6 as beta and wrong-gated the
+        // beta-only sigsafe patches. Read ApplicationVersionType when the game exposes it.
+        try
+        {
+            var t = versionObj.GetType();
+            MemberInfo? tm = (MemberInfo?)t.GetProperty("ApplicationVersionType") ?? t.GetField("ApplicationVersionType");
+            object? tv = (tm is PropertyInfo p) ? p.GetValue(versionObj)
+                       : (tm is FieldInfo f) ? f.GetValue(versionObj)
+                       : null;
+            var name = tv?.ToString() ?? string.Empty;
+            if (name.IndexOf("Development", StringComparison.OrdinalIgnoreCase) >= 0
+             || name.IndexOf("Beta", StringComparison.OrdinalIgnoreCase) >= 0)
+                return GameBranch.Beta;
+        }
+        catch { /* fall through to the version-number default */ }
+
+        // A valid 1.x with a non-beta (or unreadable) type is the public/stable line today.
+        return major >= 1 ? GameBranch.Public : GameBranch.Unknown;
     }
 }
