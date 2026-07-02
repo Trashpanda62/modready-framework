@@ -566,20 +566,28 @@ public class SettingsPropertyVM : ViewModel
         // dropdown (never mis-typed as bool), otherwise default to bool.
         if (IsDropdownType(property.PropertyType))
             return new SettingsPropertyVM(owner, property, attribute, "dropdown");
+        // Diagnostic: anything non-bool that still defaults to "bool" is a mis-classify
+        // waiting to happen (the UI-layer WriteBack will throw coercing bool -> the real
+        // type). Log the exact attribute + property type so it is traceable.
+        if (property.PropertyType != typeof(bool))
+            DiagLog.Log("SettingsPropertyVM", $"Create: {owner.Id}.{property.Name} defaulting to bool -- attr={attribute.GetType().FullName}, propType={property.PropertyType.FullName}");
         return new SettingsPropertyVM(owner, property, attribute, "bool");
     }
 
     /// <summary>True if the type is (or derives from) Dropdown&lt;T&gt; / DropdownDefault&lt;T&gt;.
-    /// Mirrors MCM.Common.DropdownConverter.CanConvert so widget-type classification and
-    /// JSON round-tripping agree on what a dropdown is.</summary>
+    /// Matched by generic-type FullName rather than typeof() equality: in Bannerlord's
+    /// multi-MCM environment a consumer mod's Dropdown&lt;T&gt; can come from a different
+    /// MCM assembly than the one this code was compiled against, so a typeof() compare
+    /// (assembly-sensitive) silently missed and the dropdown was typed "bool". Mirrors the
+    /// intent of MCM.Common.DropdownConverter.CanConvert.</summary>
     private static bool IsDropdownType(Type? t)
     {
         while (t != null && t != typeof(object))
         {
             if (t.IsGenericType)
             {
-                var d = t.GetGenericTypeDefinition();
-                if (d == typeof(MCM.Common.Dropdown<>) || d == typeof(MCM.Common.DropdownDefault<>)) return true;
+                var n = t.GetGenericTypeDefinition().FullName;
+                if (n == "MCM.Common.Dropdown`1" || n == "MCM.Common.DropdownDefault`1") return true;
             }
             t = t.BaseType;
         }
