@@ -21,7 +21,6 @@ using System;
 using System.Reflection;
 
 using ModReady.Foundation;
-using ModReady.Harmony.Music;
 
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -32,17 +31,6 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
 {
     private const string Tag = "ModReady.Harmony";
     private static bool _unhandledHookInstalled;
-
-    // v1.0 BYO music picker (workstream C2). Loaded once after the Harmony gate
-    // opens; PsaiRedirectManager.TryLoadRuntime is then pumped from the tick
-    // until PSAI is initialized and our soundtrack is merged in.
-    //
-    // SHELVED for the v1.0.0 ship: the picker is feature-complete + verified but held
-    // back as a future add-on. Flip this flag to true AND uncomment the
-    // [PrefabExtension]/[ViewModelMixin] attributes in
-    // src/ModReady.MCM/UI/PrefabExtensions/MusicOptions{Patch,Mixin}.cs to re-enable.
-    private static readonly bool EnableMusicPicker = true;
-    private static MusicConfig? _musicConfig;
 
     // [ThreadStatic] guard so a recursive failure inside our own log writer
     // (e.g. RuntimeLog.Write itself throws TypeLoadException somehow) doesn't
@@ -303,51 +291,6 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "OnSubModuleLoad/sigsafe", ex);
-        }
-
-        // v1.0 BYO music picker: scan Music\BYO\ and install the PSAI redirect
-        // patch. The soundtrack is merged into PSAI later (OnApplicationTick),
-        // once PSAI itself has initialized. All failures are swallowed and
-        // logged -- a music-feature fault must never take the game down.
-        try
-        {
-            if (EnableMusicPicker)
-            {
-                _musicConfig = MusicConfig.Load();
-                PsaiRedirectManager.Install(_musicConfig);
-                // C3: the settlement (Town/Village/Tavern) Engine.Music path. Inert
-                // unless the player dropped BYO tracks in a settlement context.
-                SettlementMusicManager.Install(_musicConfig);
-                // Persist Options > Sound music settings across launches (Done saves,
-                // Cancel reverts) by hooking the native OptionsVM close buttons.
-                MusicOptionsLifecycle.Install();
-            }
-        }
-        catch (Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "OnSubModuleLoad/music", ex);
-        }
-    }
-
-    protected override void OnApplicationTick(float dt)
-    {
-        base.OnApplicationTick(dt);
-
-        // Tick-driven: wait for TaleWorlds.PSAI.dll to load, resolve PsaiCore,
-        // install the redirect prefix, then merge our soundtrack once PSAI is
-        // initialized. Cheap no-op after that. Workstream C3 will also drive the
-        // settlement music manager's clip-advance loop from here.
-        try
-        {
-            if (EnableMusicPicker)
-            {
-                PsaiRedirectManager.Pump();
-                SettlementMusicManager.Pump();   // C3: settlement clip-advance loop
-            }
-        }
-        catch (Exception ex)
-        {
-            DiagLog.LogCaught(Tag, "OnApplicationTick/music", ex);
         }
     }
 
