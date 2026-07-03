@@ -46,6 +46,11 @@ public sealed class BannerlordHarmonySubModule : MBSubModuleBase
             DiagLog.Log(Tag,
                 "Bannerlord.Harmony module (v0.8 step 1 host) loaded -- " +
                 "Harmony binary fan is now in the AppDomain before ModReady's SubModule constructs.");
+
+            // v1.0.6: blocked-DLL fix. Writes loadFromRemoteSources into the
+            // game/launcher exe.config so web-marked mod DLLs load from the
+            // next launch onward. Idempotent + fully best-effort inside.
+            RemoteSourcesFix.Apply();
         }
         catch (System.Exception ex)
         {

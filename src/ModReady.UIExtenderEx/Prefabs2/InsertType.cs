@@ -17,7 +17,10 @@ public enum InsertType
     ReplaceKeepChildren,
     /// <summary>Replace the target node entirely.</summary>
     Replace,
-    /// <summary>Insert as the last child of the target.</summary>
+    /// <summary>Insert as a child of the target. Position: last child by
+    /// default; when the patch overrides
+    /// <see cref="PrefabExtensionInsertPatch.Index"/>, inserted at that
+    /// element index instead (see PrefabPatcher).</summary>
     Child,
     /// <summary>Insert as a sibling after the target.</summary>
     Append,

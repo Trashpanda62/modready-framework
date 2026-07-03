@@ -166,6 +166,17 @@ internal static class PrefabPatcher
         }
         var insertType = (InsertType)typeProp.GetValue(instance);
 
+        // Child-insert position: only honored when the patch class actually
+        // overrides Index (upstream semantics). Non-overriding patches keep
+        // the historical append-as-last-child behavior.
+        int? childIndex = null;
+        var indexProp = reg.PatchType.GetPropertyHierarchical("Index");
+        if (indexProp != null && indexProp.GetGetMethod(true) is { } getIndex &&
+            getIndex.GetBaseDefinition().DeclaringType != getIndex.DeclaringType)
+        {
+            childIndex = (int)indexProp.GetValue(instance);
+        }
+
         // Locate the content member and produce the fragment(s) to insert.
         if (!TryResolveContent(instance, reg.PatchType, out var fragments, out var removeRootNode, out var contentDescription))
         {
@@ -173,7 +184,7 @@ internal static class PrefabPatcher
             return false;
         }
 
-        return ApplyFragments(doc, target, insertType, fragments, removeRootNode, reg.PatchType.FullName ?? reg.PatchType.Name);
+        return ApplyFragments(doc, target, insertType, fragments, removeRootNode, reg.PatchType.FullName ?? reg.PatchType.Name, childIndex);
     }
 
     /// <summary>
@@ -183,7 +194,7 @@ internal static class PrefabPatcher
     /// the v1 patch families (which map their enums onto v2 InsertType).
     /// </summary>
     private static bool ApplyFragments(XmlDocument doc, XmlNode target, InsertType insertType,
-        List<XmlNode> fragments, bool removeRootNode, string patchName)
+        List<XmlNode> fragments, bool removeRootNode, string patchName, int? childIndex = null)
     {
         // Import fragments into the destination document so they belong to it.
         var imported = fragments.Select(n => doc.ImportNode(n, deep: true)).ToList();
@@ -248,7 +259,31 @@ internal static class PrefabPatcher
                             break;
                         }
                     }
-                    foreach (var n in imported) container.AppendChild(n);
+                    if (childIndex is { } idx)
+                    {
+                        // Index semantics (ModReady design decision, documented
+                        // 2026-07-02 review): insert before the idx-th ELEMENT
+                        // child of the container; negative or past-the-end idx
+                        // falls through to append-as-last-child. Upstream BUTR
+                        // source wasn't available to verify its exact OOB
+                        // behavior, so we chose the non-throwing option --
+                        // a mod asking for slot 7 of 3 still gets its widget,
+                        // at the end. Element-only indexing (skipping comment/
+                        // text nodes) matches the container-detection loop
+                        // above and how Gauntlet counts visible children.
+                        var kids = container.ChildNodes.Cast<XmlNode>()
+                            .Where(c => c.NodeType == XmlNodeType.Element).ToList();
+                        var anchorKid = (idx >= 0 && idx < kids.Count) ? kids[idx] : null;
+                        foreach (var n in imported)
+                        {
+                            if (anchorKid != null) container.InsertBefore(n, anchorKid);
+                            else container.AppendChild(n);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var n in imported) container.AppendChild(n);
+                    }
                     return true;
                 }
 

@@ -23,6 +23,18 @@ public abstract partial class PrefabExtensionInsertPatch
     public abstract InsertType Type { get; }
 
     /// <summary>
+    /// Insertion position among the target's children. Only meaningful when
+    /// <see cref="Type"/> is <see cref="InsertType.Child"/>; upstream
+    /// UIExtenderEx declares this virtual slot on the base class, and consumer
+    /// mods compiled against it override get_Index -- without the slot here,
+    /// those derived types fail to LOAD (TypeLoadException surfaced by the
+    /// game as a "dependency conflict"; see AIInfluence v5.0.7). The patcher
+    /// honors an overridden Index for Child inserts and keeps the historical
+    /// append-as-last-child behavior when it is not overridden.
+    /// </summary>
+    public virtual int Index => 0;
+
+    /// <summary>
     /// Marker base for the content-attribute family. A derived patch class
     /// must apply exactly one of these to a property or method that returns
     /// the XML content to insert.
