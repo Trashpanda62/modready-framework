@@ -38,6 +38,26 @@ public sealed class BannerlordHarmonySubModule : MBSubModuleBase
 {
     private const string Tag = "Bannerlord.Harmony.Host";
 
+    protected override void OnBeforeInitialModuleScreenSetAsRoot()
+    {
+        try
+        {
+            base.OnBeforeInitialModuleScreenSetAsRoot();
+
+            // v1.0.6: Continue save-load loop fix. MUST live in this host --
+            // the ModReady umbrella module is optional (deps-standalone users
+            // disable it) but every configuration loads Bannerlord.Harmony.
+            // This hook runs after all module assemblies (incl. SandBox.View)
+            // are loaded, which Install() needs to resolve its targets.
+            ContinueLoadGuard.Install();
+        }
+        catch (System.Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "OnBeforeInitialModuleScreenSetAsRoot", ex); }
+            catch { /* nothing we can do */ }
+        }
+    }
+
     protected override void OnSubModuleLoad()
     {
         try

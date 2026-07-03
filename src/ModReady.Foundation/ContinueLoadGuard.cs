@@ -111,6 +111,35 @@ public static class ContinueLoadGuard
     {
         try
         {
+            // Diagnostic (cheap -- TryLoadSave fires at most a handful of times
+            // per session): log the real caller chain. If the double-inquiry
+            // arrives via a path other than PreloadScreen.OnFrameTick, this is
+            // the line that names it.
+            try
+            {
+                var frames = new System.Diagnostics.StackTrace(2, false).GetFrames();
+                var chain = new System.Text.StringBuilder();
+                int taken = 0;
+                if (frames != null)
+                {
+                    foreach (var f in frames)
+                    {
+                        var mb = f.GetMethod();
+                        var dt = mb?.DeclaringType;
+                        if (dt == null) continue;
+                        var ns = dt.Namespace ?? string.Empty;
+                        if (ns.StartsWith("HarmonyLib", StringComparison.Ordinal) ||
+                            ns.StartsWith("MonoMod", StringComparison.Ordinal) ||
+                            ns.StartsWith("ModReady", StringComparison.Ordinal)) continue;
+                        if (chain.Length > 0) chain.Append(" <- ");
+                        chain.Append(dt.Name).Append('.').Append(mb!.Name);
+                        if (++taken >= 8) break;
+                    }
+                }
+                DiagLog.Log(Tag, $"TryLoadSave called; inTick={_tickInstance != null}; callers: {chain}");
+            }
+            catch { /* diagnostics only */ }
+
             var inst = _tickInstance;
             if (inst == null) return true; // not the Continue/PreloadScreen path (e.g. Saved Games list) -- never guard
 
