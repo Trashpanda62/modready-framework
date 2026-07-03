@@ -179,6 +179,7 @@ public static class SettingsRegistry
             // loads referenced assemblies lazily when the JIT first
             // touches one of their types.
             EagerLoadModuleAssemblies();
+            WarnOnDuplicateSaveDefiners();
 
             int newlyRegistered = 0;
             var asms = AppDomain.CurrentDomain.GetAssemblies();
@@ -527,6 +528,20 @@ public static class SettingsRegistry
                 DiagLog.Log(Tag, $"EagerLoad: {enabledModules.Count} enabled module(s) detected");
             }
 
+            // Base names (version suffix stripped) of assemblies already live in
+            // the AppDomain. Mods like Diplomacy ship one DLL per game version
+            // (Bannerlord.Diplomacy.1.3.4 ... 1.3.13) as dormant compat shims;
+            // the launcher/SubModule.xml activates exactly one. If we LoadFrom the
+            // dormant siblings too, each carries the SAME SaveableTypeDefiner with
+            // the SAME TypeSaveIds, and the save system throws
+            // "An item with the same key has already been added. Key:
+            // TaleWorlds.SaveSystem.Definition.TypeSaveId" at campaign load,
+            // silently killing save/load. Seed this set from what's already loaded
+            // so we never force-load a second variant of an active module.
+            var loadedBases = new HashSet<string>(
+                alreadyLoaded.Select(StripVersionSuffix),
+                StringComparer.OrdinalIgnoreCase);
+
             int loadedCount = 0;
             int skippedCount = 0;
             foreach (var modDir in Directory.GetDirectories(modulesRoot))
@@ -550,6 +565,19 @@ public static class SettingsRegistry
                     if (alreadyLoaded.Contains(simpleName)) { skippedCount++; continue; }
                     if (IsBoringDll(simpleName))            { skippedCount++; continue; }
 
+                    // Version-variant guard: if a sibling with the same base name
+                    // (version suffix stripped) is already loaded, skip this one.
+                    // Prevents duplicate SaveableTypeDefiner registration from a
+                    // mod's dormant per-game-version compat DLLs (e.g. Diplomacy's
+                    // Bannerlord.Diplomacy.1.3.4..1.3.12 siblings when 1.3.13 is live).
+                    var baseName = StripVersionSuffix(simpleName);
+                    if (baseName != simpleName && loadedBases.Contains(baseName))
+                    {
+                        DiagLog.Log(Tag, $"  skipped version-variant: {Path.GetFileName(dll)} (base '{baseName}' already loaded)");
+                        skippedCount++;
+                        continue;
+                    }
+
                     // Cecil peek BEFORE LoadFrom. ModuleDefinition.ReadModule
                     // is pure-managed PE parsing -- it never invokes the OS
                     // loader and never triggers native-import resolution, so
@@ -570,6 +598,7 @@ public static class SettingsRegistry
                         var loadedName = asm.GetName().Name ?? simpleName;
                         if (alreadyLoaded.Add(loadedName))
                         {
+                            loadedBases.Add(StripVersionSuffix(loadedName));
                             loadedCount++;
                             DiagLog.Log(Tag, $"  eager-loaded: {Path.GetFileName(dll)} (from {Path.GetFileName(modDir)})");
                         }
@@ -585,6 +614,115 @@ public static class SettingsRegistry
         catch (Exception ex)
         {
             DiagLog.LogCaught(Tag, "EagerLoadModuleAssemblies", ex);
+        }
+    }
+
+    /// <summary>
+    /// Strip a trailing dotted numeric version tail of 2+ segments from an
+    /// assembly simple name, so per-game-version sibling DLLs collapse to one
+    /// base. "Bannerlord.Diplomacy.1.3.13" -> "Bannerlord.Diplomacy".
+    /// A single trailing segment (e.g. "MCMv5") is NOT stripped -- only tails
+    /// of two or more all-numeric segments count as a version, so ordinary
+    /// names ending in one number stay intact.
+    /// </summary>
+    /// <summary>
+    /// Boot-time self-test: scan every loaded assembly for TaleWorlds save-type
+    /// definers (types deriving from SaveableTypeDefiner) and warn loudly if two
+    /// or more loaded assemblies that share a version-stripped base name each
+    /// carry a definer. That is the exact shape that makes the save system throw
+    /// "An item with the same key has already been added. Key:
+    /// TaleWorlds.SaveSystem.Definition.TypeSaveId" at campaign load and silently
+    /// break save/load (e.g. Diplomacy's per-game-version sibling DLLs all loaded
+    /// at once). The version-variant guard in EagerLoadModuleAssemblies should
+    /// prevent this; this check exists so any future regression -- or a genuine
+    /// two-mod collision the guard can't cover -- fails loudly in runtime.log
+    /// instead of presenting as an unexplained save/load failure.
+    /// Read-only: never instantiates a definer, only reflects over type metadata.
+    /// </summary>
+    public static void WarnOnDuplicateSaveDefiners()
+    {
+        try
+        {
+            // base name -> list of loaded assembly simple-names carrying a definer
+            var byBase = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                string simpleName;
+                try { simpleName = asm.GetName().Name ?? string.Empty; } catch { continue; }
+                if (simpleName.Length == 0) continue;
+                if (simpleName.StartsWith("TaleWorlds.", StringComparison.OrdinalIgnoreCase)) continue;
+
+                if (!AssemblyDefinesSaveDefiner(asm)) continue;
+
+                var baseName = StripVersionSuffix(simpleName);
+                if (!byBase.TryGetValue(baseName, out var list))
+                {
+                    list = new List<string>();
+                    byBase[baseName] = list;
+                }
+                list.Add(simpleName);
+            }
+
+            foreach (var kv in byBase)
+            {
+                if (kv.Value.Count < 2) continue;
+                DiagLog.Log(Tag,
+                    $"WARN: {kv.Value.Count} loaded assemblies share base '{kv.Key}' and each defines a " +
+                    $"SaveableTypeDefiner ({string.Join(", ", kv.Value)}). Duplicate TypeSaveId registration " +
+                    $"will break save/load. Only one version of a mod's DLL should be loaded -- check the " +
+                    $"module's bin folder for stale per-version sibling DLLs.");
+            }
+        }
+        catch (Exception ex)
+        {
+            try { DiagLog.LogCaught(Tag, "WarnOnDuplicateSaveDefiners", ex); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// True if the assembly defines at least one type whose base-type chain
+    /// includes a "SaveableTypeDefiner" (matched by simple type name to avoid a
+    /// hard reference to TaleWorlds.SaveSystem). Tolerates ReflectionTypeLoadException
+    /// by scanning whatever types did load.
+    /// </summary>
+    private static bool AssemblyDefinesSaveDefiner(Assembly asm)
+    {
+        Type?[] types;
+        try { types = asm.GetTypes(); }
+        catch (ReflectionTypeLoadException rtle) { types = rtle.Types; }
+        catch { return false; }
+
+        foreach (var t in types)
+        {
+            if (t == null) continue;
+            try
+            {
+                for (var b = t.BaseType; b != null && b != typeof(object); b = b.BaseType)
+                {
+                    if (string.Equals(b.Name, "SaveableTypeDefiner", StringComparison.Ordinal))
+                        return true;
+                }
+            }
+            catch { }
+        }
+        return false;
+    }
+
+    internal static string StripVersionSuffix(string simpleName)
+    {
+        if (string.IsNullOrEmpty(simpleName)) return simpleName;
+        var parts = simpleName.Split('.');
+        int keep = parts.Length;
+        while (keep > 1 && IsAllDigits(parts[keep - 1])) keep--;
+        // Require at least two numeric segments were peeled to treat it as a version.
+        if (parts.Length - keep < 2) return simpleName;
+        return string.Join(".", parts, 0, keep);
+
+        static bool IsAllDigits(string s)
+        {
+            if (s.Length == 0) return false;
+            foreach (var c in s) if (c < '0' || c > '9') return false;
+            return true;
         }
     }
 
