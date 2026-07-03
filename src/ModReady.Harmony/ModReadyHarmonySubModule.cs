@@ -299,6 +299,13 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
         base.OnBeforeInitialModuleScreenSetAsRoot();
         TryInstallPatchShield("OnBeforeInitialModuleScreenSetAsRoot");
 
+        // v1.0.6: fix the main-menu "Continue" save-load loop (native
+        // PreloadScreen re-ticks TryLoadSave on a module-mismatched save).
+        // SandBox is loaded and the main menu isn't up yet -- ideal install
+        // point. Idempotent; guards only the Continue path.
+        try { ContinueLoadGuard.Install(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "ContinueLoadGuard.Install", ex); }
+
         // Phase 3 gate (dev-only; no-op unless shieldfixture-path.flag
         // exists): synthetic broken-mod fixture proving culprit-targeted
         // unpatching leaves innocent patches intact.
