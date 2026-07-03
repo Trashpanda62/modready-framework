@@ -30,7 +30,7 @@
          docs/VERSION-POLICY.md. -->
     <AssemblyVersion>2.14.99.0</AssemblyVersion>
     <FileVersion>2.14.99.0</FileVersion>
-    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+    <InformationalVersion>ModReady 1.0.6</InformationalVersion>
 
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>

@@ -29,8 +29,8 @@
          bump per-release; dependents bind against it. FileVersion/Informational
          track the human release version. -->
     <AssemblyVersion>0.9.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+    <FileVersion>1.0.6.0</FileVersion>
+    <InformationalVersion>ModReady 1.0.6</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

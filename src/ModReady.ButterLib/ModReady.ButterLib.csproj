@@ -28,7 +28,7 @@
          docs/VERSION-POLICY.md. -->
     <AssemblyVersion>2.10.99.0</AssemblyVersion>
     <FileVersion>2.10.99.0</FileVersion>
-    <InformationalVersion>ModReady 1.0.0</InformationalVersion>
+    <InformationalVersion>ModReady 1.0.6</InformationalVersion>
 
     <!-- Microsoft.Extensions.DependencyInjection and friends must land in bin
          so the DI container is usable at runtime. -->
