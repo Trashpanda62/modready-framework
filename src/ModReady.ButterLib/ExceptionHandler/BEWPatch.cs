@@ -171,6 +171,31 @@ public static class BEWPatch
             {
                 DiagLog.Log(Tag, $"  InnerException: {__exception.InnerException.GetType().Name} -- {__exception.InnerException.Message}");
             }
+
+            // v0.7.6 (2026-07-04): log the STACK TRACE of the (inner) exception on the
+            // first sighting. Without this a swallowed NullReferenceException is
+            // undiagnosable -- the message is just "Object reference not set..." with no
+            // hint of which submodule/tick method threw it. This blindspot is why
+            // ModReady loading-bug reports were unactionable: the fault was caught and
+            // hidden, not surfaced. One stack per (method,type) per session; throttled
+            // like the message above, so no 60Hz spam.
+            if (count == 1)
+            {
+                var origin = __exception.InnerException ?? __exception;
+                var trace = origin.StackTrace;
+                if (!string.IsNullOrEmpty(trace))
+                {
+                    var lines = trace.Split('\n');
+                    int n = Math.Min(lines.Length, 15);
+                    DiagLog.Log(Tag, $"  stack ({origin.GetType().Name}, first {n} frame(s)):");
+                    for (int i = 0; i < n; i++)
+                        DiagLog.Log(Tag, "    " + lines[i].TrimEnd());
+                }
+                else
+                {
+                    DiagLog.Log(Tag, "  (no stack trace on the exception -- likely thrown from native/engine code)");
+                }
+            }
         }
         catch { }
         return null;
