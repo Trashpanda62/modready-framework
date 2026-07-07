@@ -48,6 +48,15 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
 
     public ModReadyHarmonySubModule()
     {
+        // Game Pass / MS Store (.NET 6): the umbrella module is Win64-only by
+        // design, but its DLLs may be bridged onto the Gaming.Desktop folder so
+        // the engine can find them (no "cannot find/load" popup). If it loads
+        // here on CoreCLR, no-op entirely -- every Steam-only hook below
+        // (PatchShield, SaveShield, alias bootstrap, sigsafe patches) runs from
+        // the .NET 6 Harmony host instead, and running the net472 paths on
+        // CoreCLR is exactly what crashed startup (2026-07-05).
+        if (RuntimeEnv.IsNetCore) return;
+
         if (System.Threading.Interlocked.Exchange(ref _ctorEarlyDetectionRan, 1) == 0)
         {
             // v0.7 hotfix: install the AssemblyResolve shim FIRST -- before
@@ -119,6 +128,9 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
     protected override void OnSubModuleLoad()
     {
         base.OnSubModuleLoad();
+
+        // Game Pass no-op (see ctor): the .NET 6 host owns all of this on GP.
+        if (RuntimeEnv.IsNetCore) return;
 
         // Bootstrap alias folders (Bannerlord.Harmony / UIExtenderEx / ButterLib /
         // MBOptionScreen). The public zip ships them nested under
@@ -297,6 +309,7 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
     protected override void OnBeforeInitialModuleScreenSetAsRoot()
     {
         base.OnBeforeInitialModuleScreenSetAsRoot();
+        if (RuntimeEnv.IsNetCore) return; // Game Pass no-op
         TryInstallPatchShield("OnBeforeInitialModuleScreenSetAsRoot");
 
         // v1.0.6: fix the main-menu "Continue" save-load loop (native
@@ -345,6 +358,8 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
 
     private static void TryInstallPatchShield(string from)
     {
+        if (RuntimeEnv.IsNetCore) return; // Game Pass no-op (host owns GP)
+
         // v0.7: install PatchShield (idempotent — only shields newly-patched
         // methods on each pass). Catches MissingMethodException /
         // MissingFieldException / TypeLoadException from consumer-mod

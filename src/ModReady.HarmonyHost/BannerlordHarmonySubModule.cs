@@ -38,6 +38,40 @@ public sealed class BannerlordHarmonySubModule : MBSubModuleBase
 {
     private const string Tag = "Bannerlord.Harmony.Host";
 
+    // v1.0.7 Game Pass fix: install the consumer-mod type-load recovery shims
+    // FROM THIS HOST. The umbrella ModReady module (which historically owned
+    // these installs) ships a net472 build only, so on Game Pass / Microsoft
+    // Store (.NET 6 CoreCLR) it never loads and ModReadyHarmonySubModule never
+    // runs -- leaving CollectAssemblyTypesShim uninstalled. Result: a consumer
+    // mod whose GetTypes() throws (obfuscated or built against a slightly
+    // different BUTR surface -- AIInfluence 5.0.7 is the canonical case) fails
+    // to construct with the "dependency conflict" dialog on Game Pass while
+    // working on Steam. This host ships a net6 build AND carries
+    // ModReady.Foundation.dll, and loads before every consumer mod, so its
+    // constructor is the earliest point these shims can go in on both runtimes.
+    // Every install is one-shot/idempotent internally, so the Steam path (where
+    // ModReadyHarmonySubModule also installs them) is unaffected.
+    public BannerlordHarmonySubModule()
+    {
+        // v1.0.8 Game Pass fix, step 0: bridge Steam-only mods (Win64-only
+        // build) into a Gaming.Desktop folder so the engine can find and load
+        // them on Game Pass. MUST run first -- before the engine reaches the
+        // consumer mod in the same LoadSubModules pass. AIInfluence 5.0.7 (top
+        // mod) is the canonical case: net472-only build, loads fine on .NET 6
+        // once the engine looks in the right folder.
+        try { GamePassModuleBridge.Apply(); }
+        catch (System.Exception ex) { try { DiagLog.LogCaught(Tag, "ctor/GamePassModuleBridge", ex); } catch { } }
+
+        try { AssemblyVersionShim.Install(); }
+        catch (System.Exception ex) { try { DiagLog.LogCaught(Tag, "ctor/AssemblyVersionShim", ex); } catch { } }
+
+        try { CollectAssemblyTypesShim.Install(); }
+        catch (System.Exception ex) { try { DiagLog.LogCaught(Tag, "ctor/CollectAssemblyTypesShim", ex); } catch { } }
+
+        try { SubModuleConstructionGuard.Install(); }
+        catch (System.Exception ex) { try { DiagLog.LogCaught(Tag, "ctor/SubModuleConstructionGuard", ex); } catch { } }
+    }
+
     protected override void OnBeforeInitialModuleScreenSetAsRoot()
     {
         try
