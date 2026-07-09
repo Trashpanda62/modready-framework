@@ -166,10 +166,23 @@ public static class BEWPatch
                 if (total > 5)
                     DiagLog.Log(Tag, $"  (+ {total - 5} more LoaderException(s) suppressed)");
             }
-            // Also unwrap a single InnerException for non-RTLE wrapping.
+            // Unwrap the FULL InnerException chain for non-RTLE wrapping. A
+            // one-level unwrap hid the real culprit: e.g. a map-screen crash on
+            // save-load surfaced only as TargetInvocationException ->
+            // TypeInitializationException, while the ROOT (a mod's broken text/
+            // patch throwing inside a native type's static ctor) stayed hidden.
+            // Walk to the deepest inner so the offending assembly is named.
             else if (__exception.InnerException != null)
             {
-                DiagLog.Log(Tag, $"  InnerException: {__exception.InnerException.GetType().Name} -- {__exception.InnerException.Message}");
+                var chain = __exception.InnerException;
+                int depth = 0;
+                while (chain != null && depth < 8)
+                {
+                    DiagLog.Log(Tag, $"  InnerException[{depth}]: {chain.GetType().Name} -- {chain.Message}");
+                    if (chain.InnerException == null) break;
+                    chain = chain.InnerException;
+                    depth++;
+                }
             }
 
             // v0.7.6 (2026-07-04): log the STACK TRACE of the (inner) exception on the
@@ -181,13 +194,18 @@ public static class BEWPatch
             // like the message above, so no 60Hz spam.
             if (count == 1)
             {
-                var origin = __exception.InnerException ?? __exception;
+                // Stack of the DEEPEST (root) exception -- that's the real throw
+                // site (e.g. inside a native static ctor or a mod's patch), not
+                // the outer wrapper that just re-threw it.
+                var origin = __exception;
+                int guard = 0;
+                while (origin.InnerException != null && guard++ < 8) origin = origin.InnerException;
                 var trace = origin.StackTrace;
                 if (!string.IsNullOrEmpty(trace))
                 {
                     var lines = trace.Split('\n');
                     int n = Math.Min(lines.Length, 15);
-                    DiagLog.Log(Tag, $"  stack ({origin.GetType().Name}, first {n} frame(s)):");
+                    DiagLog.Log(Tag, $"  stack (ROOT {origin.GetType().Name}, first {n} frame(s)):");
                     for (int i = 0; i < n; i++)
                         DiagLog.Log(Tag, "    " + lines[i].TrimEnd());
                 }

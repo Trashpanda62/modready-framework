@@ -38,6 +38,19 @@ public class ButterLibSubModule : MBSubModuleBase
             // BEW finalizers.
             BEWPatch.Enable();
 
+            // v1.0.9: guard GameTexts.FindText against a null text manager so a
+            // mod querying campaign UI text too early (Retinues et al.) can't
+            // poison CampaignUIHelper's static ctor and silently hang save-load
+            // at the map screen. Installed here (early, both platforms) so it's
+            // active before any campaign/mod behavior can trigger the .cctor.
+            GameTextsGuard.Install();
+
+            // v1.0.9: keep a mod's broken player-party data (Retinues' custom
+            // retinue troops with null heroes) from NRE-ing the wage/finance
+            // models during the map-bar refresh, which hangs the map screen on
+            // save-load. Finalizer lets the map VM finish constructing.
+            MapBarGuard.Install();
+
             // Options > Keybinds whitelist postfix so consumer-mod hotkey
             // categories (HotKeyCategoryContainer) render in the options UI.
             OptionsKeybindCategoryPatch.Install(new global::HarmonyLib.Harmony("modready.butterlib.hotkeyoptions"));
@@ -190,6 +203,13 @@ public class ButterLibSubModule : MBSubModuleBase
             {
                 starter.AddBehavior(new ObjectSystem.MBObjectExtensionDataStore());
                 DiagLog.Log(Tag, "OnGameStart: MBObjectExtensionDataStore save-compat behavior registered");
+
+                // v1.0.9: strip leftover/corrupt troops (null CharacterObject or
+                // null Culture -- e.g. an orphaned WarbandForge retinue) from all
+                // party rosters on load, so the native wage/food/portrait models
+                // stop NRE-ing and hanging the map/party screen.
+                starter.AddBehavior(new SaveRepair.RosterRepairBehavior());
+                DiagLog.Log(Tag, "OnGameStart: RosterRepairBehavior registered (removes corrupt leftover troops on load)");
             }
         }
         catch (Exception ex)
