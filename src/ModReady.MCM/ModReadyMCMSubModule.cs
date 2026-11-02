@@ -60,6 +60,14 @@ public class MCMSubModule : MBSubModuleBase
             }
             catch (Exception mjEx) { DiagLog.LogCaught(Tag, "ModJson DiscoverAndLoad", mjEx); }
 
+            // MCM v5.13: settings declared in each module's SubModule.xml.
+            try
+            {
+                int x = ModReady.Framework.SubModuleXmlSettings.DiscoverAndLoad();
+                if (x > 0) DiagLog.Log(Tag, $"SubModule.xml settings: registered {x} settings page(s)");
+            }
+            catch (Exception sxEx) { DiagLog.LogCaught(Tag, "SubModuleXml DiscoverAndLoad", sxEx); }
+
             SettingsRegistry.DiscoverAll();
         }
         catch (Exception ex)

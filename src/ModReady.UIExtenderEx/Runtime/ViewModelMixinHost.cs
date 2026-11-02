@@ -143,6 +143,7 @@ internal static class ViewModelMixinHost
                 if (instance == null) continue; // logged; skipped for this VM only
 
                 lock (list) { list.Add(new AttachedMixin(instance, pending.Registration)); }
+                MixinNotifications.Attach(vm, instance);
                 attachedCount++;
             }
             if (attachedCount > 0)

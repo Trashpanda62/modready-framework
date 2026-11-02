@@ -18,7 +18,7 @@ namespace Bannerlord.UIExtenderEx.ViewModels;
 /// Derived mixins should be marked with <see cref="Attributes.ViewModelMixinAttribute"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The TaleWorlds ViewModel this mixin attaches to.</typeparam>
-public abstract class BaseViewModelMixin<TViewModel> where TViewModel : ViewModel
+public abstract class BaseViewModelMixin<TViewModel> : IViewModelMixin where TViewModel : ViewModel
 {
     /// <summary>The target ViewModel instance this mixin is bound to.</summary>
     protected TViewModel ViewModel { get; }
@@ -36,6 +36,22 @@ public abstract class BaseViewModelMixin<TViewModel> where TViewModel : ViewMode
     /// <summary>Called when the target VM is being finalized so the mixin can
     /// release any resources it acquired.</summary>
     public virtual void OnFinalize() { }
+
+    /// <summary>Called whenever the target VM raises a property-change
+    /// notification (any of its OnPropertyChanged / OnPropertyChangedWithValue
+    /// overloads). UIExtenderEx 3.x surface; override to react to VM state.</summary>
+    public virtual void OnViewModelPropertyChanged(string propertyName) { }
+
+    /// <summary>Read a non-public field or property of the target VM by name.</summary>
+    protected TValue GetPrivate<TValue>(string name)
+    {
+        var value = Runtime.PrivateMemberAccess.Get(ViewModel, name);
+        return value is TValue v ? v : default!;
+    }
+
+    /// <summary>Write a non-public field or property of the target VM by name.</summary>
+    protected void SetPrivate<TValue>(string name, TValue value)
+        => Runtime.PrivateMemberAccess.Set(ViewModel, name, value);
 
     // Property-change helpers forwarding to the attached VM, matching the
     // upstream BUTR base-class surface. Consumer mixins (e.g. CDE's
