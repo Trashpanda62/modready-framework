@@ -17,7 +17,7 @@
     <Authors>Steve / Maxfield Management Group</Authors>
     <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
     <Description>ModReady clean-room implementation of the MCM v5 settings declaration API. Provides AttributeGlobalSettings, the SettingProperty attribute family, and JSON persistence; the UI tab is in a separate package.</Description>
-    <Product>Bannerlord Beta Dependencies</Product>
+    <Product>ModReady</Product>
 
     <!-- AssemblyVersion impersonates upstream BUTR MCMv5. Bumped from
          5.10.0.0 to 5.11.99.0 in v0.3.9: BSC and similar mods compiled

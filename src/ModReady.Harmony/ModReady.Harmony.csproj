@@ -15,7 +15,7 @@
     <Authors>Steve / Maxfield Management Group</Authors>
     <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
     <Description>ModReady Harmony loader and signature-safe binding helpers for Mount and Blade II: Bannerlord beta branch.</Description>
-    <Product>Bannerlord Beta Dependencies</Product>
+    <Product>ModReady</Product>
 
     <!-- We ship 0Harmony.dll into Modules\ModReady\bin\Win64_Shipping_Client\
          alongside this assembly, so CopyLocal must stay on for the Harmony

@@ -17,7 +17,7 @@
     <Authors>Steve / Maxfield Management Group</Authors>
     <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
     <Description>ModReady clean-room implementation of the Bannerlord.ButterLib public API surface used by community mods on the beta branch.</Description>
-    <Product>Bannerlord Beta Dependencies</Product>
+    <Product>ModReady</Product>
 
     <!-- AssemblyVersion impersonates upstream BUTR ButterLib's release line so
          existing mods compiled against Bannerlord.ButterLib v2.10.x.x have

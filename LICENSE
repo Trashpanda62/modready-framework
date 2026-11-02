@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2026 Maxfield Management Group
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Provenance note
+
+This repository contains original source only. The projects under
+src/ModReady.UIExtenderEx, src/ModReady.ButterLib and src/ModReady.MCM are
+clean-room implementations of the corresponding public API surfaces used by
+Bannerlord mods. They were written from the observable public API (type,
+member and signature names) so that consumer mods compiled against those APIs
+load unmodified. No source or binary code from BUTR
+(https://github.com/BUTR) is copied, vendored, decompiled into, or
+redistributed by this repository.
+
+ModReady is not affiliated with or endorsed by BUTR. Third-party components
+redistributed in release archives (Harmony, Mono.Cecil, MonoMod,
+Newtonsoft.Json, and others) are MIT-licensed and listed with their notices in
+Modules/ModReady/THIRD-PARTY-LICENSES.txt inside each release zip.

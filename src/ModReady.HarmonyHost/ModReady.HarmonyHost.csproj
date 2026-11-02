@@ -20,7 +20,7 @@
     <Authors>Steve / Maxfield Management Group</Authors>
     <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
     <Description>ModReady v0.8: real Bannerlord.Harmony module host. Loads the Harmony binary fan (0Harmony, Mono.Cecil, MonoMod.*) into the game AppDomain BEFORE ModReady's own SubModule constructs, so all shim infrastructure is installed against the same Harmony copy consumer mods will pick up.</Description>
-    <Product>Bannerlord Beta Dependencies</Product>
+    <Product>ModReady</Product>
 
     <!-- We ship 0Harmony.dll + Mono.Cecil.dll + MonoMod.*.dll alongside this
          assembly under Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\,

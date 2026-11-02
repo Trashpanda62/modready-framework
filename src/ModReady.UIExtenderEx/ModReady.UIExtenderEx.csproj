@@ -19,7 +19,7 @@
     <Authors>Steve / Maxfield Management Group</Authors>
     <Copyright>Copyright (c) 2026 Maxfield Management Group. MIT License.</Copyright>
     <Description>ModReady clean-room implementation of the Bannerlord UIExtenderEx public API surface. Provides GauntletUI prefab patching and ViewModel mixins for community mods.</Description>
-    <Product>Bannerlord Beta Dependencies</Product>
+    <Product>ModReady</Product>
 
     <!-- AssemblyVersion impersonates upstream BUTR UIExtenderEx so mods
          compiled against Bannerlord.UIExtenderEx v2.x bind to ours.
