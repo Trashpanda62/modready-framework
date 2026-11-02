@@ -1,4 +1,4 @@
-// ModReady.ButterLib -- GameTextsGuard
+// ModReady.Harmony -- GameTextsGuard
 //
 // Original work. MIT, copyright 2026 Maxfield Management Group.
 //
@@ -34,7 +34,7 @@ using HarmonyLib;
 
 using ModReady.Foundation;
 
-namespace Bannerlord.ButterLib.ExceptionHandler;
+namespace ModReady.Harmony.SaveRepair;
 
 public static class GameTextsGuard
 {

@@ -21,6 +21,7 @@ using System;
 using System.Reflection;
 
 using ModReady.Foundation;
+using ModReady.Harmony.SaveRepair;
 
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -132,37 +133,15 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
         // Game Pass no-op (see ctor): the .NET 6 host owns all of this on GP.
         if (RuntimeEnv.IsNetCore) return;
 
-        // Bootstrap alias folders (Bannerlord.Harmony / UIExtenderEx / ButterLib /
-        // MBOptionScreen). The public zip ships them nested under
-        // Modules\ModReady\aliases\ so end users see a single module on disk;
-        // on first launch we materialise them as siblings of ModReady so the
-        // launcher sees them and consumer mods that DependedModule on those
-        // IDs can find them. Idempotent — skips folders that already exist.
-        try { BootstrapAliasFolders(); }
-        catch (Exception ex) { DiagLog.LogCaught(Tag, "BootstrapAliasFolders", ex); }
-
-        // v0.8.2: unconditionally write the User-scope CREST_SHOW_STUBS=1 env
-        // var so BLSE LauncherEx's hide-stubs filter (which would otherwise
-        // hide our 4 dependency modules from the launcher modlist) bails out
-        // on the NEXT BLSE launch. BLSE reads this env var once at launcher
-        // startup, before ModReady loads, so on a fresh install the dep
-        // modules become visible starting on the second launch.
-        //
-        // There is no opt-out toggle: modders who want the raw 4-dep stack
-        // without ModReady's PatchShield/SaveShield/MCM extras can simply
-        // disable the ModReady module in the launcher — the 4 dependency
-        // modules ship the canonical DLLs and run standalone (v0.8+).
-        try
-        {
-            const string envName = "CREST_SHOW_STUBS";
-            var current = System.Environment.GetEnvironmentVariable(envName, System.EnvironmentVariableTarget.User);
-            if (current != "1")
-            {
-                System.Environment.SetEnvironmentVariable(envName, "1", System.EnvironmentVariableTarget.User);
-                DiagLog.Log(Tag, $"set User env {envName}=1 (was '{current ?? "<null>"}'); BLSE will surface dep modules from the next launch");
-            }
-        }
-        catch (Exception ex) { DiagLog.LogCaught(Tag, "Set CREST_SHOW_STUBS", ex); }
+        // v2.0: save-load guards moved here from ModReady's former ButterLib module.
+        // Installed early so they are active before any campaign/mod behavior can
+        // trigger CampaignUIHelper's static ctor or the map-bar refresh.
+        try { RemoteSourcesFix.Apply(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "RemoteSourcesFix", ex); }
+        try { GameTextsGuard.Install(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "GameTextsGuard", ex); }
+        try { MapBarGuard.Install(); }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "MapBarGuard", ex); }
 
         // Install AssemblyResolve redirect first so any subsequent assembly
         // load triggered downstream resolves to our already-loaded copies.
@@ -342,6 +321,20 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
     {
         base.OnGameStart(game, gameStarterObject);
         TryInstallPatchShield("OnGameStart");
+
+        if (RuntimeEnv.IsNetCore) return;
+        try
+        {
+            // Strip leftover/corrupt troops (null CharacterObject or null Culture,
+            // e.g. an orphaned WarbandForge retinue) from party rosters on load.
+            if (game.GameType is TaleWorlds.CampaignSystem.Campaign
+                && gameStarterObject is TaleWorlds.CampaignSystem.CampaignGameStarter starter)
+            {
+                starter.AddBehavior(new RosterRepairBehavior());
+                DiagLog.Log(Tag, "OnGameStart: RosterRepairBehavior registered");
+            }
+        }
+        catch (Exception ex) { DiagLog.LogCaught(Tag, "OnGameStart/RosterRepair", ex); }
     }
 
     public override void OnAfterGameInitializationFinished(Game game, object starterObject)
@@ -401,126 +394,6 @@ public class ModReadyHarmonySubModule : MBSubModuleBase
         }
     }
 
-    /// <summary>
-    /// One-time bootstrap. Looks at our own assembly location
-    /// (Modules\ModReady\bin\Win64_Shipping_Client\ModReady.Harmony.dll), walks
-    /// up to the Modules\ root, and for each known alias folder name (the four
-    /// modules consumer mods declare as DependedModule), copies
-    /// `Modules\ModReady\aliases\&lt;Name&gt;\` into `Modules\&lt;Name&gt;\` if the
-    /// destination doesn't exist. Skips silently for folders that already exist
-    /// (re-runs are safe and free).
-    ///
-    /// On the FIRST launch after a fresh install, the alias folders aren't on
-    /// disk yet — consumer mods that DependedModule on Bannerlord.Harmony /
-    /// UIExtenderEx / ButterLib / MBOptionScreen won't load, and BLSE may
-    /// gate the launcher. We pop a TaleWorlds.Library InformationManager
-    /// message asking the user to restart, then exit normally; on the SECOND
-    /// launch the aliases are present and everything works.
-    /// </summary>
-    private static void BootstrapAliasFolders()
-    {
-        var ownPath = typeof(ModReadyHarmonySubModule).Assembly.Location;
-        if (string.IsNullOrEmpty(ownPath)) return;
-
-        // ownPath = ...\Modules\ModReady\bin\Win64_Shipping_Client\ModReady.Harmony.dll
-        var binDir         = System.IO.Path.GetDirectoryName(ownPath);          // Win64_Shipping_Client
-        var modReadyBin    = System.IO.Path.GetDirectoryName(binDir);            // bin
-        var modReadyModule = System.IO.Path.GetDirectoryName(modReadyBin);       // ModReady
-        var modulesRoot    = System.IO.Path.GetDirectoryName(modReadyModule);    // Modules
-        if (string.IsNullOrEmpty(modReadyModule) || string.IsNullOrEmpty(modulesRoot)) return;
-
-        // v0.8 task #14: under MO2/USVFS the modulesRoot derived above is the
-        // VIRTUALISED path. Writes there land in MO2's Overwrite folder, not
-        // on the real game disk, so on the next real launch the launcher
-        // doesn't see the alias folders we materialise. MO2Bootstrap detects
-        // USVFS and resolves the real on-disk Modules path via the kernel-
-        // provided MainModule.FileName (which USVFS doesn't hook). If
-        // detected, we redirect the materialisation target there.
-        if (ModReady.Foundation.MO2Bootstrap.IsUnderMO2())
-        {
-            var realModules = ModReady.Foundation.MO2Bootstrap.TryGetRealModulesPath();
-            if (!string.IsNullOrEmpty(realModules))
-            {
-                DiagLog.Log(Tag, $"BootstrapAliasFolders: MO2 detected ({ModReady.Foundation.MO2Bootstrap.DetectionReason}); " +
-                                  $"redirecting materialisation from virtual '{modulesRoot}' to real '{realModules}'");
-                modulesRoot = realModules!;
-            }
-            else
-            {
-                DiagLog.Log(Tag, $"BootstrapAliasFolders: MO2 detected ({ModReady.Foundation.MO2Bootstrap.DetectionReason}) " +
-                                  "but real Modules path could not be derived; falling back to virtualised path (alias folders may not survive)");
-            }
-        }
-
-        var aliasStaging = System.IO.Path.Combine(modReadyModule!, "aliases");
-        if (!System.IO.Directory.Exists(aliasStaging))
-        {
-            // Not a single-folder install; nothing to bootstrap. Local-dev
-            // builds via Ralph-Loop already deploy alias folders as siblings.
-            return;
-        }
-
-        // Phase 1.6 / finding H3 (2026-06-10 review): alias folders used to be
-        // created once and never touched again ("if exists -> continue").
-        // After any ModReady update the alias folders kept the OLD build's
-        // DLLs, and -- with AssemblyVersion pinned across releases -- the CLR
-        // happily bound new ModReady code against a stale Foundation/Harmony
-        // copy that loaded first from an alias folder. That produced exactly
-        // the MissingMethodException class this stack exists to prevent, with
-        // no diagnostic pointing at the stale alias. Each materialised folder
-        // now carries a modready-version.txt stamp; on FileVersion mismatch
-        // the folder is re-copied. Refreshed DLLs take effect NEXT launch
-        // (this session already loaded the old ones), which is exactly the
-        // window the old code left permanently broken.
-        var stampVersion = TryGetOwnFileVersion();
-
-        int created = 0, refreshed = 0;
-        foreach (var sub in System.IO.Directory.GetDirectories(aliasStaging))
-        {
-            var name = System.IO.Path.GetFileName(sub);
-            var dest = System.IO.Path.Combine(modulesRoot!, name);
-            var stampPath = System.IO.Path.Combine(dest, AliasStampFile);
-            try
-            {
-                if (!System.IO.Directory.Exists(dest))
-                {
-                    CopyDirectoryRecursive(sub, dest);
-                    TryWriteStamp(stampPath, stampVersion);
-                    created++;
-                    DiagLog.Log(Tag, $"BootstrapAliasFolders: created Modules\\{name} (stamp {stampVersion})");
-                    continue;
-                }
-
-                var existing = System.IO.File.Exists(stampPath)
-                    ? System.IO.File.ReadAllText(stampPath).Trim()
-                    : "(no stamp -- pre-1.0 install)";
-
-                // Old .stale-* shunt files from a previous refresh are
-                // unlocked by now; garbage-collect them opportunistically.
-                CleanupStaleFiles(dest);
-
-                if (!string.IsNullOrEmpty(stampVersion) &&
-                    string.Equals(existing, stampVersion, StringComparison.Ordinal))
-                    continue; // up to date
-
-                RefreshDirectoryRecursive(sub, dest);
-                TryWriteStamp(stampPath, stampVersion);
-                refreshed++;
-                DiagLog.Log(Tag, $"BootstrapAliasFolders: refreshed Modules\\{name} ({existing} -> {stampVersion}); takes effect next launch");
-            }
-            catch (Exception ex)
-            {
-                DiagLog.LogCaught(Tag, $"BootstrapAliasFolders/{name}", ex);
-            }
-        }
-
-        if (created > 0 || refreshed > 0)
-        {
-            DiagLog.Log(Tag, $"BootstrapAliasFolders: materialised {created}, refreshed {refreshed} alias folder(s). " +
-                              "Consumer mods that depend on Bannerlord.Harmony / UIExtenderEx / ButterLib / MBOptionScreen " +
-                              "will see the current binaries on the next start.");
-        }
-    }
 
     // Phase 1.6 / H3 -----------------------------------------------------
 
