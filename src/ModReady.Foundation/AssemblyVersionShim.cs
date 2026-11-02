@@ -23,8 +23,12 @@ public static class AssemblyVersionShim
 
     private static readonly string[] _redirectedNames = new[]
     {
-        // v2.0: ModReady runs on top of the real BUTR stack and ships none of
-        // its assemblies, so only BCL facade version skew is redirected here.
+        "0Harmony", "MCMv5", "Bannerlord.UIExtenderEx", "Bannerlord.ButterLib",
+        "Bannerlord.Harmony", "Newtonsoft.Json",
+        "Microsoft.Extensions.Logging.Abstractions", "Microsoft.Extensions.DependencyInjection",
+        "Microsoft.Extensions.DependencyInjection.Abstractions", "Microsoft.Extensions.Options",
+        "Microsoft.Extensions.Primitives", "Serilog", "Serilog.Extensions.Logging",
+        "Mono.Cecil", "MonoMod.Core", "MonoMod.Utils",
         "System.Buffers", "System.Memory", "System.Numerics.Vectors",
         "System.Runtime.CompilerServices.Unsafe", "System.Threading.Tasks.Extensions", "System.ValueTuple",
     };
@@ -90,7 +94,10 @@ public static class AssemblyVersionShim
             // a user who ALSO installs the standalone ModReady framework mod will
             // have Modules\ModReady\, and its Foundation copy is equally canonical.
             "\\Modules\\ModReady\\",
-            "\\Modules\\Bannerlord.Harmony\\"
+            "\\Modules\\Bannerlord.Harmony\\",
+            "\\Modules\\Bannerlord.UIExtenderEx\\",
+            "\\Modules\\Bannerlord.ButterLib\\",
+            "\\Modules\\Bannerlord.MBOptionScreen\\"
         };
         foreach (var seg in managed)
         {

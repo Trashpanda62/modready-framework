@@ -1,4 +1,4 @@
-// ModReady.Harmony -- MapBarGuard
+// ModReady.ButterLib -- MapBarGuard
 //
 // Original work. MIT, copyright 2026 Maxfield Management Group.
 //
@@ -29,7 +29,7 @@ using HarmonyLib;
 
 using ModReady.Foundation;
 
-namespace ModReady.Harmony.SaveRepair;
+namespace Bannerlord.ButterLib.ExceptionHandler;
 
 public static class MapBarGuard
 {

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  v0.8 step 4: REAL Bannerlord.MBOptionScreen module (no longer an alias stub).
+
+  Closes out the v0.8 promotion sequence. All four BUTR-alias module folders
+  are now real modules holding their canonical DLLs:
+    Bannerlord.Harmony            (step 1) — Harmony binary fan
+    Bannerlord.UIExtenderEx       (step 2) — UIExtenderEx
+    Bannerlord.ButterLib          (step 3) — ButterLib + DI fan + Serilog
+    Bannerlord.MBOptionScreen     (this)   — MCMv5 + Newtonsoft.Json
+
+  Holds MCMv5.dll directly. Runs TWO SubModule classes: MCM.MCMSubModule
+  (settings declaration surface) and MCM.UI.MCMUISubModule (Mod Config UI
+  wiring). Both live inside MCMv5.dll. Loads BEFORE ModReady because
+  ModReady's SubModule.xml carries <DependedModule Id="Bannerlord.MBOptionScreen" />.
+
+  Why both submodules: MCMSubModule handles settings registration via
+  SettingsRegistry; MCMUISubModule handles the OptionsVM mixin wiring +
+  prefab extension registration. Splitting them mirrors upstream BUTR MCM,
+  which consumer mods may bind by name (e.g. CDE patches MCMUISubModule
+  directly). Both stay separate entries here.
+
+  DependedModule on ModReady REMOVED — we load before ModReady now.
+  DependedModule on Harmony + UIExtenderEx + ButterLib retained — MCM
+  references Harmony (patches), UIExtenderEx (prefab system), and ButterLib
+  (DI services) at the IL level.
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.MBOptionScreen" />
+  <Name value="Mod Configuration Menu v5" />
+  <Version value="v5.11.99.0" />
+  <DefaultModule value="false" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="true" />
+  <Official value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="OfficialOptional" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.14.99.0" />
+    <DependedModule Id="Bannerlord.ButterLib" DependentVersion="v2.10.99.0" />
+  </DependedModules>
+
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
+    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.10.99.0" />
+  
+    <DependedModuleMetadata id="Native" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="Sandbox" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="StoryMode" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+  </DependedModuleMetadatas>
+
+  <ModulesToLoadAfterThis>
+    <Module Id="Native" />
+    <Module Id="SandBoxCore" />
+    <Module Id="Sandbox" />
+    <Module Id="StoryMode" />
+    <Module Id="CustomBattle" />
+  </ModulesToLoadAfterThis>
+
+  <SubModules>
+    <SubModule>
+      <Name value="MCM" />
+      <DLLName value="MCMv5.dll" />
+      <SubModuleClassType value="MCM.MCMSubModule" />
+      <Assemblies>
+        <!-- Assemblies in strict DEPENDENCY order (leaf deps first). REQUIRED for
+             Game Pass / Microsoft Store (.NET 6): CoreCLR's Assembly.LoadFrom does
+             NOT auto-probe this folder for a dependency the way .NET Framework
+             (Steam/GOG) does, so the launcher's per-assembly preload fails with
+             "could not be loaded correctly due to a dependency conflict" if a
+             dependent is listed before its dependency. Do not reorder casually. -->
+        <Assembly value="ModReady.Foundation.dll" />
+        <Assembly value="Newtonsoft.Json.dll" />
+        <Assembly value="MCMv5.dll" />
+      </Assemblies>
+      <Tags />
+    </SubModule>
+    <SubModule>
+      <Name value="MCM UI" />
+      <DLLName value="MCMv5.dll" />
+      <SubModuleClassType value="MCM.UI.MCMUISubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>

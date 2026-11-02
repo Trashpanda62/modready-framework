@@ -119,7 +119,10 @@ internal static class HarmonyRuntimeGate
         // either ModReady or one of the four alias module IDs.
         string[] managed = {
             "\\Modules\\ModReady\\",
-            "\\Modules\\Bannerlord.Harmony\\"
+            "\\Modules\\Bannerlord.Harmony\\",
+            "\\Modules\\Bannerlord.UIExtenderEx\\",
+            "\\Modules\\Bannerlord.ButterLib\\",
+            "\\Modules\\Bannerlord.MBOptionScreen\\"
         };
         foreach (var seg in managed)
         {

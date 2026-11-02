@@ -145,9 +145,10 @@ public static class RuntimeLog
                     if (!string.IsNullOrEmpty(modulesFolder)
                         && string.Equals(System.IO.Path.GetFileName(modulesFolder), "Modules", StringComparison.OrdinalIgnoreCase))
                     {
-                        // dir is the module folder we loaded from (Modules\ModReady
-                        // since v2.0, which no longer ships Bannerlord.Harmony).
-                        return System.IO.Path.Combine(dir, "runtime.log");
+                        // dir is the module folder we loaded from (Modules\<X>).
+                        var harmonyDir = System.IO.Path.Combine(modulesFolder, "Bannerlord.Harmony");
+                        var home = Directory.Exists(harmonyDir) ? harmonyDir : dir;
+                        return System.IO.Path.Combine(home, "runtime.log");
                     }
                     dir = modulesFolder;
                 }

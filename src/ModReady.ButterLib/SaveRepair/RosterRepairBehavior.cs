@@ -1,4 +1,4 @@
-// ModReady.Harmony -- RosterRepairBehavior
+// ModReady.ButterLib -- RosterRepairBehavior
 //
 // Original work. MIT, copyright 2026 Maxfield Management Group.
 //
@@ -30,7 +30,7 @@ using TaleWorlds.Core;
 
 using ModReady.Foundation;
 
-namespace ModReady.Harmony.SaveRepair;
+namespace Bannerlord.ButterLib.SaveRepair;
 
 public sealed class RosterRepairBehavior : CampaignBehaviorBase
 {

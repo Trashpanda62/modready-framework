@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  v0.8 step 3: REAL Bannerlord.ButterLib module (no longer an alias stub).
+
+  Same pattern as v0.8 steps 1 (Bannerlord.Harmony) and 2 (Bannerlord.UIExtenderEx).
+  Holds Bannerlord.ButterLib.dll directly and runs ButterLibSubModule. Loads
+  BEFORE ModReady because ModReady's SubModule.xml carries
+  <DependedModule Id="Bannerlord.ButterLib" />.
+
+  Load order in v0.8 step 3:
+    Bannerlord.Harmony            (real module, step 1)
+    Bannerlord.UIExtenderEx       (real module, step 2)
+    Bannerlord.ButterLib          (real module, this step)
+    Bannerlord.MBOptionScreen     (still alias stub — promoted in step 4)
+    ModReady                      (loads after all of the above)
+
+  Assemblies block includes the full DI fan (Microsoft.Extensions.*) plus
+  Serilog so ButterLibSubModule's OnSubModuleLoad has every type resolvable
+  when it builds the DI container.
+
+  DependedModule on ModReady REMOVED — we load before ModReady now.
+  DependedModule on Bannerlord.Harmony + Bannerlord.UIExtenderEx retained
+  because ButterLib.dll references both at the IL level (Harmony for the
+  underlying patcher, UIExtenderEx for the BUTR.CrashReport integration).
+-->
+<Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Id value="Bannerlord.ButterLib" />
+  <Name value="ButterLib" />
+  <Version value="v2.10.99.0" />
+  <DefaultModule value="false" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="true" />
+  <Official value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="OfficialOptional" />
+  <Url value="" />
+
+  <DependedModules>
+    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.14.99.0" />
+  </DependedModules>
+
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
+  
+    <DependedModuleMetadata id="Native" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="Sandbox" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="StoryMode" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
+  </DependedModuleMetadatas>
+
+  <ModulesToLoadAfterThis>
+    <Module Id="Native" />
+    <Module Id="SandBoxCore" />
+    <Module Id="Sandbox" />
+    <Module Id="StoryMode" />
+    <Module Id="CustomBattle" />
+  </ModulesToLoadAfterThis>
+
+  <SubModules>
+    <SubModule>
+      <Name value="Bannerlord.ButterLib" />
+      <DLLName value="Bannerlord.ButterLib.dll" />
+      <SubModuleClassType value="Bannerlord.ButterLib.ButterLibSubModule" />
+      <Assemblies>
+        <!-- Assemblies in strict DEPENDENCY order (leaf deps first). REQUIRED for
+             Game Pass / Microsoft Store (.NET 6): CoreCLR's Assembly.LoadFrom does
+             NOT auto-probe this folder for a dependency the way .NET Framework
+             (Steam/GOG) does, so the launcher's per-assembly preload fails with
+             "could not be loaded correctly due to a dependency conflict" if a
+             dependent is listed before its dependency. Do not reorder casually. -->
+        <Assembly value="System.Runtime.CompilerServices.Unsafe.dll" />
+        <Assembly value="Serilog.dll" />
+        <Assembly value="Microsoft.Extensions.Primitives.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.Options.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.Abstractions.dll" />
+        <Assembly value="Microsoft.Extensions.DependencyInjection.dll" />
+        <Assembly value="Microsoft.Extensions.Logging.dll" />
+        <Assembly value="ModReady.Foundation.dll" />
+        <Assembly value="Bannerlord.ButterLib.dll" />
+      </Assemblies>
+      <Tags />
+    </SubModule>
+  </SubModules>
+</Module>
