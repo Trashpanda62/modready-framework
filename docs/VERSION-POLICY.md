@@ -4,6 +4,11 @@ ModReady ships two kinds of assemblies, and they version differently on
 purpose. This file is the policy of record — check it before "fixing" any
 version number.
 
+## Upstream lines tracked (2026-11-02)
+
+Caught up to BUTR UIExtenderEx 3.0.x, MCM 5.13.x, ButterLib 2.12.x so mods built
+against those releases resolve and pass launcher version checks.
+
 ## The three surfaces
 
 Every shipped DLL has three version surfaces a mod or user can observe:
@@ -26,9 +31,9 @@ in `.99` to sort above any real upstream patch of that line.**
 
 | Assembly | All three surfaces |
 |---|---|
-| Bannerlord.UIExtenderEx.dll | 2.14.99.0 / module v2.14.99.0 |
-| Bannerlord.ButterLib.dll | 2.10.99.0 / module v2.10.99.0 |
-| MCMv5.dll | 5.11.99.0 / module v5.11.99.0 |
+| Bannerlord.UIExtenderEx.dll | 3.0.99.0 / module v3.0.99.0 |
+| Bannerlord.ButterLib.dll | 2.12.99.0 / module v2.12.99.0 |
+| MCMv5.dll | 5.13.99.0 / module v5.13.99.0 |
 
 Why `.99`: a mod checking "is UIExtenderEx >= 2.12" passes; the version
 still honestly identifies the claimed upstream compatibility line. The

@@ -38,6 +38,10 @@ public sealed class FluentGlobalSettings : BaseSettings, MCM.Internal.IFluentSet
     public override string Id { get; }
     public override string DisplayName { get; }
 
+    // MCM 5.13 SubModule.xml settings: the module's own SubModule.xml is the
+    // store, so SettingsStorage must not load or save Configs/ModSettings JSON.
+    internal bool StoredInSubModuleXml { get; set; }
+
     internal FluentGlobalSettings(SettingsBuilderImpl builder)
     {
         _builder = builder ?? throw new ArgumentNullException(nameof(builder));

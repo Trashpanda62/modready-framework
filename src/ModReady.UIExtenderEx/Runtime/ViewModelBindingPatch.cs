@@ -233,6 +233,25 @@ internal static class ViewModelBindingPatch
         // We log only the commands ModReady actually routes to one of our mixins.
         try
         {
+            // UIExtenderEx 3.x: a mixin method marked [BUTRViewModelOverride(name)]
+            // replaces the VM's own method of that name for binding invocations.
+            foreach (var mixin in ViewModelMixinHost.GetMixins(__instance))
+            {
+                var ov = mixin.GetType()
+                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .FirstOrDefault(mi => string.Equals(
+                        mi.GetCustomAttribute<BUTRViewModelOverrideAttribute>(inherit: false)?.MethodName,
+                        commandName, StringComparison.Ordinal));
+                if (ov == null) continue;
+                if (!TryConvertCommandArgs(ov, parameters, out var ovArgs))
+                {
+                    DiagLog.Log(Tag, $"ExecuteCommand('{commandName}'): override {mixin.GetType().FullName}.{ov.Name} args could not be converted; VM method runs instead");
+                    break;
+                }
+                ov.Invoke(mixin, ovArgs);
+                return false; // skip the VM's own method
+            }
+
             // If the VM declares a method with this name, let the original run.
             var vmMethod = __instance.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .FirstOrDefault(m => string.Equals(m.Name, commandName, StringComparison.Ordinal));

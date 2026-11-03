@@ -400,6 +400,7 @@ internal static class SettingsStorage
 
     public static void Load(object instance, string settingsId)
     {
+        if (instance is MCM.Abstractions.Base.Global.FluentGlobalSettings { StoredInSubModuleXml: true }) return;
         // Re-entrancy guard. See BeginLoad.
         var __id = settingsId ?? string.Empty;
         if (!BeginLoad(__id)) return;
@@ -535,6 +536,7 @@ internal static class SettingsStorage
 
     public static void Save(object instance, string settingsId)
     {
+        if (instance is MCM.Abstractions.Base.Global.FluentGlobalSettings { StoredInSubModuleXml: true }) return;
         // Re-entrancy guard. See BeginSave.
         var __id = settingsId ?? string.Empty;
         if (!BeginSave(__id)) return;

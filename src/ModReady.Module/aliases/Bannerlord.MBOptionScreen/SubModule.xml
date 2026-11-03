@@ -29,7 +29,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
   <Id value="Bannerlord.MBOptionScreen" />
   <Name value="Mod Configuration Menu v5" />
-  <Version value="v5.11.99.0" />
+  <Version value="v5.13.99.0" />
   <DefaultModule value="false" />
   <SingleplayerModule value="true" />
   <MultiplayerModule value="true" />
@@ -40,14 +40,14 @@
 
   <DependedModules>
     <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.99.0" />
-    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.14.99.0" />
-    <DependedModule Id="Bannerlord.ButterLib" DependentVersion="v2.10.99.0" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v3.0.99.0" />
+    <DependedModule Id="Bannerlord.ButterLib" DependentVersion="v2.12.99.0" />
   </DependedModules>
 
   <DependedModuleMetadatas>
     <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.99.0" />
-    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.14.99.0" />
-    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.10.99.0" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v3.0.99.0" />
+    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.12.99.0" />
   
     <DependedModuleMetadata id="Native" order="LoadAfterThis" version="v1.0.0.*" optional="true" />
     <DependedModuleMetadata id="SandBoxCore" order="LoadAfterThis" version="v1.0.0.*" optional="true" />

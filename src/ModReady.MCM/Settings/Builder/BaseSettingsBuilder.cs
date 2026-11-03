@@ -30,6 +30,10 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
 
     internal readonly List<PropertyGroupBuilderImpl> _groups = new();
 
+    // Set by SubModuleXmlSettings: the built settings live in a SubModule.xml,
+    // not in Configs/ModSettings JSON.
+    internal bool StoredInSubModuleXml { get; set; }
+
     public SettingsBuilderImpl(string id, string displayName)
     {
         Id = id ?? throw new ArgumentNullException(nameof(id));
@@ -81,6 +85,7 @@ internal sealed class SettingsBuilderImpl : ISettingsBuilder
         try
         {
             settings = new MCM.Abstractions.Base.Global.FluentGlobalSettings(this);
+            settings.StoredInSubModuleXml = StoredInSubModuleXml; // must precede Register's JSON load
             MCM.Internal.FluentSettingsRegistry.Register(settings);
             DiagLog.Log("FluentBuilder", $"registered fluent settings '{Id}' with {_groups.Count} group(s)");
         }

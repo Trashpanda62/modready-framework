@@ -25,11 +25,11 @@
          compiled against Bannerlord.UIExtenderEx v2.x bind to ours.
          M19 (Phase 4.1): all three version surfaces agree on the advertised
          line (AssemblyVersion == FileVersion == alias SubModule.xml ==
-         v2.14.99.0) so mods gating on Assembly.GetName().Version and mods
+         v3.0.99.0) so mods gating on Assembly.GetName().Version and mods
          gating on the module version see the same answer. Policy:
          docs/VERSION-POLICY.md. -->
-    <AssemblyVersion>2.14.99.0</AssemblyVersion>
-    <FileVersion>2.14.99.0</FileVersion>
+    <AssemblyVersion>3.0.99.0</AssemblyVersion>
+    <FileVersion>3.0.99.0</FileVersion>
     <InformationalVersion>ModReady 1.0.6</InformationalVersion>
 
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
