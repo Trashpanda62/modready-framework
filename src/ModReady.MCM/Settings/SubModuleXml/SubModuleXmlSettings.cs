@@ -88,6 +88,7 @@ namespace ModReady.Framework
         private static bool Build(XmlStore store, XmlElement settings, string id, string displayName)
         {
             var builder = BaseSettingsBuilder.Create(id, displayName);
+            if (builder is SettingsBuilderImpl impl) impl.StoredInSubModuleXml = true;
             var delimiter = Attr(settings, "SubGroupDelimiter", "/");
             if (delimiter != "/") builder.SetSubGroupDelimiter(delimiter);
 
@@ -286,6 +287,9 @@ namespace ModReady.Framework
             public void Set(XmlElement property, string value)
             {
                 if (property.GetAttribute("Value") == value) return;
+                // Don't touch the shipped file until the value actually differs
+                // from what it declares.
+                if (!property.HasAttribute("Value") && property.GetAttribute("Default") == value) return;
                 property.SetAttribute("Value", value);
                 try
                 {
